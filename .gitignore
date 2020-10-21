@@ -1,0 +1,7 @@
+/.vscode
+/.idea
+/.venv
+/.persistence
+
+*.pyc
+*.pyo
