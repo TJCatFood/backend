@@ -23,6 +23,7 @@ services:
       context: .
       dockerfile: Dockerfile.web.dev
     command: python manage.py runserver 0.0.0.0:8000
+    user: "${UID}:${GID}"
     volumes: 
       - "./catfood:/code/catfood:rw"
     ports:
