@@ -72,7 +72,7 @@ jobs:
       - name: Run Migrations # run migrations to create table in side car db container
         run: python manage.py migrate
       - name: Run Test # running tests
-        run: python manage.py test
+        run: coverage run --source='.' manage.py test
       - name: Run codecov action
         uses: codecov/codecov-action@v1
         with:
