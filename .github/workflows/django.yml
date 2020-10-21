@@ -43,12 +43,12 @@ jobs:
     env:
       SECRET_KEY: EatingOurOwnCatFood
       DEBUG: 1
-      DB_HOST: ${{ services.db }}
+      DB_HOST: localhost
       DB_NAME: postgres
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_PORT: 5432
-      REDIS: redis://${{ services.redis }}:6379
+      REDIS: redis://localhost:6379
     steps:
       - name: Checkout code # checking our the code at current commit that triggers the workflow
         uses: actions/checkout@v2
