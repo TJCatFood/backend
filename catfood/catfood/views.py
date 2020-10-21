@@ -9,7 +9,9 @@ from django.db.utils import OperationalError
 
 from django.core.cache import cache
 
+
 class CatFoodStatusView(APIView):
+
     permission_classes = (AllowAny,)
 
     def get(self, request, format=None):

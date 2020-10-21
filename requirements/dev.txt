@@ -1,6 +1,5 @@
 asgiref==3.2.10
 astroid==2.4.2
-autopep8==1.5.4
 coverage==5.3
 Django==3.1.2
 django-redis==4.12.1
@@ -12,7 +11,6 @@ Markdown==3.3.2
 mccabe==0.6.1
 psycopg2==2.8.6
 pycodestyle==2.6.0
-pylint==2.6.0
 pytz==2020.1
 redis==3.5.3
 six==1.15.0
