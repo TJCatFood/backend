@@ -63,7 +63,7 @@
 进入代码根目录，运行
 
 ```
-docker-compose up
+UID=${UID} GID=${GID} docker-compose up
 ```
 
 不要关闭终端，使用代码编辑器修改代码
@@ -84,7 +84,7 @@ docker ps
 docker exec -it <container name or id> /bin/bash 
 ```
 
-**注意！** Docker 容器内的用户是 `root`，外部普通权限用户不能修改 `root` 的文件
+Bash 会提示 `I have no name!`，但是此时 UID 和 GID 是正确的，无视即可
 
 #### 关闭 Web 服务器
 
