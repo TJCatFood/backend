@@ -41,14 +41,14 @@ jobs:
             --health-timeout 5s
             --health-retries 5
     env:
-      - SECRET_KEY=EatingOurOwnCatFood
-      - DEBUG=1
-      - DB_HOST=${{ jobs.health-check-job.services.db }}
-      - DB_NAME=postgres
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_PORT=5432
-      - REDIS=redis://${{ jobs.health-check-job.services.redis }}:6379
+      SECRET_KEY: EatingOurOwnCatFood
+      DEBUG: 1
+      DB_HOST: ${{ jobs.health-check-job.services.db }}
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_PORT: 5432
+      REDIS: redis://${{ jobs.health-check-job.services.redis }}:6379
     steps:
       - name: Checkout code # checking our the code at current commit that triggers the workflow
         uses: actions/checkout@v2
