@@ -10,9 +10,6 @@ Markdown==3.3.2
 mccabe==0.6.1
 psycopg2==2.8.6
 pycodestyle==2.6.0
-pylint==2.6.0
-pylint-django==2.3.0  
-pylint-plugin-utils==0.6 
 pytz==2020.1
 redis==3.5.3
 six==1.15.0
