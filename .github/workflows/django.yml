@@ -10,8 +10,11 @@ on:
   # any code pushed to main
   push:
     branches:
-      - master
-      - develop
+      - main
+
+defaults:
+  run:
+    working-directory: catfood
 
 # three job definition
 jobs:
@@ -54,9 +57,9 @@ jobs:
       - name: Check Python version # checking the python version to see if 3.x is installed.
         run: python --version
       - name: Install requirements # install application requirements
-        run: pip install -r requirements/dev.txt
+        run: pip install -r ../requirements/dev.txt
       - name: Check Syntax # check code formatting
-        run: pycodestyle --statistics ./catfood
+        run: pycodestyle --statistics .
       - name: Run Migrations # run migrations to create table in side car db container
         run: python manage.py migrate
       - name: Run Test # running tests
