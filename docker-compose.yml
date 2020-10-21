@@ -32,7 +32,7 @@ services:
       - DB_PORT=5432
       - REDIS=redis://redis:6379
     command: python manage.py runserver 0.0.0.0:8000
-    user: "${UID}:${GID}"
+    user: "${USER_ID}:${GROUP_ID}"
     volumes: 
       - "./catfood:/code/catfood:rw"
     ports:
