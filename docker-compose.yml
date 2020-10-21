@@ -22,6 +22,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.web.dev
+    environment:
+      - SECRET_KEY=EatingOurOwnCatFood
+      - DEBUG=1
+      - DB_HOST=db
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_PORT=5432
+      - REDIS=redis://redis:6379
     command: python manage.py runserver 0.0.0.0:8000
     user: "${UID}:${GID}"
     volumes: 
