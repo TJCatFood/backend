@@ -1,13 +1,10 @@
 # name of our workflow
-name: Django CI/CD Workflow
+name: Django CI Workflow
 
-# triggers for our workflow
 on:
-  # opening a pull request to main
   pull_request:
     branches:
       - main
-  # any code pushed to main
   push:
     branches:
       - main
@@ -16,14 +13,13 @@ defaults:
   run:
     working-directory: catfood
 
-# three job definition
 jobs:
   health-check-job: # health check job for testing and code formatting check
     runs-on: ubuntu-latest # os for running the job
     services:
       db: # we need a postgres docker image to be booted a side car service to run the tests that needs a db
         image: postgres
-        env: # the environment variable must match with app/settings.py if block of DATBASES variable otherwise test will fail due to connectivity issue.
+        env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
