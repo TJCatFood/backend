@@ -60,7 +60,7 @@
 - DB 的数据会持久化存储在 `.persistence` 下，删除请使用
 
     ```
-    # sudo -rm -rf .persistence #
+    # sudo rm -rf .persistence #
     ```
 #### 启动 Web 服务器
 
