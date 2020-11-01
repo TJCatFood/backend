@@ -1,6 +1,6 @@
 # Cat Food Backend
 
-[![codecov](https://codecov.io/gh/TJCatFood/backend/branch/main/graph/badge.svg?token=C1YPF6SH0G)](undefined)
+[![codecov](https://codecov.io/gh/TJCatFood/backend/branch/main/graph/badge.svg?token=C1YPF6SH0G)](https://codecov.io/gh/TJCatFood/backend/)
 
 ![Django CI/CD Workflow](https://github.com/TJCatFood/backend/workflows/Django%20CI/CD%20Workflow/badge.svg)
 
