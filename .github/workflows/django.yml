@@ -44,10 +44,6 @@ jobs:
         ports: 
           - 9000:9000
         options: >-
-            --health-cmd "curl -f http://localhost:9000/minio/health/live"
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 5
             minio/minio
             server /data
     env:
@@ -61,7 +57,7 @@ jobs:
       REDIS: redis://localhost:6379
       MINIO_ACCESS_KEY: minio
       MINIO_SECRET_KEY: minio123
-      MINIO_ADDRESS: minio:9000
+      MINIO_ADDRESS: localhost:9000
     steps:
       - name: Checkout code # checking our the code at current commit that triggers the workflow
         uses: actions/checkout@v2
