@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'minio_storage',
 ]
 
 MIDDLEWARE = [
@@ -126,6 +127,21 @@ CACHES = {
 # Use Redis as session backend
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
+
+# Use Minio as file storage backend
+
+STATIC_ROOT = './static_files/'
+DEFAULT_FILE_STORAGE = "minio_storage.storage.MinioMediaStorage"
+MINIO_STORAGE_ENDPOINT = 'minio:9000'
+MINIO_STORAGE_ACCESS_KEY = environ['MINIO_ACCESS_KEY']
+MINIO_STORAGE_SECRET_KEY = environ['MINIO_SECRET_KEY']
+MINIO_STORAGE_USE_HTTPS = False
+MINIO_STORAGE_MEDIA_OBJECT_METADATA = {"Cache-Control": "max-age=1000"}
+MINIO_STORAGE_MEDIA_URL='minio:9000'
+MINIO_STORAGE_MEDIA_BUCKET_NAME = 'media-bucket'
+MINIO_STORAGE_AUTO_CREATE_MEDIA_BUCKET = True
+MINIO_STORAGE_STATIC_BUCKET_NAME = 'static-bucket'
+MINIO_STORAGE_AUTO_CREATE_STATIC_BUCKET = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/

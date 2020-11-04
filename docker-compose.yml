@@ -18,6 +18,24 @@ services:
     ports: 
       - 6379:6379
 
+  minio:
+    image: minio/minio:latest
+    restart: always
+    volumes:
+      - "./.persistence/minio-data/:/data"
+      - "./.persistence/minio-config/:/root/.minio"
+    environment:
+      - MINIO_ACCESS_KEY=minio
+      - MINIO_SECRET_KEY=minio123
+    ports: 
+      - 9000:9000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    command: server /data
+
   web:
     build:
       context: .
@@ -31,6 +49,9 @@ services:
       - DB_PASSWORD=postgres
       - DB_PORT=5432
       - REDIS=redis://redis:6379
+      - MINIO_ACCESS_KEY=minio
+      - MINIO_SECRET_KEY=minio123
+      - MINIO_ADDRESS=http://localhost:9000
     command: python manage.py runserver 0.0.0.0:8000
     user: "${USER_ID}:${GROUP_ID}"
     volumes: 
@@ -40,3 +61,4 @@ services:
     depends_on:
       - db
       - redis 
+      - minio
