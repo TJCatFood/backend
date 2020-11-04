@@ -37,7 +37,7 @@ jobs:
             --health-timeout 5s
             --health-retries 5
       minio:
-        image: minio/minio
+        image: marshmallowqwq/minio-test
         env:
           MINIO_ACCESS_KEY: minio
           MINIO_SECRET_KEY: minio123
@@ -48,11 +48,6 @@ jobs:
             --health-interval 10s
             --health-timeout 5s
             --health-retries 5
-            -e "MINIO_ACCESS_KEY=minio"
-            -e "MINIO_SECRET_KEY=minio123"
-            minio/minio
-            server /data
-            && echo
     env:
       SECRET_KEY: EatingOurOwnCatFood
       DEBUG: 1
