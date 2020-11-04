@@ -36,6 +36,19 @@ jobs:
             --health-interval 10s
             --health-timeout 5s
             --health-retries 5
+      minio:
+        image: minio/minio
+        env:
+          MINIO_ACCESS_KEY: minio
+          MINIO_SECRET_KEY: minio123
+        ports: 
+          - 9000:9000
+        options: >-
+            --entrypoint "server /data"
+            --health-cmd "curl -f http://localhost:9000/minio/health/live"
+            --health-interval 30s
+            --health-timeout 20s
+            --health-retries 3
     env:
       SECRET_KEY: EatingOurOwnCatFood
       DEBUG: 1
@@ -45,6 +58,9 @@ jobs:
       DB_PASSWORD: postgres
       DB_PORT: 5432
       REDIS: redis://localhost:6379
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+      MINIO_ADDRESS: minio:9000
     steps:
       - name: Checkout code # checking our the code at current commit that triggers the workflow
         uses: actions/checkout@v2
