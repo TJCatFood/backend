@@ -90,3 +90,8 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           verbose: true # optional (default = false)
+      - name: Dump docker logs on failure using different shell
+        if: failure()
+        uses: jwalton/gh-docker-logs@v2.0.0
+        with:
+          shell: '/bin/sh'
