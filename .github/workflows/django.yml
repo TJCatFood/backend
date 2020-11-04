@@ -50,6 +50,7 @@ jobs:
             --health-retries 5
             minio/minio
             server /data
+            \; echo
     env:
       SECRET_KEY: EatingOurOwnCatFood
       DEBUG: 1
@@ -90,8 +91,6 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           verbose: true # optional (default = false)
-      - name: Dump docker logs on failure using different shell
+      - name: Dump docker logs to stdout on failure
         if: failure()
         uses: jwalton/gh-docker-logs@v2.0.0
-        with:
-          shell: '/bin/sh'
