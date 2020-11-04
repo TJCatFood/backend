@@ -22,8 +22,8 @@ services:
     image: minio/minio:latest
     restart: always
     volumes:
-      - "./.persistence/minio-data/:/data"
-      - "./.persistence/minio-config/:/root/.minio"
+      - "./.persistence/minio/data:/data"
+      - "./.persistence/minio/config/:/root/.minio"
     environment:
       - MINIO_ACCESS_KEY=minio
       - MINIO_SECRET_KEY=minio123
