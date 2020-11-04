@@ -43,7 +43,6 @@ jobs:
           MINIO_SECRET_KEY: minio123
         ports: 
           - 9000:9000
-        command: 
         options: >-
             --entrypoint "server"
             --health-cmd "curl -f http://localhost:9000/minio/health/live"
