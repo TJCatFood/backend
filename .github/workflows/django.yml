@@ -48,6 +48,7 @@ jobs:
             --health-interval 30s
             --health-timeout 20s
             --health-retries 3
+            minio/minio
             server /data
     env:
       SECRET_KEY: EatingOurOwnCatFood
