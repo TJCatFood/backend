@@ -52,7 +52,7 @@ jobs:
             -e "MINIO_SECRET_KEY=minio123"
             minio/minio
             server /data
-            \; echo
+            ; echo
     env:
       SECRET_KEY: EatingOurOwnCatFood
       DEBUG: 1
