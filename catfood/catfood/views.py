@@ -57,9 +57,8 @@ class CatFoodStatusView(APIView):
         try:
             testfile_content = b'minio here'
             path = default_storage.save('test/testfile', ContentFile(testfile_content))
-            print(path)
             testfile_content_read = default_storage.open(path).read()
             default_storage.delete(path)
             return testfile_content == testfile_content_read
-        except Exception as e:
+        except Exception:
             return False
