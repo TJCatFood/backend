@@ -32,10 +32,22 @@ jobs:
         ports:
           - 6379:6379
         options: >-
-            --health-cmd "redis-cli ping"
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 5
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      minio:
+        image: marshmallowqwq/minio-test
+        env:
+          MINIO_ACCESS_KEY: minio
+          MINIO_SECRET_KEY: minio123
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/live"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
       SECRET_KEY: EatingOurOwnCatFood
       DEBUG: 1
@@ -45,6 +57,9 @@ jobs:
       DB_PASSWORD: postgres
       DB_PORT: 5432
       REDIS: redis://localhost:6379
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+      MINIO_ADDRESS: localhost:9000
     steps:
       - name: Checkout code # checking our the code at current commit that triggers the workflow
         uses: actions/checkout@v2
@@ -73,3 +88,6 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           verbose: true # optional (default = false)
+      - name: Dump docker logs to stdout on failure # if above workflow failed, dump log inside docker to stdout
+        if: failure()
+        uses: jwalton/gh-docker-logs@v2.0.0
