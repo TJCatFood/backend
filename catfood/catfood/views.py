@@ -60,9 +60,6 @@ class CatFoodStatusView(APIView):
             print(path)
             testfile_content_read = default_storage.open(path).read()
             default_storage.delete(path)
-            if not (testfile_content == testfile_content_read):
-                return False
-            return True
+            return testfile_content == testfile_content_read:
         except Exception as e:
-            print(e)
             return False
