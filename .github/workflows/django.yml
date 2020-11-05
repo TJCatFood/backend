@@ -73,7 +73,7 @@ jobs:
       - name: Setup python environment # setting python environment to 3.x
         uses: actions/setup-python@v2
         with:
-          python-version: "3.x" # if you want multiple python version run just use matrix strategy in job config. See the documentation of GitHub Actions
+          python-version: '3.x' # if you want multiple python version run just use matrix strategy in job config. See the documentation of GitHub Actions
       - name: Check Python version # checking the python version to see if 3.x is installed.
         run: python --version
       - name: Install requirements # install application requirements
