@@ -6,7 +6,7 @@ COPY ./requirements/dev.txt /code
 
 # Use tuna mirrors
 RUN pip install pip -U
-RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip config set global.index-url https://mirrors.cloud.tencent.com/pypi/simple
 
 RUN pip install -r /code/dev.txt
 
