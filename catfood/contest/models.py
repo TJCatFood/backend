@@ -33,7 +33,10 @@ class Attend(models.Model):
 
 class ContestQuestion(models.Model):
     contest_id = models.ForeignKey('Contest', on_delete=models.CASCADE)
-    question_id = models.ForeignKey('courseDataBase.questionBank', on_delete=models.CASCADE)
+    question_id = models.ForeignKey(
+        'courseDataBase.questionBank',
+        on_delete=models.CASCADE
+    )
     question_type = models.CharField(
         max_length=20,
         choices=QuestionType.choices,
