@@ -43,7 +43,13 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('question_type', models.CharField(choices=[('SingleAnswer', 'SingleAnswer'), ('MultipleAnswer', 'MultipleAnswer')], default='SingleAnswer', max_length=20)),
+                ('question_type', models.CharField(
+                    choices=[
+                        ('SingleAnswer', 'SingleAnswer'),
+                        ('MultipleAnswer', 'MultipleAnswer')
+                    ],
+                    default='SingleAnswer', max_length=20)
+                 ),
                 ('answer', models.CharField(max_length=16)),
                 ('contest_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contest.contest')),
                 ('question_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='courseDataBase.questionbank')),
@@ -57,7 +63,14 @@ class Migration(migrations.Migration):
             name='ContestQuestion',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('question_type', models.CharField(choices=[('SingleAnswer', 'SingleAnswer'), ('MultipleAnswer', 'MultipleAnswer')], default='SingleAnswer', max_length=20)),
+                ('question_type', models.CharField(
+                    choices=[
+                        ('SingleAnswer', 'SingleAnswer'),
+                        ('MultipleAnswer', 'MultipleAnswer')
+                    ],
+                    default='SingleAnswer',
+                    max_length=20)
+                 ),
                 ('contest_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contest.contest')),
                 ('question_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='courseDataBase.questionbank')),
             ],
