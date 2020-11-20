@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'contest',
     'class',
     'grade',
-    'courseDataBase',
+    'course_database',
     'lecture',
     'experiment',
 ]

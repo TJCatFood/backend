@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class ExperimentCaseDataBase(models.Model):
+class ExperimentCaseDatabase(models.Model):
     experiment_case_id = models.AutoField(primary_key=True)
     experiment_name = models.CharField(max_length=50)
     experiment_case_name = models.CharField(max_length=50)
@@ -21,7 +21,7 @@ class CourseDocument(models.Model):
     file_link = models.CharField(max_length=200)
 
 
-class questionBank(models.Model):
+class questionDatabase(models.Model):
     question_id = models.AutoField(primary_key=True)
     question_chapter = models.IntegerField
     question_content = models.CharField(max_length=100)

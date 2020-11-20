@@ -4,7 +4,7 @@ from django.db import models
 
 
 class ExperimentAssignment(models.Model):
-    case_id = models.ForeignKey('courseDataBase.ExperimentCaseDataBase', on_delete=models.CASCADE)
+    case_id = models.ForeignKey('course_database.ExperimentCaseDatabase', on_delete=models.CASCADE)
     course_id = models.ForeignKey('class.Course', on_delete=models.CASCADE)
     submission_uploader = models.ForeignKey('user.User', on_delete=models.CASCADE)
     submission_file_link = models.CharField(max_length=200)
@@ -15,7 +15,7 @@ class ExperimentAssignment(models.Model):
 
 
 class CourseCase(models.Model):
-    case_id = models.ForeignKey('courseDataBase.ExperimentCaseDataBase', on_delete=models.CASCADE)
+    case_id = models.ForeignKey('course_database.ExperimentCaseDatabase', on_delete=models.CASCADE)
     course_id = models.ForeignKey('class.Course', on_delete=models.CASCADE)
     case_start_timestamp = models.DateTimeField()
     case_end_timestamp = models.DateTimeField()

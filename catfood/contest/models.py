@@ -34,7 +34,7 @@ class Attend(models.Model):
 class ContestQuestion(models.Model):
     contest_id = models.ForeignKey('Contest', on_delete=models.CASCADE)
     question_id = models.ForeignKey(
-        'courseDataBase.questionBank',
+        'course_database.questionDatabase',
         on_delete=models.CASCADE
     )
     question_type = models.CharField(
@@ -58,7 +58,7 @@ class Submission(models.Model):
     user_id = models.ForeignKey('user.User', on_delete=models.CASCADE)
     contest_id = models.ForeignKey('Contest', on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-    question_id = models.ForeignKey('courseDataBase.questionBank', on_delete=models.CASCADE)
+    question_id = models.ForeignKey('course_database.questionDatabase', on_delete=models.CASCADE)
     question_type = models.CharField(
         max_length=20,
         choices=QuestionType.choices,
