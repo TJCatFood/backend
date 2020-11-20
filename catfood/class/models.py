@@ -23,7 +23,10 @@ class Course(models.Model):
 class Teach(models.Model):
     course_id = models.ForeignKey('Course', on_delete=models.CASCADE)
     teacher_id = models.ForeignKey('user.User', on_delete=models.CASCADE)
-    role = models.IntegerField(choices=Role.choices)
+    role = models.CharField(
+        max_length=64,
+        choices=Role.choices
+    )
 
     class Meta:
         unique_together = (('teacher_id', 'course_id'),)
