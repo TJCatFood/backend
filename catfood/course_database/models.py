@@ -41,3 +41,4 @@ class choiceMultipleQuestionDatabase(models.Model):
     question_choice_c_content = models.CharField(max_length=256)
     question_choice_d_content = models.CharField(max_length=256)
     question_answer = models.CharField(max_length=20)
+    
