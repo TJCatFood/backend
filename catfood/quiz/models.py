@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 
+
 class QuestionType(models.TextChoices):
     SINGLE = 'SingleAnswer', 'SingleAnswer'
     MULTIPLE = 'MultipleAnswer', 'MultipleAnswer'
@@ -38,7 +39,6 @@ class QuizQuestion(models.Model):
 
     class Meta:
         unique_together = (('quiz_id', 'question_id', 'question_type'),)
-
 
 
 class QuizSubmission(models.Model):
