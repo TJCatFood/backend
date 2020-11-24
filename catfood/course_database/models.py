@@ -21,7 +21,18 @@ class CourseDocument(models.Model):
     file_link = models.CharField(max_length=200)
 
 
-class questionDatabase(models.Model):
+class choiceSingleQuestionDatabase(models.Model):
+    question_id = models.AutoField(primary_key=True)
+    question_chapter = models.IntegerField
+    question_content = models.CharField(max_length=100)
+    question_choice_a_content = models.CharField(max_length=256)
+    question_choice_b_content = models.CharField(max_length=256)
+    question_choice_c_content = models.CharField(max_length=256)
+    question_choice_d_content = models.CharField(max_length=256)
+    question_answer = models.CharField(max_length=20)
+
+
+class choiceMultipleQuestionDatabase(models.Model):
     question_id = models.AutoField(primary_key=True)
     question_chapter = models.IntegerField
     question_content = models.CharField(max_length=100)

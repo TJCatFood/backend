@@ -15,11 +15,10 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Contest',
+            name='Quiz',
             fields=[
-                ('contest_id', models.AutoField(primary_key=True, serialize=False)),
+                ('quiz_id', models.AutoField(primary_key=True, serialize=False)),
                 ('title', models.CharField(max_length=100, null=True)),
-                ('participant_number', models.IntegerField()),
                 ('start_time', models.DateTimeField()),
                 ('end_time', models.DateTimeField()),
                 ('chapter', models.IntegerField()),
@@ -29,53 +28,43 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='Match',
-            fields=[
-                ('match_id', models.AutoField(primary_key=True, serialize=False)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('contest_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contest.contest')),
-                ('user_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='user.user')),
-            ],
-        ),
-        migrations.CreateModel(
-            name='ContestSubmission',
+            name='QuizSubmission',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('timestamp', models.DateTimeField(auto_now_add=True)),
                 ('question_id', models.IntegerField()),
                 ('question_type', models.IntegerField(choices=[('SingleAnswer', 'SingleAnswer'), ('MultipleAnswer', 'MultipleAnswer')], default='SingleAnswer')),
                 ('answer', models.CharField(max_length=16)),
-                ('contest_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contest.contest')),
+                ('quiz_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='quiz.quiz')),
                 ('user_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='user.user')),
             ],
             options={
-                'unique_together': {('user_id', 'contest_id', 'question_id', 'question_type')},
+                'unique_together': {('user_id', 'quiz_id', 'question_id', 'question_type')},
             },
         ),
         migrations.CreateModel(
-            name='ContestQuestion',
+            name='QuizQuestion',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('question_id', models.IntegerField()),
                 ('question_type', models.IntegerField(choices=[('SingleAnswer', 'SingleAnswer'), ('MultipleAnswer', 'MultipleAnswer')], default='SingleAnswer')),
-                ('contest_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contest.contest')),
+                ('quiz_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='quiz.quiz')),
             ],
             options={
-                'unique_together': {('contest_id', 'question_id', 'question_type')},
+                'unique_together': {('quiz_id', 'question_id', 'question_type')},
             },
         ),
         migrations.CreateModel(
-            name='AttendContest',
+            name='AttendQuiz',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('timestamp', models.DateTimeField(auto_now_add=True)),
                 ('score', models.IntegerField()),
-                ('rank', models.IntegerField()),
-                ('contest_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contest.contest')),
+                ('quiz_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='quiz.quiz')),
                 ('user_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='user.user')),
             ],
             options={
-                'unique_together': {('user_id', 'contest_id')},
+                'unique_together': {('user_id', 'quiz_id')},
             },
         ),
     ]
