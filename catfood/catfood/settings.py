@@ -118,7 +118,10 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     # Deny permission to any unauthenticated user, and allow permission otherwise.
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated'
+        # FIXME: Changed to AllowAny temporarily
+        # Read: https://www.django-rest-framework.org/api-guide/permissions/
+        # should be IsAuthenticated or other if our own auth is set up
+        'rest_framework.permissions.AllowAny'
     ]
 }
 
