@@ -16,6 +16,7 @@ def get_matches(request):
     }
     return Response(content)
 
+
 @api_view(['GET'])
 def get_match(request, match_id):
     content = {
@@ -24,12 +25,14 @@ def get_match(request, match_id):
     }
     return Response(content)
 
+
 class TestView(APIView):
 
     def get(self, request, format=None):
         response = 'test succeed!'
-        content = {"response": f"{response}"
-                  }
+        content = {
+            "response": f"{response}"
+        }
         return Response(content)
 
 
@@ -40,7 +43,7 @@ class ContestView(APIView):
 
     def post(self, request, format=None):
         data = request.data
-        return Response(data, status = status.HTTP_201_CREATED)
+        return Response(data, status=status.HTTP_201_CREATED)
 
 
 class MatchesVIew(APIView):
@@ -53,7 +56,7 @@ class MatchesVIew(APIView):
         elif response_type == '1':
             return self.get_student_matches(contest_id)
         else:
-            return Response('Bad Request!' ,status = status.HTTP_400_BAD_REQUEST)
+            return Response('Bad Request!', status=status.HTTP_400_BAD_REQUEST)
 
     def get_contest_matches(self, contest_id):
         content = {
