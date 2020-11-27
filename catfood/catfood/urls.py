@@ -6,4 +6,5 @@ router = routers.DefaultRouter()
 urlpatterns = [
     path('api/', include(router.urls)),
     path('status/', views.CatFoodStatusView.as_view()),
+    path('api/v1/contest/', include('contest.urls')),
 ]
