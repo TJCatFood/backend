@@ -1,0 +1,13 @@
+FROM debian:buster
+
+# Use mirrors.cloud.tencent.com
+COPY ./sources.list.nchan /etc/apt/sources.list
+RUN apt update && \
+    apt upgrade -y && \
+    apt install -y nginx nginx-common nginx-extras && \
+    apt autoremove -y && \
+    apt autoclean
+
+# mount nchan.conf to /etc/nginx/sites-enabled/default
+
+CMD ["nginx", "-g", "daemon off;"]

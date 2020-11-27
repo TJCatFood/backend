@@ -62,3 +62,14 @@ services:
       - db
       - redis 
       - minio
+
+  nchan:
+    build:
+      context: .
+      dockerfile: Dockerfile.nchan.dev
+    volumes: 
+      - "./nchan.conf:/etc/nginx/sites-enabled/default"
+    ports:
+      - 8080:8080
+    depends_on: 
+      - web
