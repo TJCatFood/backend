@@ -1,38 +1,11 @@
 from django.shortcuts import render
+from django.contrib import auth
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
-
-@api_view(['POST'])
-def post_register(request):
-  realname = request.get('realname')
-  content = {
-    "realname" : f"{realname}"
-  }
-  return Response(content)
-
-@api_view(['PATCH'])#different with APIdoc
-def patch_change_password(request):
-  #TODO： User Authentication
-  content = {
-    'isSuccess' : true,
-    data : {
-      'message' : 'password changed successfully'
-    }
-  }
-  return Response(content)
-
-@api_view(['POST'])
-def post_accounts(request):
-  #TODO： User Authentication
-  content = {
-    'isSuccess' : true,
-    data : {
-      'message' : 'accounts appended successfully'
-    }
-  }
-  return Response(content)
+from rest_framework.authentication import BasicAuthentication,SessionAuthentication
+from rest_framework.permissions import AllowAny,IsAuthenticated
 
 class DefaultView(APIView):
 
@@ -40,20 +13,48 @@ class DefaultView(APIView):
     return Response('this is the default page')
 
 class LoginView(APIView):
+  authentication_classes = (BasicAuthentication,SessionAuthentication)
+  permission_classes = (AllowAny,)
 
   def get(self, request, format=None):
-    return Response('login with token')
+    if request.session.get("login") == "success":
+      return Response('login with token sec')
+    else:
+      return Response('login without token')
 
   def post(self, request, format=None):
-    user_id = request.get('user_id')
-    password_digest = request.get('password_digest')
+    user_id = request.POST.get('user_id')
+    password_digest = request.POST.get('password_digest')
+    # user = auth.authenticate(request, username=user_id, password=password_digest)
+    # left the authenticate logic undone
     # read from db
-    isSuccess = true
+    isSuccess = 'true'
+    request.session["login"]="success"
     content = {
       'isSuccess' : f"{isSuccess}",
-      data : {
+      'data' : {
         'user_id' : f"{user_id}"
       }
+    }
+    return Response(content)
+
+class LogoutView(APIView):
+  authentication_classes = (BasicAuthentication,SessionAuthentication)
+  permission_classes = (IsAuthenticated,)
+
+  def post(self, request):
+    #the logout job
+    return Response("logged out")
+
+class RegisterView(APIView):
+
+  def get(self, request, format=None):
+    return Response('the register page')
+
+  def post(self, request, format=None):
+    realname = request.get('realname')
+    content = {
+      "realname" : f"{realname}"
     }
     return Response(content)
 
@@ -70,6 +71,38 @@ class AccountView(APIView):
       'isSuccess' : f"{isSuccess}",
       data : {
         'user_id' : f"{user_id}"
+      }
+    }
+    return Response(content)
+
+class PasswordView(APIView):
+  authentication_classes = (BasicAuthentication,SessionAuthentication)
+  permission_classes = (IsAuthenticated,)
+
+  def get(self, request, format:None):
+    return Response('this is the password changing page')
+
+  def patch(self, request, format:None):
+    #different with APIdoc
+    #TODO： User Authentication
+    content = {
+      'isSuccess' : true,
+      data : {
+        'message' : 'password changed successfully'
+      }
+    }
+    return Response(content)
+
+class AccountsView(APIView):
+  def get(self, request, format:None):
+    return Response('this is the accounts page')
+
+  def post(self, request, format=None):
+    #TODO： User Authentication
+    content = {
+      'isSuccess' : true,
+      data : {
+        'message' : 'accounts appended successfully'
       }
     }
     return Response(content)
