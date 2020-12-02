@@ -6,6 +6,8 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.authentication import BasicAuthentication,SessionAuthentication
 from rest_framework.permissions import AllowAny,IsAuthenticated
+from user.authentication import ExampleAuthentication
+from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 
 class DefaultView(APIView):
 
@@ -39,8 +41,10 @@ class LoginView(APIView):
     return Response(content)
 
 class LogoutView(APIView):
-  authentication_classes = (BasicAuthentication,SessionAuthentication)
-  permission_classes = (IsAuthenticated,)
+  # authentication_classes = (BasicAuthentication,SessionAuthentication)
+  # permission_classes = (IsAuthenticated,)
+  authentication_classes = [ExampleAuthentication]
+  permission_classes = [IsStudent|IsTeachingAssistant|IsTeacher|IsChargingTeacher]
 
   def post(self, request):
     #the logout job
@@ -66,10 +70,10 @@ class AccountView(APIView):
   def patch(self, request, user_id, format=None):
     #TODO： User Authentication
     #different with APIdoc
-    isSuccess = true
+    isSuccess = 'true'
     content = {
       'isSuccess' : f"{isSuccess}",
-      data : {
+      'data' : {
         'user_id' : f"{user_id}"
       }
     }
@@ -86,8 +90,8 @@ class PasswordView(APIView):
     #different with APIdoc
     #TODO： User Authentication
     content = {
-      'isSuccess' : true,
-      data : {
+      'isSuccess' : 'true',
+      'data' : {
         'message' : 'password changed successfully'
       }
     }
@@ -100,8 +104,8 @@ class AccountsView(APIView):
   def post(self, request, format=None):
     #TODO： User Authentication
     content = {
-      'isSuccess' : true,
-      data : {
+      'isSuccess' : 'true',
+      'data' : {
         'message' : 'accounts appended successfully'
       }
     }
