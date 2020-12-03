@@ -37,7 +37,7 @@
 
 ### 配置 Docker 和 Docker Compose
 
-- [如何在 Linux 安装 Docker (Tuna/docker-ce)](https://mirrors.tuna.tsinghua.edu.cn/help/docker-ce/)
+- [如何在 Linux 安装 Docker (TUNA/docker-ce)](https://mirrors.tuna.tsinghua.edu.cn/help/docker-ce/)
 
 - [如何安装 Docker Compose](https://docs.docker.com/compose/install/)
 
@@ -47,9 +47,6 @@
 
 - [Docker 文档](https://docs.docker.com/)
 
-- [LMGTFY](http://letmegooglethat.com/?q=RTFM)
-
-- [Broken English?](https://www.deepl.com/en/translator)
 
 ### 使用 Docker 环境开发
 
@@ -88,8 +85,6 @@ docker ps
 docker exec -it <container name or id> /bin/bash 
 ```
 
-Bash 会提示 `I have no name!`，但是此时 UID 和 GID 是正确的，无视即可
-
 #### 关闭 Web 服务器
 
 ```
@@ -98,6 +93,22 @@ docker-compose down
 
 了解其他配置可以阅读 `Dockerfile.web.dev` 和 `docker-compose.yml`
 
-## Lint
+### VSCode 使用建议
 
-使用 vscode+pylint 的默认配置
+#### VSCode Docker
+
+[Docker](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker)
+
+##### 打开 Docker 的 Shell
+
+![VSCode Docker](./image/vscode-docker.png)
+
+#### VSCode Remote
+
+[Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+
+##### Remote Dev in Docker
+
+点击左下角 `><` 图标，选择 Attach to Running Container
+
+![VSCode Remote Container](./image/vscode-remote-container.png)
