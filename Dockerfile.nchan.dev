@@ -1,7 +1,7 @@
 FROM debian:buster
 
 # Use mirrors.cloud.tencent.com
-COPY ./sources.list.nchan /etc/apt/sources.list
+COPY ./nchan/sources.list.nchan /etc/apt/sources.list
 RUN apt update && \
     apt upgrade -y && \
     apt install -y nginx nginx-common nginx-extras && \

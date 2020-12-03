@@ -52,7 +52,7 @@ services:
       - MINIO_ACCESS_KEY=minio
       - MINIO_SECRET_KEY=minio123
       - MINIO_ADDRESS=minio:9000
-    command: python manage.py runserver 0.0.0.0:8000
+    command: "python manage.py runserver 0.0.0.0:8000"
     user: "${USER_ID}:${GROUP_ID}"
     volumes: 
       - "./catfood:/code/catfood:rw"
@@ -68,7 +68,7 @@ services:
       context: .
       dockerfile: Dockerfile.nchan.dev
     volumes: 
-      - "./nchan.conf:/etc/nginx/sites-enabled/default"
+      - "./nchan/nchan.conf:/etc/nginx/sites-enabled/default"
     ports:
       - 8080:8080
       - 8081:8081
