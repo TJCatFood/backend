@@ -28,11 +28,15 @@ class LoginView(APIView):
 
   def post(self, request, format=None):
     user_id = request.POST.get('user_id')
-    password_digest = request.POST.get('password_digest')
+    password = request.POST.get('password')
     # user = auth.authenticate(request, username=user_id, password=password_digest)
     # left the authenticate logic undone
     # read from db
-    isSuccess = 'true'
+    user = User.objects.get(user_id=user_id)
+    if user.check_password(password):
+      isSuccess = 'true'
+    else:
+      isSuccess = 'false'
     request.session["login"]="success"
     content = {
       'isSuccess' : f"{isSuccess}",
@@ -58,9 +62,9 @@ class RegisterView(APIView):
     return Response('the register page')
 
   def post(self, request, format=None):
-    username, password, realname = request.POST.get('username'), request.POST.get('password'), request.POST.get('realname')
-    if username and password:
-      models.User.objects.create(username=username,password=password,realname=realname)
+    user_id, password, realname = request.POST.get('user_id'), request.POST.get('password'), request.POST.get('realname')
+    if user_id and password:
+      User.objects.create(user_id=user_id,password=password,realname=realname)
       content = {
         "realname" : f"{realname}"
       }
