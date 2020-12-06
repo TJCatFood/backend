@@ -9,6 +9,8 @@ from rest_framework.permissions import AllowAny,IsAuthenticated
 from user.authentication import ExampleAuthentication
 from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 
+from .models import *
+
 class DefaultView(APIView):
 
   def get(self, request, format=None):
@@ -56,11 +58,15 @@ class RegisterView(APIView):
     return Response('the register page')
 
   def post(self, request, format=None):
-    realname = request.get('realname')
-    content = {
-      "realname" : f"{realname}"
-    }
-    return Response(content)
+    username, password, realname = request.POST.get('username'), request.POST.get('password'), request.POST.get('realname')
+    if username and password:
+      models.User.objects.create(username=username,password=password,realname=realname)
+      content = {
+        "realname" : f"{realname}"
+      }
+      return Response(content)
+    else:
+      return Response('Error Register')
 
 class AccountView(APIView):
 

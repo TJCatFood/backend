@@ -6,7 +6,8 @@ class IsChargingTeacher(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_charging_teacher)
+        user = request.get('username')
+        return bool(request.user and request.user.character and request.user.character==1)
     def has_object_permission(self, request, view, obj):
         return True
 
@@ -16,7 +17,7 @@ class IsTeacher(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_teacher)
+        return bool(request.user and request.user.character and request.user.character==2)
     def has_object_permission(self, request, view, obj):
         return True
 
@@ -26,7 +27,7 @@ class IsTeachingAssistant(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_teaching_assistant)
+        return bool(request.user and request.user.character and request.user.character==3)
     def has_object_permission(self, request, view, obj):
         return True
 
@@ -36,6 +37,6 @@ class IsStudent(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_student)
+        return bool(request.user and request.user.character and request.user.character==4)
     def has_object_permission(self, request, view, obj):
         return True

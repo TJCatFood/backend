@@ -1,22 +1,22 @@
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import User as BaseUser
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django import forms
 
+user_character = ((1, 'is_charging_teacher'), (2, 'is_teacher'), (3, 'is_teaching_assistant'), (4, 'is_student'))
 
 
-class User(AbstractBaseUser):
-    user_id = models.AutoField(primary_key=True)
-    # AbstractBaseUser seems to have this.
-    # password_digest = models.CharField(max_length=50)
+class User(AbstractUser):
+    #user_id = models.CharField(max_length=50, primary_key=True)
+    #password_digest = models.CharField(max_length=50)
     realname = models.CharField(max_length=50)
     personal_id = models.CharField(max_length=20)
     email = models.EmailField(max_length=50)
     university_id = models.IntegerField()
     school_id = models.IntegerField()
-    character = models.IntegerField()
+    character = models.IntegerField(choices=user_character, default=4)
     avatar = models.CharField(max_length=50)
-    REQUIRED_FIELDS = ['password']
-    USERNAME_FIELD = 'user_id'
+
 
 
 class University(models.Model):
