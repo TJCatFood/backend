@@ -8,7 +8,7 @@ from rest_framework.authentication import BasicAuthentication,SessionAuthenticat
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from user.authentication import ExampleAuthentication
 from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
-
+from django.db.models.query import EmptyQuerySet
 from .models import *
 
 class DefaultView(APIView):
@@ -29,19 +29,40 @@ class LoginView(APIView):
   def post(self, request, format=None):
     user_id = request.POST.get('user_id')
     password = request.POST.get('password')
-    # user = auth.authenticate(request, username=user_id, password=password_digest)
-    # left the authenticate logic undone
-    # read from db
-    user = User.objects.get(user_id=user_id)
-    if user.check_password(password):
-      isSuccess = 'true'
-    else:
-      isSuccess = 'false'
-    request.session["login"]="success"
+    # check the user_id
+    try:
+      user = User.objects.get(user_id=user_id)
+    except:
+      content = {
+        'isSuccess': "false",
+        'error': {
+          'message': "输入的用户ID不存在"
+        }
+      }
+      return Response(content, status=400)
+
+    # check the password
+    if not user.check_password(password):
+      content = {
+        'isSuccess': "false",
+        'error': {
+          'message': "用户ID与密码不匹配"
+        }
+      }
+      return Response(content, status=400)
+
+    # request.session["login"]="success"
     content = {
-      'isSuccess' : f"{isSuccess}",
-      'data' : {
-        'user_id' : f"{user_id}"
+      'isSuccess': "true",
+      'data': {
+        'user_id': f"{user.user_id}",
+        'realname': f"{user.realname}",
+        'email': f"{user.email}",
+        'university_id': f"{user.university_id}",
+        'school_id': f"{user.school_id}",
+        'character': f"{user.character}",
+        'personal_id': f"{user.personal_id}",
+        'avatar': f"{user.avatar}",
       }
     }
     return Response(content)
@@ -62,15 +83,44 @@ class RegisterView(APIView):
     return Response('the register page')
 
   def post(self, request, format=None):
-    user_id, password, realname = request.POST.get('user_id'), request.POST.get('password'), request.POST.get('realname')
-    if user_id and password:
-      User.objects.create(user_id=user_id,password=password,realname=realname)
+    user_id, password = request.POST.get('user_id'), request.POST.get('password') 
+
+    if User.objects.filter(user_id=user_id).count() != 0:
       content = {
-        "realname" : f"{realname}"
+        'isSuccess': "false",
+        'error': {
+          'message': "用户ID已被注册"
+        }
       }
-      return Response(content)
+      return Response(content, status=400)
+
+    realname = request.POST.get('realname')
+    email = request.POST.get('email')
+    university_id = request.POST.get('university_id')
+    school_id = request.POST.get('school_id')
+    character = request.POST.get('character')
+    personal_id = request.POST.get('personal_id')
+    avatar = request.POST.get('avatar')
+    
+    if user_id and password:
+      User.objects.create(user_id=user_id,password=password,realname=realname,
+        email=email, university_id=university_id, school_id=school_id, character=character,
+        personal_id=personal_id, avatar=avatar)
+      content = {
+        'isSuccess' : "true",
+        'data' : {
+          'message' : "注册成功"
+        }
+      }
+      return Response(content, status=201)
     else:
-      return Response('Error Register')
+      content = {
+        'isSuccess' : "false",
+        'data' : {
+          'message' : "缺少用户ID或密码"
+        }
+      }
+      return Response(content, status=400)
 
 class AccountView(APIView):
 
