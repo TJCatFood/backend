@@ -6,25 +6,23 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.authentication import BasicAuthentication,SessionAuthentication
 from rest_framework.permissions import AllowAny,IsAuthenticated
-from user.authentication import ExampleAuthentication
+from user.authentication import CatfoodAuthentication
 from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 from django.db.models.query import EmptyQuerySet
 from .models import *
 
 class DefaultView(APIView):
+  authentication_classes = (CatfoodAuthentication,)
   permission_classes = (IsStudent,)
   def get(self, request, format=None):
     return Response('this is the default page')
 
 class LoginView(APIView):
-  authentication_classes = (BasicAuthentication,SessionAuthentication)
-  permission_classes = (AllowAny,)
-
-  def get(self, request, format=None):
-    if request.session['user_id']:
-      return Response('login with token sec')
-    else:
-      return Response('login without token')
+  # def get(self, request, format=None):
+  #   if request.session['user_id']:
+  #     return Response('login with token sec')
+  #   else:
+  #     return Response('login without token')
 
   def post(self, request, format=None):
     user_id = request.POST.get('user_id')
@@ -51,7 +49,7 @@ class LoginView(APIView):
       }
       return Response(content, status=400)
 
-    # request.session["login"]="success"
+    
     content = {
       'isSuccess': "true",
       'data': {
@@ -65,18 +63,22 @@ class LoginView(APIView):
         'avatar': f"{user.avatar}",
       }
     }
-    request.session['user_id']=user.user_id
-    request.session['character']=user.character
+    request.session['user_id'] = user.user_id
+    request.session["login"] = True
+    # request.session['character']=user.character
     return Response(content)
 
 class LogoutView(APIView):
-  # authentication_classes = (BasicAuthentication,SessionAuthentication)
-  # permission_classes = (IsAuthenticated,)
-  authentication_classes = [ExampleAuthentication]
+  authentication_classes = (CatfoodAuthentication,)
   permission_classes = [IsStudent|IsTeachingAssistant|IsTeacher|IsChargingTeacher]
 
   def post(self, request):
-    #the logout job
+    try:
+      del request.session['login']
+      del request.session['user_id']
+    except KeyError:
+      pass
+    request.session.flush()
     return Response("logged out")
 
 class RegisterView(APIView):

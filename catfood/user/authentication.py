@@ -1,14 +1,16 @@
 from rest_framework import authentication
 from rest_framework import exceptions
 from django.contrib import auth
+from .models import User
 
-class ExampleAuthentication(authentication.BaseAuthentication):
+class CatfoodAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
-        username = request.POST.get('username')
-        if not username:
-            raise exceptions.AuthenticationFailed('Username Required')
-        try:
-            user = auth.get_user_model().objects.get(username=username)
-        except:
-            raise exceptions.AuthenticationFailed('No such user')
+        if request.session.get("login"):
+            user_id = request.session.get('user_id')
+            try:
+                user = User.objects.get(user_id=user_id)
+            except:
+                raise exceptions.AuthenticationFailed('No such user')
+        else:
+            raise exceptions.AuthenticationFailed('Not logged in or cookies disabled')
         return (user, None)

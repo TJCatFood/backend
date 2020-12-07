@@ -6,14 +6,7 @@ class IsChargingTeacher(BasePermission):
     """
 
     def has_permission(self, request, view):
-        try:
-            if request.session.get('character'):
-                return bool(request.session['character'] == 1)
-            else:
-                return False
-        except AttributeError as e:
-            return False
-        #return bool(request.user and request.user.character and request.user.character==1)
+        return bool(request.user and request.user.character and request.user.character==1)
     def has_object_permission(self, request, view, obj):
         return True
 
@@ -23,14 +16,7 @@ class IsTeacher(BasePermission):
     """
 
     def has_permission(self, request, view):
-        try:
-            if request.session.get('character'):
-                return bool(request.session['character'] == 2)
-            else:
-                return False
-        except AttributeError as e:
-            return False
-        #return bool(request.user and request.user.character and request.user.character==2)
+        return bool(request.user and request.user.character and request.user.character==2)
     def has_object_permission(self, request, view, obj):
         return True
 
@@ -40,14 +26,7 @@ class IsTeachingAssistant(BasePermission):
     """
 
     def has_permission(self, request, view):
-        try:
-            if request.session.get('character'):
-                return bool(request.session['character'] == 3)
-            else:
-                return False
-        except AttributeError as e:
-            return False
-        #return bool(request.user and request.user.character and request.user.character==3)
+        return bool(request.user and request.user.character and request.user.character==3)
     def has_object_permission(self, request, view, obj):
         return True
 
@@ -57,13 +36,6 @@ class IsStudent(BasePermission):
     """
 
     def has_permission(self, request, view):
-        try:
-            if request.session.get('character'):
-                return bool(request.session['character'] == 4)
-            else:
-                return False
-        except AttributeError as e:
-            return False
-        #return bool(request.user and request.user.character and request.user.character==4)
+        return bool(request.user and request.user.character and request.user.character==4)
     def has_object_permission(self, request, view, obj):
         return True
