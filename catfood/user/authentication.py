@@ -10,7 +10,7 @@ class CatfoodAuthentication(authentication.BaseAuthentication):
             try:
                 user = User.objects.get(user_id=user_id)
             except:
-                raise exceptions.AuthenticationFailed('No such user')
+                raise exceptions.AuthenticationFailed('用户不存在')
         else:
-            raise exceptions.AuthenticationFailed('Not logged in or cookies disabled')
+            raise exceptions.AuthenticationFailed('未登录或cookie被禁用')
         return (user, None)

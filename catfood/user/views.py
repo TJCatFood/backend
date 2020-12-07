@@ -12,19 +12,35 @@ from django.db.models.query import EmptyQuerySet
 from .models import *
 
 class DefaultView(APIView):
+  # This view is merely for test use.
   authentication_classes = (CatfoodAuthentication,)
   permission_classes = (IsStudent,)
   def get(self, request, format=None):
     return Response('this is the default page')
 
 class LoginView(APIView):
-  # def get(self, request, format=None):
-  #   if request.session['user_id']:
-  #     return Response('login with token sec')
-  #   else:
-  #     return Response('login without token')
   permission_classes = (AllowAny,)
   def post(self, request, format=None):
+    # login with session_id
+    if request.session.get("user_id"):
+        user_id = request.session['user_id']
+        user = User.objects.get(user_id=user_id)
+        content = {
+        'isSuccess': "true",
+        'data': {
+          'user_id': f"{user.user_id}",
+          'realname': f"{user.realname}",
+          'email': f"{user.email}",
+          'university_id': f"{user.university_id}",
+          'school_id': f"{user.school_id}",
+          'character': f"{user.character}",
+          'personal_id': f"{user.personal_id}",
+          'avatar': f"{user.avatar}",
+          }
+        }
+        return Response(content)
+
+    # login with user_id and password
     user_id = request.POST.get('user_id')
     password = request.POST.get('password')
     # check the user_id
@@ -65,7 +81,6 @@ class LoginView(APIView):
     }
     request.session['user_id'] = user.user_id
     request.session["login"] = True
-    # request.session['character']=user.character
     return Response(content)
 
 class LogoutView(APIView):
@@ -89,12 +104,8 @@ class LogoutView(APIView):
 
 class RegisterView(APIView):
   permission_classes = (AllowAny,)
-  def get(self, request, format=None):
-    return Response('the register page')
-
   def post(self, request, format=None):
     user_id, password = request.POST.get('user_id'), request.POST.get('password')
-
     if User.objects.filter(user_id=user_id).count() != 0:
       content = {
         'isSuccess': "false",
