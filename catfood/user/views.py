@@ -8,13 +8,37 @@ from rest_framework.permissions import AllowAny
 from user.authentication import CatfoodAuthentication
 from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 from django.db.models.query import EmptyQuerySet
-from .models import User
+from rest_framework import status
+from .models import User, University, School
+from .serializers import UniversitySerializer, SchoolSerializer
 
 class DefaultView(APIView):
   # This view is merely for test use.
   permission_classes = (AllowAny,)
   def get(self, request, format=None):
+    # if request.GET("university_id"):
+    #   university_id = request.GET.get("university_id")
+    #   try:
+    #     university = University.objects.get(university_id=university_id)
+    #     Response(university.university_name)
+    #   except:
+    #     return Response("no such university")
+    # else:
     return Response('PlanePlane, do you still remember me?')
+
+  # def post(self, request, format=None):
+  #   if request.POST.get("university_id"):
+  #     university_id = request.POST.get("university_id")
+  #     university_name = request.POST.get("university_name")
+  #     if University.objects.filter(university_id=university_id).count() != 0:
+  #       return Response("existed university")
+  #     university = University(university_id=university_id, university_name=university_name)
+  #     university.save()
+  #     #university = University.objects.get(university_id=university_id)
+  #
+  #     return Response("add successfully")
+  #   else:
+  #     return Response("no id")
 
 class LoginView(APIView):
   permission_classes = (AllowAny,)
@@ -30,8 +54,8 @@ class LoginView(APIView):
             'user_id': f"{user.user_id}",
             'realname': f"{user.realname}",
             'email': f"{user.email}",
-            'university_id': f"{user.university_id}",
-            'school_id': f"{user.school_id}",
+            'university_id': f"{user.university_id.university_name}",
+            'school_id': f"{user.school_id.school_name}",
             'character': f"{user.character}",
             'personal_id': f"{user.personal_id}",
             'avatar': f"{user.avatar}",
@@ -155,8 +179,8 @@ class AccountView(APIView):
       'user_id': f"{user.user_id}",
       'realname': f"{user.realname}",
       'email': f"{user.email}",
-      'university_id': f"{user.university_id}",
-      'school_id': f"{user.school_id}",
+      'university_id': f"{user.university_id.university_name}",
+      'school_id': f"{user.school_id.school_name}",
       'character': f"{user.character}",
       'personal_id': f"{user.personal_id}",
       'avatar': f"{user.avatar}",
@@ -223,3 +247,33 @@ class AccountsView(APIView):
       }
     }
     return Response(content)
+
+class UniversityView(APIView):
+  permission_classes = (AllowAny,)
+  #only for test
+  def get(self, request, format=None):
+    cases = University.objects.all()
+    serializer = UniversitySerializer(cases, many=True)
+    return Response(serializer.data)
+
+  def post(self, request, format=None):
+    serializer = UniversitySerializer(data=request.data)
+    if serializer.is_valid():
+      serializer.save()
+      return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class SchoolView(APIView):
+  permission_classes = (AllowAny,)
+  # only for test
+  def get(self, request, format=None):
+    cases = School.objects.all()
+    serializer = SchoolSerializer(cases, many=True)
+    return Response(serializer.data)
+
+  def post(self, request, format=None):
+    serializer = SchoolSerializer(data=request.data)
+    if serializer.is_valid():
+      serializer.save()
+      return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -24,12 +24,14 @@ class UserManager(BaseUserManager):
             character = 4
         if avatar == None:
             avatar = ''
+        university = University.objects.get(university_id=university_id)
+        school = School.objects.get(school_id=school_id)
         user = self.model(
             user_id=user_id,
             realname=realname,
             email=User.objects.normalize_email(email),
-            university_id=university_id,
-            school_id=school_id,
+            university_id=university,
+            school_id=school,
             personal_id=personal_id,
             avatar=avatar,
         )
@@ -43,8 +45,8 @@ class User(AbstractBaseUser):
     # AbstractBaseUser already has password.
     realname = models.CharField(max_length=50)
     email = models.EmailField(max_length=50)
-    university_id = models.IntegerField(default=0)
-    school_id = models.IntegerField(default=0)
+    university_id = models.ForeignKey('University', on_delete=models.CASCADE)
+    school_id = models.ForeignKey('School', on_delete=models.CASCADE)
     character = models.IntegerField(choices=user_character, default=4)
     personal_id = models.CharField(max_length=20)
     avatar = models.CharField(max_length=50)
@@ -55,6 +57,7 @@ class User(AbstractBaseUser):
 
 class University(models.Model):
     university_id = models.AutoField(primary_key=True)
+    official_id = models.CharField(max_length=20, default=0)
     university_name = models.CharField(max_length=50)
 
 
