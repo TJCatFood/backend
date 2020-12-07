@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from course_database.models import ExperimentCaseDatabase
-
+from experiment.models import CourseCase
+from course.models import Course
 class ExperimentCaseDatabaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExperimentCaseDatabase
@@ -13,3 +14,12 @@ class ExperimentCaseDatabaseSerializer(serializers.ModelSerializer):
             'answer_file_token'
         ]
  
+class CourseCaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CourseCase
+        fields = [
+            'case_id',
+            'course_id',
+            'case_start_timestamp',
+            'case_end_timestamp',
+        ]
