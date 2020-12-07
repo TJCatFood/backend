@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'bulletin',
     'user',
     'contest',
-    'class',
+    'course',
     'grade',
     'course_database',
     'lecture',

@@ -6,3 +6,5 @@
 *.pyc
 *.pyo
 *.DS_Store
+
+/catfood/.vscode

@@ -35,7 +35,7 @@ class School(models.Model):
 
 class TakeCourse(models.Model):
     student_id = models.ForeignKey('User', on_delete=models.CASCADE)
-    course_id = models.ForeignKey('class.Course', on_delete=models.CASCADE)
+    course_id = models.ForeignKey('course.Course', on_delete=models.CASCADE)
     active = models.BooleanField(default=False)
 
     class Meta:
@@ -44,7 +44,7 @@ class TakeCourse(models.Model):
 
 class Invitation(models.Model):
     invitor_id = models.ForeignKey('User', on_delete=models.CASCADE)
-    course_id = models.ForeignKey('class.Course', on_delete=models.CASCADE)
+    course_id = models.ForeignKey('course.Course', on_delete=models.CASCADE)
     email = models.EmailField(max_length=50)
     invitee_name = models.CharField(max_length=200, null=True)
 
