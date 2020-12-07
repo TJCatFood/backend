@@ -122,10 +122,10 @@ REST_FRAMEWORK = {
         # Read: https://www.django-rest-framework.org/api-guide/permissions/
         # should be IsAuthenticated or other if our own auth is set up
         'rest_framework.permissions.AllowAny',
-        # 'user.permissions.IsChargingTeacher',
-        # 'user.permissions.IsTeacher',
-        # 'user.permissions.IsTeachingAssistant',
-        # 'user.permissions.IsStudent',
+        'user.permissions.IsChargingTeacher',
+        'user.permissions.IsTeacher',
+        'user.permissions.IsTeachingAssistant',
+        'user.permissions.IsStudent',
     ]
 }
 

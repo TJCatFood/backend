@@ -78,12 +78,12 @@ class LogoutView(APIView):
     return Response("logged out")
 
 class RegisterView(APIView):
-
+  permission_classes = (AllowAny,)
   def get(self, request, format=None):
     return Response('the register page')
 
   def post(self, request, format=None):
-    user_id, password = request.POST.get('user_id'), request.POST.get('password') 
+    user_id, password = request.POST.get('user_id'), request.POST.get('password')
 
     if User.objects.filter(user_id=user_id).count() != 0:
       content = {
@@ -101,7 +101,7 @@ class RegisterView(APIView):
     character = request.POST.get('character')
     personal_id = request.POST.get('personal_id')
     avatar = request.POST.get('avatar')
-    
+
     if user_id and password:
       User.objects.create(user_id=user_id,password=password,realname=realname,
         email=email, university_id=university_id, school_id=school_id, character=character,
