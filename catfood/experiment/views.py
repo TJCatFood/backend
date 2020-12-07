@@ -6,9 +6,11 @@ from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.decorators import api_view
 from course_database.models import ExperimentCaseDatabase
-from experiment.serializers import ExperimentCaseDatabaseSerializer
+from experiment.models import CourseCase, ExperimentAssignment
+from experiment.serializers import ExperimentCaseDatabaseSerializer, CourseCaseSerializer, ExperimentAssignmentSerializer
 from rest_framework.parsers import JSONParser
 from django.http import HttpResponse, JsonResponse
+from rest_framework import generics
 
 class TestView(APIView):
 
@@ -65,22 +67,43 @@ def experiment_case_detail(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['GET', 'POST'])
-def course_case_list(request, course):
+def course_case_list(request, course_id):
     """
     List all cases of a specific course, or bind a case to this course.
     """
     # TODO: 鉴权
     if request.method == 'GET':
-        cases = ExperimentCaseDatabase.objects.all()
-        serializer = ExperimentCaseDatabaseSerializer(cases, many=True)
+        cases = CourseCase.objects.all()
+        cases = cases.filter(course_id=course_id)
+        serializer = CourseCaseSerializer(cases, many=True)
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = ExperimentCaseDatabaseSerializer(data=request.data)
+        serializer = CourseCaseSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class CourseCasesDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CourseCase.objects.all()
+    serializer_class = CourseCaseSerializer
 
+@api_view(['GET', 'POST'])
+def assignment_list(request, course_case_id):
+    """
+    List all cases of a specific assignments.
+    """
+    if request.method == 'GET':
+        assignments = ExperimentAssignment.objects.all()
+        assignments = assignments.filter(course_case_id=course_case_id)
+        serializer = ExperimentAssignmentSerializer(assignments, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = ExperimentAssignmentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
