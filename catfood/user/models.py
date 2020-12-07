@@ -18,6 +18,12 @@ class UserManager(BaseUserManager):
             email = ''
         if personal_id == None:
             personal_id = ''
+        if university_id == None:
+            university_id = 0
+        if school_id == None:
+            school_id = 0
+        if character == None:
+            character = 4
         if avatar == None:
             avatar = ''
         user = self.model(
