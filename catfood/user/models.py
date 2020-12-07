@@ -9,20 +9,20 @@ user_character = ((1, 'is_charging_teacher'), (2, 'is_teacher'), (3, 'is_teachin
 
 class UserManager(BaseUserManager):
     def create(self, user_id, password, realname=None, email=None, university_id=None,
-        school_id=None, character=None, personal_id=None, avatar=None):
-        if realname == None:
+               school_id=None, character=None, personal_id=None, avatar=None):
+        if realname is None:
             realname = ''
-        if email == None:
+        if email is None:
             email = ''
-        if personal_id == None:
+        if personal_id is None:
             personal_id = ''
-        if university_id == None:
+        if university_id is None:
             university_id = 0
-        if school_id == None:
+        if school_id is None:
             school_id = 0
-        if character == None:
+        if character is None:
             character = 4
-        if avatar == None:
+        if avatar is None:
             avatar = ''
         university = University.objects.get(university_id=university_id)
         school = School.objects.get(school_id=school_id)

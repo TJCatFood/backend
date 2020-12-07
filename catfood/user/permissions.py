@@ -1,14 +1,17 @@
 from rest_framework.permissions import BasePermission
 
+
 class IsChargingTeacher(BasePermission):
     """
     Allows access only to charging teachers.
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.character and request.user.character==1)
+        return bool(request.user and request.user.character and request.user.character == 1)
+
     def has_object_permission(self, request, view, obj):
         return True
+
 
 class IsTeacher(BasePermission):
     """
@@ -16,9 +19,11 @@ class IsTeacher(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.character and request.user.character==2)
+        return bool(request.user and request.user.character and request.user.character == 2)
+
     def has_object_permission(self, request, view, obj):
         return True
+
 
 class IsTeachingAssistant(BasePermission):
     """
@@ -26,9 +31,11 @@ class IsTeachingAssistant(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.character and request.user.character==3)
+        return bool(request.user and request.user.character and request.user.character == 3)
+
     def has_object_permission(self, request, view, obj):
         return True
+
 
 class IsStudent(BasePermission):
     """
@@ -36,6 +43,7 @@ class IsStudent(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.character and request.user.character==4)
+        return bool(request.user and request.user.character and request.user.character == 4)
+
     def has_object_permission(self, request, view, obj):
         return True

@@ -3,6 +3,7 @@ from rest_framework import exceptions
 from django.contrib import auth
 from .models import User
 
+
 class CatfoodAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
         if request.session.get("login"):
@@ -12,8 +13,9 @@ class CatfoodAuthentication(authentication.BaseAuthentication):
                 # In case users change their passwords
                 if request.session.get("password") != user.password:
                     raise exceptions.AuthenticationFailed('未登录或cookie失效/被浏览器禁用')
-            except NotADirectoryError:
+            except(Exception):
                 raise exceptions.AuthenticationFailed('用户不存在')
         else:
             raise exceptions.AuthenticationFailed('未登录或cookie失效/被浏览器禁用')
+
         return (user, None)
