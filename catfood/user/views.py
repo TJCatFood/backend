@@ -23,7 +23,7 @@ class LoginView(APIView):
   #     return Response('login with token sec')
   #   else:
   #     return Response('login without token')
-
+  permission_classes = (AllowAny,)
   def post(self, request, format=None):
     user_id = request.POST.get('user_id')
     password = request.POST.get('password')
@@ -79,7 +79,13 @@ class LogoutView(APIView):
     except KeyError:
       pass
     request.session.flush()
-    return Response("logged out")
+    content = {
+      'isSuccess': "true",
+      'date': {
+        'message': "登出成功"
+      }
+    }
+    return Response(content, status=201)
 
 class RegisterView(APIView):
   permission_classes = (AllowAny,)
