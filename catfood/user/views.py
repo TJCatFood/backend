@@ -4,19 +4,17 @@ from django.contrib import auth
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
-from rest_framework.authentication import BasicAuthentication,SessionAuthentication
-from rest_framework.permissions import AllowAny,IsAuthenticated
+from rest_framework.permissions import AllowAny
 from user.authentication import CatfoodAuthentication
 from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 from django.db.models.query import EmptyQuerySet
-from .models import *
+from .models import User
 
 class DefaultView(APIView):
   # This view is merely for test use.
-  authentication_classes = (CatfoodAuthentication,)
-  permission_classes = (IsStudent,)
+  permission_classes = (AllowAny,)
   def get(self, request, format=None):
-    return Response('this is the default page')
+    return Response('PlanePlane, do you still remember me?')
 
 class LoginView(APIView):
   permission_classes = (AllowAny,)
@@ -25,20 +23,21 @@ class LoginView(APIView):
     if request.session.get("user_id"):
         user_id = request.session['user_id']
         user = User.objects.get(user_id=user_id)
-        content = {
-        'isSuccess': "true",
-        'data': {
-          'user_id': f"{user.user_id}",
-          'realname': f"{user.realname}",
-          'email': f"{user.email}",
-          'university_id': f"{user.university_id}",
-          'school_id': f"{user.school_id}",
-          'character': f"{user.character}",
-          'personal_id': f"{user.personal_id}",
-          'avatar': f"{user.avatar}",
+        if request.session.get("password") == user.password:
+          content = {
+          'isSuccess': "true",
+          'data': {
+            'user_id': f"{user.user_id}",
+            'realname': f"{user.realname}",
+            'email': f"{user.email}",
+            'university_id': f"{user.university_id}",
+            'school_id': f"{user.school_id}",
+            'character': f"{user.character}",
+            'personal_id': f"{user.personal_id}",
+            'avatar': f"{user.avatar}",
+            }
           }
-        }
-        return Response(content)
+          return Response(content)
 
     # login with user_id and password
     user_id = request.POST.get('user_id')
@@ -80,11 +79,12 @@ class LoginView(APIView):
       }
     }
     request.session['user_id'] = user.user_id
+    request.session['password'] = user.password
     request.session["login"] = True
     return Response(content)
 
 class LogoutView(APIView):
-  authentication_classes = (CatfoodAuthentication,)
+  authentication_classes = [CatfoodAuthentication]
   permission_classes = [IsStudent|IsTeachingAssistant|IsTeacher|IsChargingTeacher]
 
   def post(self, request):
@@ -127,6 +127,7 @@ class RegisterView(APIView):
       User.objects.create(user_id=user_id,password=password,realname=realname,
         email=email, university_id=university_id, school_id=school_id, character=character,
         personal_id=personal_id, avatar=avatar)
+      request.session.flush()
       content = {
         'isSuccess' : "true",
         'data' : {
@@ -144,42 +145,73 @@ class RegisterView(APIView):
       return Response(content, status=400)
 
 class AccountView(APIView):
+  authentication_classes = [CatfoodAuthentication]
+  permission_classes = [IsStudent|IsTeachingAssistant|IsTeacher|IsChargingTeacher]
+  def get(self, request, format=None):
+    user = request.user
+    content = {
+    'isSuccess': "true",
+    'data': {
+      'user_id': f"{user.user_id}",
+      'realname': f"{user.realname}",
+      'email': f"{user.email}",
+      'university_id': f"{user.university_id}",
+      'school_id': f"{user.school_id}",
+      'character': f"{user.character}",
+      'personal_id': f"{user.personal_id}",
+      'avatar': f"{user.avatar}",
+      }
+    }
+    return Response(content)
 
-  def get(self, request, user_id, format=None):#different with APIdoc
-    return Response('the info of user ' + user_id)
-
-  def patch(self, request, user_id, format=None):
-    #TODO： User Authentication
-    #different with APIdoc
+  def patch(self, request, format=None):
+    user = request.user
+    email = request.POST.get("email")
+    avatar = request.POST.get("avatar")
+    if email:
+      user.email = User.objects.normalize_email(email)
+    if avatar:
+      user.avatar = avatar
+    user.save()
     isSuccess = 'true'
     content = {
       'isSuccess' : f"{isSuccess}",
       'data' : {
-        'user_id' : f"{user_id}"
+        'message' : '用户信息更改成功'
       }
     }
-    return Response(content)
+    return Response(content, status=200)
 
 class PasswordView(APIView):
-  authentication_classes = (BasicAuthentication,SessionAuthentication)
-  permission_classes = (IsAuthenticated,)
+  authentication_classes = [CatfoodAuthentication]
+  permission_classes = [IsStudent|IsTeachingAssistant|IsTeacher|IsChargingTeacher]
 
-  def get(self, request, format:None):
-    return Response('this is the password changing page')
-
-  def patch(self, request, format:None):
-    #different with APIdoc
-    #TODO： User Authentication
+  def patch(self, request, format=None):
+    user = request.user
+    old_password = request.POST.get("old_password")
+    if not user.check_password(old_password):
+      content = {
+        'isSuccess': "false",
+        'error': {
+          'message': "旧密码错误"
+        }
+      }
+      return Response(content, status=400)
+    password = request.POST.get("password")
+    # User.objects.change_password(user.user_id, password)
+    user.set_password(password)
+    user.save()
+    request.session.flush()
     content = {
       'isSuccess' : 'true',
       'data' : {
-        'message' : 'password changed successfully'
+        'message' : '密码更改成功'
       }
     }
-    return Response(content)
+    return Response(content, status=200)
 
 class AccountsView(APIView):
-  def get(self, request, format:None):
+  def get(self, request, format=None):
     return Response('this is the accounts page')
 
   def post(self, request, format=None):

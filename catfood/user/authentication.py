@@ -9,8 +9,11 @@ class CatfoodAuthentication(authentication.BaseAuthentication):
             user_id = request.session.get('user_id')
             try:
                 user = User.objects.get(user_id=user_id)
-            except:
+                # In case users change their passwords
+                if request.session.get("password") != user.password:
+                    raise exceptions.AuthenticationFailed('未登录或cookie失效/被浏览器禁用')
+            except NotADirectoryError:
                 raise exceptions.AuthenticationFailed('用户不存在')
         else:
-            raise exceptions.AuthenticationFailed('未登录或cookie被禁用')
+            raise exceptions.AuthenticationFailed('未登录或cookie失效/被浏览器禁用')
         return (user, None)

@@ -2,9 +2,7 @@ from django.contrib.auth.models import User as BaseUser
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django import forms
-from django.contrib.auth.models import (
-    BaseUserManager, AbstractBaseUser
-)
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 user_character = ((1, 'is_charging_teacher'), (2, 'is_teacher'), (3, 'is_teaching_assistant'), (4, 'is_student'))
 
@@ -29,7 +27,7 @@ class UserManager(BaseUserManager):
         user = self.model(
             user_id=user_id,
             realname=realname,
-            email=email,
+            email=User.objects.normalize_email(email),
             university_id=university_id,
             school_id=school_id,
             personal_id=personal_id,
@@ -43,7 +41,6 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser):
     user_id = models.CharField(max_length=50, primary_key=True)
     # AbstractBaseUser already has password.
-    # password_digest = models.CharField(max_length=50)
     realname = models.CharField(max_length=50)
     email = models.EmailField(max_length=50)
     university_id = models.IntegerField(default=0)
