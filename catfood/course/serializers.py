@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from course.models import Course
+from experiment.models import CourseCase
 
 class CourseSerializers(serializers.ModelSerializer):
     class Meta:
@@ -14,6 +15,6 @@ class CourseSerializers(serializers.ModelSerializer):
             'course_type',
             'course_start_time',
             'course_end_time',
-            'course_avatar'
+            'course_avatar',
         ]
  

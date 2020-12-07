@@ -11,7 +11,7 @@ class ExperimentCaseDatabaseSerializer(serializers.ModelSerializer):
             'experiment_case_name',
             'experiment_case_description',
             'experiment_case_file_token',
-            'answer_file_token'
+            'answer_file_token',
         ]
  
 class CourseCaseSerializer(serializers.ModelSerializer):
