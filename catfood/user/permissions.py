@@ -7,8 +7,8 @@ class IsChargingTeacher(BasePermission):
 
     def has_permission(self, request, view):
         try:
-            if not request.user_id:
-                return bool(request.user_id.character == 1)
+            if request.session.get('character'):
+                return bool(request.session['character'] == 1)
             else:
                 return False
         except AttributeError as e:
@@ -24,8 +24,8 @@ class IsTeacher(BasePermission):
 
     def has_permission(self, request, view):
         try:
-            if not request.user_id:
-                return bool(request.user_id.character == 2)
+            if request.session.get('character'):
+                return bool(request.session['character'] == 2)
             else:
                 return False
         except AttributeError as e:
@@ -41,8 +41,8 @@ class IsTeachingAssistant(BasePermission):
 
     def has_permission(self, request, view):
         try:
-            if not request.user_id:
-                return bool(request.user_id.character == 3)
+            if request.session.get('character'):
+                return bool(request.session['character'] == 3)
             else:
                 return False
         except AttributeError as e:
@@ -58,8 +58,8 @@ class IsStudent(BasePermission):
 
     def has_permission(self, request, view):
         try:
-            if not request.user_id:
-                return bool(request.user_id.character == 4)
+            if request.session.get('character'):
+                return bool(request.session['character'] == 4)
             else:
                 return False
         except AttributeError as e:

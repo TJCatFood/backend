@@ -12,7 +12,7 @@ from django.db.models.query import EmptyQuerySet
 from .models import *
 
 class DefaultView(APIView):
-
+  permission_classes = (IsStudent,)
   def get(self, request, format=None):
     return Response('this is the default page')
 
@@ -21,7 +21,7 @@ class LoginView(APIView):
   permission_classes = (AllowAny,)
 
   def get(self, request, format=None):
-    if request.session.get("login") == "success":
+    if request.session['user_id']:
       return Response('login with token sec')
     else:
       return Response('login without token')
@@ -65,6 +65,8 @@ class LoginView(APIView):
         'avatar': f"{user.avatar}",
       }
     }
+    request.session['user_id']=user.user_id
+    request.session['character']=user.character
     return Response(content)
 
 class LogoutView(APIView):
