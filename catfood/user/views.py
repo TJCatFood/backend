@@ -231,7 +231,7 @@ class AccountsView(APIView):
 
 class UniversityView(APIView):
     permission_classes = (AllowAny,)
-    # only for test
+    # FIXME: only for test
 
     def get(self, request, format=None):
         cases = University.objects.all()
@@ -248,7 +248,7 @@ class UniversityView(APIView):
 
 class SchoolView(APIView):
     permission_classes = (AllowAny,)
-    # only for test
+    # FIXME: only for test
 
     def get(self, request, format=None):
         cases = School.objects.all()
