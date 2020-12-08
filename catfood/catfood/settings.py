@@ -121,7 +121,11 @@ REST_FRAMEWORK = {
         # FIXME: Changed to AllowAny temporarily
         # Read: https://www.django-rest-framework.org/api-guide/permissions/
         # should be IsAuthenticated or other if our own auth is set up
-        'rest_framework.permissions.AllowAny'
+        'rest_framework.permissions.AllowAny',
+        'user.permissions.IsChargingTeacher',
+        'user.permissions.IsTeacher',
+        'user.permissions.IsTeachingAssistant',
+        'user.permissions.IsStudent',
     ]
 }
 
@@ -173,3 +177,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Tell Django about the custom `User` model we created.
+AUTH_USER_MODEL = 'user.User'

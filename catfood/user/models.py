@@ -1,29 +1,63 @@
+from django.contrib.auth.models import User as BaseUser
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django import forms
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+
+user_character = ((1, 'is_charging_teacher'), (2, 'is_teacher'), (3, 'is_teaching_assistant'), (4, 'is_student'))
 
 
-class Character(models.TextChoices):
-    TEACHER = 'Teacher', 'Teacher'
-    TA = 'TeachingAssistant', 'TeachingAssistant'
+class UserManager(BaseUserManager):
+    def create(self, user_id, password, realname=None, email=None, university_id=None,
+               school_id=None, character=None, personal_id=None, avatar=None):
+        if realname is None:
+            realname = ''
+        if email is None:
+            email = ''
+        if personal_id is None:
+            personal_id = ''
+        if university_id is None:
+            university_id = 0
+        if school_id is None:
+            school_id = 0
+        if character is None:
+            character = 4
+        if avatar is None:
+            avatar = ''
+        university = University.objects.get(university_id=university_id)
+        school = School.objects.get(school_id=school_id)
+        user = self.model(
+            user_id=user_id,
+            realname=realname,
+            email=User.objects.normalize_email(email),
+            university_id=university,
+            school_id=school,
+            personal_id=personal_id,
+            avatar=avatar,
+        )
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
 
 
-class User(models.Model):
-    user_id = models.AutoField(primary_key=True)
-    password_digest = models.CharField(max_length=50)
+class User(AbstractBaseUser):
+    user_id = models.CharField(max_length=50, primary_key=True)
+    # AbstractBaseUser already has password.
     realname = models.CharField(max_length=50)
-    school_id_number = models.CharField(max_length=20)
     email = models.EmailField(max_length=50)
-    university_id = models.IntegerField()
-    school_id = models.IntegerField()
-    character = models.CharField(
-        max_length=32,
-        choices=Character.choices
-    )
+    university_id = models.ForeignKey('University', on_delete=models.CASCADE)
+    school_id = models.ForeignKey('School', on_delete=models.CASCADE)
+    character = models.IntegerField(choices=user_character, default=4)
+    personal_id = models.CharField(max_length=20)
     avatar = models.CharField(max_length=50)
+    USERNAME_FIELD = 'user_id'
+    REQUIRED_FIELDS = ['password']
+    objects = UserManager()
 
 
 class University(models.Model):
     university_id = models.AutoField(primary_key=True)
+    official_id = models.CharField(max_length=20, default=0)
     university_name = models.CharField(max_length=50)
 
 
