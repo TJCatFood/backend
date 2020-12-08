@@ -13,36 +13,6 @@ from .models import User, University, School
 from .serializers import UniversitySerializer, SchoolSerializer
 
 
-class DefaultView(APIView):
-    # This view is merely for test use.
-    permission_classes = (AllowAny,)
-
-    def get(self, request, format=None):
-        # if request.GET("university_id"):
-        #   university_id = request.GET.get("university_id")
-        #   try:
-        #     university = University.objects.get(university_id=university_id)
-        #     Response(university.university_name)
-        #   except:
-        #     return Response("no such university")
-        # else:
-        return Response('PlanePlane, do you still remember me?')
-
-    # def post(self, request, format=None):
-    #   if request.POST.get("university_id"):
-    #     university_id = request.POST.get("university_id")
-    #     university_name = request.POST.get("university_name")
-    #     if University.objects.filter(university_id=university_id).count() != 0:
-    #       return Response("existed university")
-    #     university = University(university_id=university_id, university_name=university_name)
-    #     university.save()
-    #     #university = University.objects.get(university_id=university_id)
-    #
-    #     return Response("add successfully")
-    #   else:
-    #     return Response("no id")
-
-
 class LoginView(APIView):
     permission_classes = (AllowAny,)
 

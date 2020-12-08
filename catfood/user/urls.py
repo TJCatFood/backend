@@ -4,7 +4,6 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 urlpatterns = [
-    path('', views.DefaultView.as_view()),
     path('login/', views.LoginView.as_view()),
     path('register/', views.RegisterView.as_view()),
     path('account/', views.AccountView.as_view()),
