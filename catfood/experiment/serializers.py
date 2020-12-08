@@ -29,8 +29,7 @@ class ExperimentAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExperimentAssignment
         fields = [
-            'case_id',
-            'course_id',
+            'course_case_id',
             'submission_uploader',
             'submission_file_token',
             'submission_timestamp',
