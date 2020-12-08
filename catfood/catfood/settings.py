@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'lecture',
     'experiment',
     'quiz',
+    'match',
 ]
 
 MIDDLEWARE = [
