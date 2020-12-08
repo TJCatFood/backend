@@ -15,4 +15,9 @@ urlpatterns = [
     path('experiment-file-database/experiment/<int:experiment_id>/count', views.ExperimentIdTemplate.as_view()),
     path('experiment-file-database/experiment/<int:experiment_id>/<int:file_id>', views.ExperimentIdFileIdTemplate.as_view()),
     # experiment file database ends
+    # contest question database starts
+    path('contest-question-database/question', views.QuestionController.as_view()),
+    path('contest-question-database/question/count', views.QuestionCountController.as_view()),
+    path('contest-question-database/question/<int:question_type>/<int:question_id>', views.QuestionPutController.as_view()),
+    # contest question database ends
 ]

@@ -8,7 +8,7 @@ class ExperimentCaseDatabase(models.Model):
     experiment_case_description = models.CharField(max_length=1024, null=True)
     experiment_case_file_link = models.CharField(max_length=256)
     answer_file_link = models.CharField(max_length=256)
-    component_id = models.IntegerField
+    component_id = models.IntegerField()
 
 
 class CourseDocument(models.Model):
@@ -23,7 +23,7 @@ class CourseDocument(models.Model):
 
 class choiceSingleQuestionDatabase(models.Model):
     question_id = models.AutoField(primary_key=True)
-    question_chapter = models.IntegerField
+    question_chapter = models.IntegerField()
     question_content = models.CharField(max_length=100)
     question_choice_a_content = models.CharField(max_length=256)
     question_choice_b_content = models.CharField(max_length=256)
@@ -34,7 +34,7 @@ class choiceSingleQuestionDatabase(models.Model):
 
 class choiceMultipleQuestionDatabase(models.Model):
     question_id = models.AutoField(primary_key=True)
-    question_chapter = models.IntegerField
+    question_chapter = models.IntegerField()
     question_content = models.CharField(max_length=100)
     question_choice_a_content = models.CharField(max_length=256)
     question_choice_b_content = models.CharField(max_length=256)
