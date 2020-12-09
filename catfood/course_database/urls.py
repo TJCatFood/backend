@@ -18,6 +18,6 @@ urlpatterns = [
     # contest question database starts
     path('contest-question-database/question', views.QuestionController.as_view()),
     path('contest-question-database/question/count', views.QuestionCountController.as_view()),
-    path('contest-question-database/question/<int:question_type>/<int:question_id>', views.QuestionPutController.as_view()),
+    path('contest-question-database/question/<int:question_type>/<int:question_id>', views.QuestionPutDeleteController.as_view()),
     # contest question database ends
 ]
