@@ -5,12 +5,24 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.permissions import AllowAny
 
 from .models import Announcement
+from .serializers import AnnouncementSerializer
 
 import json
 import datetime
 
+class Announcement_:
+    def __init__(self, announcement: Announcement):
+        self.announcement_id = announcement.announcement_id
+        self.course_id = announcement.course_id
+        self.announcement_title = announcement.announcement_title
+        self.announcement_contents = announcement.announcement_contents
+        self.announcement_is_pinned = announcement.announcement_is_pinned
+        self.announcement_publish_time = announcement.announcement_publish_time
+        self.announcement_last_update_time = announcement.announcement_last_update_time
+        self.announcement_sender_id = announcement.announcement_sender_id
 
 class AliveView(APIView):
 
@@ -24,13 +36,18 @@ class AliveView(APIView):
 
 class AnnouncementController(APIView):
 
+    # FIXME: this permission is for testing purpose only
+    permission_classes = (AllowAny,)
+
     def get(self, request, course_id, format=None):
         content = {
             "course_id": course_id,
         }
-        announcement_list = Announcement.objects.filter(course_id=course_id)
-        print(announcement_list)
-        return Response(content)
+        response = []
+        raw_announcement_list = Announcement.objects.filter(course_id=course_id)
+        for item in raw_announcement_list:
+            response.append(AnnouncementSerializer(item).data)
+        return Response(response)
 
     def post(self, request, course_id, format=None):
         request_body_unicode = request.body.decode('utf-8')
@@ -46,3 +63,4 @@ class AnnouncementController(APIView):
             announcement_sender_id=114514,
         )
         new_announcement.save()
+        return Response(AnnouncementSerializer(new_announcement).data)
