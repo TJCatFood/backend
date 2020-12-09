@@ -24,13 +24,13 @@ class LoginView(APIView):
             user = User.objects.get(user_id=user_id)
             if request.session.get("password") == user.password:
                 content = {
-                    'isSuccess': "true",
+                    'isSuccess': True,
                     'data': {
                         'user_id': f"{user.user_id}",
                         'realname': f"{user.realname}",
                         'email': f"{user.email}",
-                        'university_id': f"{user.university_id.university_name}",
-                        'school_id': f"{user.school_id.school_name}",
+                        'university_name': f"{user.university_id.university_name}",
+                        'school_name': f"{user.school_id.school_name}",
                         'character': f"{user.character}",
                         'personal_id': f"{user.personal_id}",
                         'avatar': f"{user.avatar}",
@@ -46,7 +46,7 @@ class LoginView(APIView):
             user = User.objects.get(user_id=user_id)
         except(ObjectDoesNotExist):
             content = {
-                'isSuccess': "false",
+                'isSuccess': False,
                 'error': {
                     'message': "输入的用户ID不存在"
                 }
@@ -69,8 +69,8 @@ class LoginView(APIView):
                 'user_id': f"{user.user_id}",
                 'realname': f"{user.realname}",
                 'email': f"{user.email}",
-                'university_id': f"{user.university_id.university_name}",
-                'school_id': f"{user.school_id.school_name}",
+                'university_name': f"{user.university_id.university_name}",
+                'school_name': f"{user.school_id.school_name}",
                 'character': f"{user.character}",
                 'personal_id': f"{user.personal_id}",
                 'avatar': f"{user.avatar}",
@@ -94,7 +94,7 @@ class LogoutView(APIView):
             pass
         request.session.flush()
         content = {
-            'isSuccess': "true",
+            'isSuccess': True,
             'date': {
                 'message': "登出成功"
             }
@@ -106,20 +106,7 @@ class RegisterView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request, format=None):
-        if User.objects.filter(user_id=1).count() == 0:
-            user_id = 1
-        else:
-            user_id = int(User.objects.all().aggregate(Max('user_id'))['user_id__max']) + 1
         password = request.POST.get('password')
-        if User.objects.filter(user_id=user_id).count() != 0:
-            content = {
-                'isSuccess': "false",
-                'error': {
-                    'message': "用户ID已被注册"
-                }
-            }
-            return Response(content, status=400)
-
         realname = request.POST.get('realname')
         email = request.POST.get('email')
         university_id = request.POST.get('university_id')
@@ -128,32 +115,33 @@ class RegisterView(APIView):
         personal_id = request.POST.get('personal_id')
         avatar = request.POST.get('avatar')
 
-        if user_id and password:
+        if password:
             try:
-                User.objects.create(user_id=user_id, password=password, realname=realname,
-                                    email=email, university_id=university_id, school_id=school_id, character=character,
-                                    personal_id=personal_id, avatar=avatar)
+                user = User.objects.create(password=password, realname=realname,
+                                           email=email, university_id=university_id, school_id=school_id, character=character,
+                                           personal_id=personal_id, avatar=avatar)
             except(ObjectDoesNotExist):
                 content = {
-                    'isSuccess': "false",
-                    'data': {
+                    'isSuccess': False,
+                    'error': {
                         'message': "大学或学院编号不符合外码约束"
                     }
                 }
                 return Response(content, status=400)
             request.session.flush()
             content = {
-                'isSuccess': "true",
+                'isSuccess': True,
                 'data': {
+                    'user_id': f"{user.user_id}",
                     'message': "注册成功"
                 }
             }
             return Response(content, status=201)
         else:
             content = {
-                'isSuccess': "false",
+                'isSuccess': False,
                 'data': {
-                    'message': "缺少用户ID或密码"
+                    'message': "缺少必填信息"
                 }
             }
             return Response(content, status=400)
@@ -166,7 +154,7 @@ class AccountView(APIView):
     def get(self, request, format=None):
         user = request.user
         content = {
-            'isSuccess': "true",
+            'isSuccess': True,
             'data': {
                 'user_id': f"{user.user_id}",
                 'realname': f"{user.realname}",
@@ -208,7 +196,7 @@ class PasswordView(APIView):
         old_password = request.POST.get("old_password")
         if not user.check_password(old_password):
             content = {
-                'isSuccess': "false",
+                'isSuccess': False,
                 'error': {
                     'message': "旧密码错误"
                 }

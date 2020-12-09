@@ -8,7 +8,7 @@ user_character = ((1, 'is_charging_teacher'), (2, 'is_teacher'), (3, 'is_teachin
 
 
 class UserManager(BaseUserManager):
-    def create(self, user_id, password, realname=None, email=None, university_id=None,
+    def create(self, password, realname=None, email=None, university_id=None,
                school_id=None, character=None, personal_id=None, avatar=None):
         if realname is None:
             realname = ''
@@ -27,7 +27,6 @@ class UserManager(BaseUserManager):
         university = University.objects.get(university_id=university_id)
         school = School.objects.get(school_id=school_id)
         user = self.model(
-            user_id=user_id,
             realname=realname,
             email=User.objects.normalize_email(email),
             university_id=university,
@@ -41,7 +40,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
-    user_id = models.CharField(max_length=50, primary_key=True)
+    user_id = models.AutoField(primary_key=True)
     # AbstractBaseUser already has password.
     realname = models.CharField(max_length=50)
     email = models.EmailField(max_length=50)
