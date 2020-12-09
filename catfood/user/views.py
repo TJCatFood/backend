@@ -133,7 +133,13 @@ class RegisterView(APIView):
                 'isSuccess': True,
                 'data': {
                     'user_id': f"{user.user_id}",
-                    'message': "注册成功"
+                    'realname': f"{user.realname}",
+                    'email': f"{user.email}",
+                    'university_id': f"{user.university_id.university_name}",
+                    'school_id': f"{user.school_id.school_name}",
+                    'character': f"{user.character}",
+                    'personal_id': f"{user.personal_id}",
+                    'avatar': f"{user.avatar}",
                 }
             }
             return Response(content, status=201)
