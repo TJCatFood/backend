@@ -22,25 +22,6 @@ class AliveView(APIView):
         return Response(content)
 
 
-class CourseIdTemplate(APIView):
-
-    def get(self, request, course_id, format=None):
-        content = {
-            "course_id": course_id,
-        }
-        return Response(content)
-
-
-class CourseIdAnnouncementIdTemplate(APIView):
-
-    def get(self, request, course_id, announcement_id, format=None):
-        content = {
-            "course_id": course_id,
-            "announcement_id": announcement_id,
-        }
-        return Response(content)
-
-
 class AnnouncementController(APIView):
 
     def get(self, request, course_id, format=None):
