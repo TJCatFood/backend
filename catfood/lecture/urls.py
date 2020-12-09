@@ -12,7 +12,7 @@ urlpatterns = [
     path('course-homework/<int:course_id>/homework/<int:homework_id>/file', views.CourseIdHomeworkIdTemplate.as_view()),
     path('course-homework/<int:course_id>/homework/<int:homework_id>/file/<int:homework_file_id>', views.CourseIdHomeworkIdHomeworkFileIdTemplate.as_view()),
     path('course-homework/<int:course_id>/homework/<int:homework_id>/file/<int:homework_file_id>/score', views.CourseIdHomeworkIdHomeworkFileIdTemplate.as_view()),
-    # course homework ends 
+    # course homework ends
     # course chapter description starts
     path('course-chapter-description/<int:course_id>/chapter/', views.CourseIdTemplate.as_view()),
     path('course-chapter-description/<int:course_id>/chapter/<int:chapter_id>', views.CourseIdChapterIdTemplate.as_view()),

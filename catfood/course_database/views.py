@@ -17,10 +17,12 @@ from typing import Union
 import json
 from enum import IntEnum
 
+
 class QuestionType(IntEnum):
     SINGLE_CHOICE = 0
     MULTIPLE_CHOICE = 1
     UNKNOWN = -2
+
 
 class Question:
     def __init__(self, item: Union[choiceSingleQuestionDatabase, choiceMultipleQuestionDatabase]):
@@ -40,6 +42,7 @@ class Question:
             self.question_type = QuestionType.UNKNOWN
 
 # Templates starts here
+
 
 class AliveView(APIView):
 
@@ -233,9 +236,9 @@ class QuestionController(APIView):
                 }), status=400)
             new_question.save()
             return Response(request_body)
-        except:
+        except Exception:
             return Response(dict({
-                "msg": "Invaild question."
+                "msg": "Generic exception."
             }), status=400)
 
 
@@ -288,9 +291,9 @@ class QuestionPutDeleteController(APIView):
                 }), status=400)
             old_question.save()
             return Response(request_body)
-        except:
+        except Exception:
             return Response(dict({
-                "msg": "Invaild question."
+                "msg": "Generic exception."
             }), status=400)
 
     def delete(self, request, question_type, question_id, format=None):

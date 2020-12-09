@@ -16,6 +16,7 @@ class AliveView(APIView):
         }
         return Response(content)
 
+
 class CourseIdTemplate(APIView):
 
     def get(self, request, course_id, format=None):
@@ -24,6 +25,7 @@ class CourseIdTemplate(APIView):
             "course_id": f"{response}"
         }
         return Response(content)
+
 
 class CourseIdHomeworkIdTemplate(APIView):
 
@@ -34,6 +36,7 @@ class CourseIdHomeworkIdTemplate(APIView):
         }
         return Response(content)
 
+
 class CourseIdHomeworkIdHomeworkFileIdTemplate(APIView):
 
     def get(self, request, course_id, homework_id, homework_file_id, format=None):
@@ -43,6 +46,7 @@ class CourseIdHomeworkIdHomeworkFileIdTemplate(APIView):
             "homework_file_id": homework_file_id
         }
         return Response(content)
+
 
 class CourseIdChapterIdTemplate(APIView):
 
