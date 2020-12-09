@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view
 
 from rest_framework.permissions import AllowAny
 
-from course_database.models import ExperimentCaseDatabase, CourseDocument, choiceMultipleQuestionDatabase, choiceSingleQuestionDatabase
+from .models import ExperimentCaseDatabase, CourseDocument, choiceMultipleQuestionDatabase, choiceSingleQuestionDatabase
 
 from typing import Union
 

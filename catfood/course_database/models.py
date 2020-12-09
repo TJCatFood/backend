@@ -13,8 +13,8 @@ class ExperimentCaseDatabase(models.Model):
 
 class CourseDocument(models.Model):
     file_course_document_id = models.AutoField(primary_key=True)
-    course_id = models.ForeignKey('class.Course', on_delete=models.CASCADE)
-    file_uploader = models.ForeignKey('user.User', on_delete=models.CASCADE)
+    # course_id = models.ForeignKey('class.Course', on_delete=models.CASCADE)
+    # file_uploader = models.ForeignKey('user.User', on_delete=models.CASCADE)
     file_usage = models.CharField(max_length=100)
     file_timestamp = models.DateTimeField(auto_now=True)
     file_comment = models.CharField(max_length=1024)
