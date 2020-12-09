@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib import auth
-
+from django.db.models import Max
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
@@ -105,7 +105,11 @@ class RegisterView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request, format=None):
-        user_id, password = request.POST.get('user_id'), request.POST.get('password')
+        if User.objects.filter(user_id=1).count() == 0:
+            user_id = 1
+        else:
+            user_id = int(User.objects.all().aggregate(Max('user_id'))['user_id__max']) + 1
+        password = request.POST.get('password')
         if User.objects.filter(user_id=user_id).count() != 0:
             content = {
                 'isSuccess': "false",
