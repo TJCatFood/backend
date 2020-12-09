@@ -36,9 +36,11 @@ class CourseIdHomeworkIdTemplate(APIView):
         }
         return Response(content)
 
+# Too long!
+# class CourseIdHomeworkIdHomeworkFileIdTemplate(APIView):
 
-class CourseIdHomeworkIdHomeworkFileIdTemplate(APIView):
 
+class CIHIHFI(APIView):
     def get(self, request, course_id, homework_id, homework_file_id, format=None):
         content = {
             "course_id": course_id,

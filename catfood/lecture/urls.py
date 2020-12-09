@@ -10,8 +10,8 @@ urlpatterns = [
     path('course-homework/<int:course_id>/homework/<int:homework_id>', templates.CourseIdHomeworkIdTemplate.as_view()),
     path('course-homework/<int:course_id>/homework/<int:homework_id>/count', templates.CourseIdHomeworkIdTemplate.as_view()),
     path('course-homework/<int:course_id>/homework/<int:homework_id>/file', templates.CourseIdHomeworkIdTemplate.as_view()),
-    path('course-homework/<int:course_id>/homework/<int:homework_id>/file/<int:homework_file_id>', templates.CourseIdHomeworkIdHomeworkFileIdTemplate.as_view()),
-    path('course-homework/<int:course_id>/homework/<int:homework_id>/file/<int:homework_file_id>/score', templates.CourseIdHomeworkIdHomeworkFileIdTemplate.as_view()),
+    path('course-homework/<int:course_id>/homework/<int:homework_id>/file/<int:homework_file_id>', templates.CIHIHFI.as_view()),
+    path('course-homework/<int:course_id>/homework/<int:homework_id>/file/<int:homework_file_id>/score', templates.CIHIHFI.as_view()),
     # course homework ends
     # course chapter description starts
     path('course-chapter-description/<int:course_id>/chapter/', templates.CourseIdTemplate.as_view()),
