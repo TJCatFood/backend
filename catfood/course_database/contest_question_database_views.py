@@ -46,7 +46,7 @@ class Question:
 
 class QuestionView(APIView):
 
-    # this permission is for testing purpose only
+    # FIXME: this permission is for testing purpose only
     permission_classes = (AllowAny,)
 
     def get(self, request, format=None):
@@ -182,7 +182,7 @@ class QuestionView(APIView):
 
 class QuestionCountView(APIView):
 
-    # this permission is for testing purpose only
+    # FIXME: this permission is for testing purpose only
     permission_classes = (AllowAny,)
 
     def get(self, request, format=None):
@@ -197,7 +197,7 @@ class QuestionCountView(APIView):
 
 class QuestionIdView(APIView):
 
-    # this permission is for testing purpose only
+    # FIXME: this permission is for testing purpose only
     permission_classes = (AllowAny,)
 
     def put(self, request, question_type, question_id, format=None):
