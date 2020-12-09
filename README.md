@@ -64,7 +64,7 @@
 进入代码根目录，运行
 
 ```
-USER_ID=${UID} GROUP_ID=${GID} docker-compose up
+USER_ID=`id -u` GROUP_ID=`id -g` docker-compose up
 ```
 
 不要关闭终端，使用代码编辑器修改代码
