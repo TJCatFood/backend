@@ -18,22 +18,22 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.AlterField(
-            model_name='homeworkfilelist',
+            model_name='HomeworkFile',
             name='file_uploader',
             field=models.IntegerField(),
         ),
         migrations.AlterField(
-            model_name='homeworklist',
+            model_name='Homework',
             name='course_id',
             field=models.IntegerField(),
         ),
         migrations.AlterField(
-            model_name='homeworklist',
+            model_name='Homework',
             name='homework_creator',
             field=models.IntegerField(),
         ),
         migrations.AlterField(
-            model_name='homeworkscorelist',
+            model_name='HomeworkScore',
             name='student_id',
             field=models.IntegerField(),
         ),

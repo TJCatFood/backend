@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view
 
 from rest_framework.permissions import AllowAny
 
-from .models import ExperimentCaseDatabase, CourseDocument, choiceMultipleQuestionDatabase, choiceSingleQuestionDatabase
+from .models import ExperimentCase, CourseDocument, MultipleChoiceQuestion, SingleChoiceQuestion
 
 from typing import Union
 
@@ -25,7 +25,7 @@ class QuestionType(IntEnum):
 
 
 class Question:
-    def __init__(self, item: Union[choiceSingleQuestionDatabase, choiceMultipleQuestionDatabase]):
+    def __init__(self, item: Union[SingleChoiceQuestion, MultipleChoiceQuestion]):
         self.question_id = item.question_id
         self.question_chapter = item.question_chapter
         self.question_content = item.question_content
@@ -34,9 +34,9 @@ class Question:
         self.question_choice_c_content = item.question_choice_c_content
         self.question_choice_d_content = item.question_choice_d_content
         self.question_answer = item.question_answer
-        if type(item) == choiceSingleQuestionDatabase:
+        if type(item) == SingleChoiceQuestion:
             self.question_type = QuestionType.SINGLE_CHOICE
-        elif type(item) == choiceMultipleQuestionDatabase:
+        elif type(item) == MultipleChoiceQuestion:
             self.question_type = QuestionType.MULTIPLE_CHOICE
         else:
             self.question_type = QuestionType.UNKNOWN
@@ -150,11 +150,11 @@ class QuestionController(APIView):
         all_questions = []
         if need_filter:
             if requested_question_type == QuestionType.SINGLE_CHOICE:
-                all_single_choice_questions = choiceSingleQuestionDatabase.objects.all()
+                all_single_choice_questions = SingleChoiceQuestion.objects.all()
                 for item in all_single_choice_questions:
                     all_questions.append(Question(item))
             elif requested_question_type == QuestionType.MULTIPLE_CHOICE:
-                all_multiple_choice_questions = choiceMultipleQuestionDatabase.objects.all()
+                all_multiple_choice_questions = MultipleChoiceQuestion.objects.all()
                 for item in all_multiple_choice_questions:
                     all_questions.append(Question(item))
             else:
@@ -162,10 +162,10 @@ class QuestionController(APIView):
                     "msg": "question_type wants to fuck you"
                 }), status=400)
         else:
-            all_single_choice_questions = choiceSingleQuestionDatabase.objects.all()
+            all_single_choice_questions = SingleChoiceQuestion.objects.all()
             for item in all_single_choice_questions:
                 all_questions.append(Question(item))
-            all_multiple_choice_questions = choiceMultipleQuestionDatabase.objects.all()
+            all_multiple_choice_questions = MultipleChoiceQuestion.objects.all()
             for item in all_multiple_choice_questions:
                 all_questions.append(Question(item))
 
@@ -176,8 +176,8 @@ class QuestionController(APIView):
 
         # calcs the pagination
         if need_pagination:
-            single_choice_questions_count = choiceSingleQuestionDatabase.objects.count()
-            multiple_choice_questions_count = choiceMultipleQuestionDatabase.objects.count()
+            single_choice_questions_count = SingleChoiceQuestion.objects.count()
+            multiple_choice_questions_count = MultipleChoiceQuestion.objects.count()
             question_count = single_choice_questions_count + multiple_choice_questions_count
             response["pagination"] = dict(
                 {
@@ -211,7 +211,7 @@ class QuestionController(APIView):
         try:
             question_type = request_body["questionType"]
             if question_type == QuestionType.SINGLE_CHOICE:
-                new_question = choiceSingleQuestionDatabase(
+                new_question = SingleChoiceQuestion(
                     question_chapter=request_body["questionChapter"],
                     question_content=request_body["questionContent"],
                     question_choice_a_content=request_body["questionChoiceAContent"],
@@ -221,7 +221,7 @@ class QuestionController(APIView):
                     question_answer=request_body["questionAnswer"],
                 )
             elif question_type == QuestionType.MULTIPLE_CHOICE:
-                new_question = choiceMultipleQuestionDatabase(
+                new_question = MultipleChoiceQuestion(
                     question_chapter=request_body["questionChapter"],
                     question_content=request_body["questionContent"],
                     question_choice_a_content=request_body["questionChoiceAContent"],
@@ -248,8 +248,8 @@ class QuestionCountController(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request, format=None):
-        single_choice_questions_count = choiceSingleQuestionDatabase.objects.count()
-        multiple_choice_questions_count = choiceMultipleQuestionDatabase.objects.count()
+        single_choice_questions_count = SingleChoiceQuestion.objects.count()
+        multiple_choice_questions_count = MultipleChoiceQuestion.objects.count()
         question_count = single_choice_questions_count + multiple_choice_questions_count
         content = {
             "question_count": question_count
@@ -267,7 +267,7 @@ class QuestionPutDeleteController(APIView):
         request_body = json.loads(request_body_unicode)
         try:
             if question_type == QuestionType.SINGLE_CHOICE:
-                old_question = choiceSingleQuestionDatabase.objects.get(question_id=question_id)
+                old_question = SingleChoiceQuestion.objects.get(question_id=question_id)
                 old_question.question_chapter = request_body["questionChapter"]
                 old_question.question_content = request_body["questionContent"]
                 old_question.question_choice_a_content = request_body["questionChoiceAContent"]
@@ -277,7 +277,7 @@ class QuestionPutDeleteController(APIView):
                 old_question.question_answer = request_body["questionAnswer"]
 
             elif question_type == QuestionType.MULTIPLE_CHOICE:
-                old_question = choiceMultipleQuestionDatabase.objects.get(question_id=question_id)
+                old_question = MultipleChoiceQuestion.objects.get(question_id=question_id)
                 old_question.question_chapter = request_body["questionChapter"]
                 old_question.question_content = request_body["questionContent"]
                 old_question.question_choice_a_content = request_body["questionChoiceAContent"]
@@ -300,19 +300,19 @@ class QuestionPutDeleteController(APIView):
 
         try:
             if question_type == QuestionType.SINGLE_CHOICE:
-                question_to_delete = choiceSingleQuestionDatabase.objects.get(question_id=question_id)
+                question_to_delete = SingleChoiceQuestion.objects.get(question_id=question_id)
             elif question_type == QuestionType.MULTIPLE_CHOICE:
-                question_to_delete = choiceMultipleQuestionDatabase.objects.get(question_id=question_id)
+                question_to_delete = MultipleChoiceQuestion.objects.get(question_id=question_id)
             else:
                 return Response(dict({
                     "msg": "question_type wants to fuck you"
                 }), status=400)
-        except choiceSingleQuestionDatabase.DoesNotExist:
+        except SingleChoiceQuestion.DoesNotExist:
             return Response(dict({
                 "msg": "Requested question does not exist.",
                 "question_type": QuestionType.SINGLE_CHOICE
             }), status=404)
-        except choiceMultipleQuestionDatabase.DoesNotExist:
+        except MultipleChoiceQuestion.DoesNotExist:
             return Response(dict({
                 "msg": "Requested question does not exist.",
                 "question_type": QuestionType.MULTIPLE_CHOICE

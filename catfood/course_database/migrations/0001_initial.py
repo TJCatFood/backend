@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='ExperimentCaseDatabase',
+            name='ExperimentCase',
             fields=[
                 ('experiment_case_id', models.AutoField(primary_key=True, serialize=False)),
                 ('experiment_name', models.CharField(max_length=50)),

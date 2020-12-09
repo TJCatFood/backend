@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('course_database', '0003_experimentcasedatabase_component_id'),
+        ('course_database', '0003_experimentcase_component_id'),
     ]
 
     operations = [

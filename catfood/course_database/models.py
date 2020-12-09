@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class ExperimentCaseDatabase(models.Model):
+class ExperimentCase(models.Model):
     experiment_case_id = models.AutoField(primary_key=True)
     experiment_name = models.CharField(max_length=50)
     experiment_case_name = models.CharField(max_length=50)
@@ -21,7 +21,7 @@ class CourseDocument(models.Model):
     file_link = models.CharField(max_length=200)
 
 
-class choiceSingleQuestionDatabase(models.Model):
+class SingleChoiceQuestion(models.Model):
     question_id = models.AutoField(primary_key=True)
     question_chapter = models.IntegerField()
     question_content = models.CharField(max_length=100)
@@ -32,7 +32,7 @@ class choiceSingleQuestionDatabase(models.Model):
     question_answer = models.CharField(max_length=20)
 
 
-class choiceMultipleQuestionDatabase(models.Model):
+class MultipleChoiceQuestion(models.Model):
     question_id = models.AutoField(primary_key=True)
     question_chapter = models.IntegerField()
     question_content = models.CharField(max_length=100)

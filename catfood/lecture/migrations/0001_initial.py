@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='HomeworkScoreList',
+            name='HomeworkScore',
             fields=[
                 ('homework_id', models.AutoField(primary_key=True, serialize=False)),
                 ('homework_student_grade', models.IntegerField()),
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='HomeworkList',
+            name='Homework',
             fields=[
                 ('homework_id', models.AutoField(primary_key=True, serialize=False)),
                 ('homework_description', models.CharField(max_length=1024)),
@@ -36,14 +36,14 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='HomeworkFileList',
+            name='HomeworkFile',
             fields=[
                 ('file_homework_id', models.AutoField(primary_key=True, serialize=False)),
                 ('file_usage', models.CharField(choices=[('Experiment', 'Experiment'), ('Lecture', 'Lecture')], max_length=100)),
                 ('file_timestamp', models.DateField(auto_now=True)),
                 ('file_link', models.CharField(max_length=200)),
                 ('file_uploader', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='user.user')),
-                ('homework_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='lecture.homeworklist')),
+                ('homework_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='lecture.Homework')),
             ],
         ),
     ]
