@@ -13,6 +13,7 @@ from .serializers import AnnouncementSerializer
 import json
 import datetime
 
+
 class Announcement_:
     def __init__(self, announcement: Announcement):
         self.announcement_id = announcement.announcement_id
@@ -23,6 +24,7 @@ class Announcement_:
         self.announcement_publish_time = announcement.announcement_publish_time
         self.announcement_last_update_time = announcement.announcement_last_update_time
         self.announcement_sender_id = announcement.announcement_sender_id
+
 
 class AliveView(APIView):
 
@@ -45,6 +47,7 @@ class AnnouncementView(APIView):
         }
         response = []
         raw_announcement_list = Announcement.objects.filter(course_id=course_id)
+        raw_announcement_list = raw_announcement_list.order_by('announcement_id')
         for item in raw_announcement_list:
             response.append(AnnouncementSerializer(item).data)
         return Response(response)
@@ -64,3 +67,69 @@ class AnnouncementView(APIView):
         )
         new_announcement.save()
         return Response(AnnouncementSerializer(new_announcement).data)
+
+
+class AnnouncementCountView(APIView):
+    # FIXME: this permission is for testing purpose only
+    permission_classes = (AllowAny,)
+
+    def get(self, request, course_id, format=None):
+        response = {
+            "courseId": course_id,
+            "announcementCount": Announcement.objects.count()
+        }
+        return Response(response)
+
+
+class AnnouncementIdView(APIView):
+    # FIXME: this permission is for testing purpose only
+    permission_classes = (AllowAny,)
+
+    def get(self, request, course_id, announcement_id, format=None):
+        query_announcement = Announcement.objects.get(course_id=course_id, announcement_id=announcement_id)
+        return Response(AnnouncementSerializer(query_announcement).data)
+
+    def put(self, request, course_id, announcement_id, format=None):
+        request_has_body = False
+        request_body = None
+        request_body_unicode = request.body.decode('utf-8')
+        if len(request_body_unicode) != 0:
+            try:
+                request_body = json.loads(request_body_unicode)
+                request_has_body = True
+            except json.decoder.JSONDecodeError:
+                return Response(dict({
+                    "msg": "Invalid JSON string provided."
+                }), status=400)
+        else:
+            return Response(dict({
+                    "msg": "Expect a JSON, but got empty contents instead."
+                }), status=400)
+        try:
+            query_announcement = Announcement.objects.get(course_id=course_id, announcement_id=announcement_id)
+        except Announcement.DoesNotExist:
+            return Response(dict({
+                "msg": "Requested announcement does not exist.",
+                "courseId": course_id,
+                "announcement_id": announcement_id
+            }), status=404)
+        query_announcement.announcement_title = request_body["announcementTitle"]
+        query_announcement.announcement_contents = request_body["announcementContents"]
+        query_announcement.announcement_is_pinned = request_body["announcementIsPinned"]
+        query_announcement.announcement_last_update_time = datetime.datetime.now()
+        query_announcement.save()
+        return Response(AnnouncementSerializer(query_announcement).data)
+
+    def delete(self, request, course_id, announcement_id, format=None):
+        try:
+            announcement_to_delete = Announcement.objects.get(course_id=course_id, announcement_id=announcement_id)
+            announcement_to_delete.delete()
+        except Announcement.DoesNotExist:
+            return Response(dict({
+                "msg": "Requested announcement does not exist.",
+                "courseId": course_id,
+                "announcement_id": announcement_id
+            }), status=404)
+        return Response(dict({
+            "msg": "Good."
+        }))
