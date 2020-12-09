@@ -11,6 +11,7 @@ from django.db.models.query import EmptyQuerySet
 from rest_framework import status
 from .models import User, University, School
 from .serializers import UniversitySerializer, SchoolSerializer
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class LoginView(APIView):
@@ -43,7 +44,7 @@ class LoginView(APIView):
         # check the user_id
         try:
             user = User.objects.get(user_id=user_id)
-        except(Exception):
+        except(ObjectDoesNotExist):
             content = {
                 'isSuccess': "false",
                 'error': {
@@ -128,9 +129,18 @@ class RegisterView(APIView):
         avatar = request.POST.get('avatar')
 
         if user_id and password:
-            User.objects.create(user_id=user_id, password=password, realname=realname,
-                                email=email, university_id=university_id, school_id=school_id, character=character,
-                                personal_id=personal_id, avatar=avatar)
+            try:
+                User.objects.create(user_id=user_id, password=password, realname=realname,
+                                    email=email, university_id=university_id, school_id=school_id, character=character,
+                                    personal_id=personal_id, avatar=avatar)
+            except(ObjectDoesNotExist):
+                content = {
+                    'isSuccess': "false",
+                    'data': {
+                        'message': "大学或学院编号不符合外码约束"
+                    }
+                }
+                return Response(content, status=400)
             request.session.flush()
             content = {
                 'isSuccess': "true",

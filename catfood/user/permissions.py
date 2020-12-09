@@ -54,7 +54,7 @@ class IsStudent(BasePermission):
     def has_permission(self, request, view):
         if request.user.is_anonymous:
             return False
-        else:        
+        else:
             return bool(request.user and request.user.character and request.user.character == 4)
 
     def has_object_permission(self, request, view, obj):
