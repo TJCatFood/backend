@@ -1,5 +1,5 @@
 from django.urls import path
-from lecture import views
+from . import views
 from rest_framework import routers
 
 router = routers.DefaultRouter()
