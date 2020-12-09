@@ -16,8 +16,8 @@ urlpatterns = [
     path('experiment-file-database/experiment/<int:experiment_id>/<int:file_id>', templates.ExperimentIdFileIdTemplate.as_view()),
     # experiment file database ends
     # contest question database starts
-    path('contest-question-database/question', contest_question_database_views.QuestionController.as_view()),
-    path('contest-question-database/question/count', contest_question_database_views.QuestionCountController.as_view()),
-    path('contest-question-database/question/<int:question_type>/<int:question_id>', contest_question_database_views.QuestionPutDeleteController.as_view()),
+    path('contest-question-database/question', contest_question_database_views.QuestionView.as_view()),
+    path('contest-question-database/question/count', contest_question_database_views.QuestionCountView.as_view()),
+    path('contest-question-database/question/<int:question_type>/<int:question_id>', contest_question_database_views.QuestionIdView.as_view()),
     # contest question database ends
 ]

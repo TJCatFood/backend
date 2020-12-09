@@ -44,7 +44,7 @@ class Question:
 # Contest question database starts
 
 
-class QuestionController(APIView):
+class QuestionView(APIView):
 
     # this permission is for testing purpose only
     permission_classes = (AllowAny,)
@@ -180,7 +180,7 @@ class QuestionController(APIView):
             }), status=400)
 
 
-class QuestionCountController(APIView):
+class QuestionCountView(APIView):
 
     # this permission is for testing purpose only
     permission_classes = (AllowAny,)
@@ -195,7 +195,7 @@ class QuestionCountController(APIView):
         return Response(content)
 
 
-class QuestionPutDeleteController(APIView):
+class QuestionIdView(APIView):
 
     # this permission is for testing purpose only
     permission_classes = (AllowAny,)
