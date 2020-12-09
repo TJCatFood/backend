@@ -56,7 +56,7 @@ class LoginView(APIView):
         # check the password
         if not user.check_password(password):
             content = {
-                'isSuccess': "false",
+                'isSuccess': False,
                 'error': {
                     'message': "用户ID与密码不匹配"
                 }
@@ -64,7 +64,7 @@ class LoginView(APIView):
             return Response(content, status=400)
 
         content = {
-            'isSuccess': "true",
+            'isSuccess': True,
             'data': {
                 'user_id': f"{user.user_id}",
                 'realname': f"{user.realname}",
