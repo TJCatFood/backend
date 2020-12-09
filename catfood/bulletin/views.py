@@ -34,7 +34,7 @@ class AliveView(APIView):
         return Response(content)
 
 
-class AnnouncementController(APIView):
+class AnnouncementView(APIView):
 
     # FIXME: this permission is for testing purpose only
     permission_classes = (AllowAny,)
