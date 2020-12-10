@@ -110,6 +110,7 @@ class LogoutView(APIView):
 
 
 class RegisterView(APIView):
+    # FIXME: remove student registration and add invitation codes
     permission_classes = (AllowAny,)
 
     def post(self, request, format=None):
@@ -255,18 +256,17 @@ class PasswordView(APIView):
 
 
 class AccountsView(APIView):
-    def get(self, request, format=None):
-        return Response('this is the accounts page')
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsChargingTeacher]
 
     def post(self, request, format=None):
-        # TODO： User Authentication
         content = {
             'isSuccess': 'true',
             'data': {
-                'message': 'accounts appended successfully'
+                'message': '账户导入成功'
             }
         }
-        return Response(content)
+        return Response(content, status=status.HTTP_201_CREATED)
 
 
 class UniversityView(APIView):
