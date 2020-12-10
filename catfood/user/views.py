@@ -135,8 +135,8 @@ class RegisterView(APIView):
                     'user_id': f"{user.user_id}",
                     'realname': f"{user.realname}",
                     'email': f"{user.email}",
-                    'university_id': f"{user.university_id.university_name}",
-                    'school_id': f"{user.school_id.school_name}",
+                    'university_name': f"{user.university_id.university_name}",
+                    'school_name': f"{user.school_id.school_name}",
                     'character': f"{user.character}",
                     'personal_id': f"{user.personal_id}",
                     'avatar': f"{user.avatar}",
@@ -165,8 +165,8 @@ class AccountView(APIView):
                 'user_id': f"{user.user_id}",
                 'realname': f"{user.realname}",
                 'email': f"{user.email}",
-                'university_id': f"{user.university_id.university_name}",
-                'school_id': f"{user.school_id.school_name}",
+                'university_name': f"{user.university_id.university_name}",
+                'school_name': f"{user.school_id.school_name}",
                 'character': f"{user.character}",
                 'personal_id': f"{user.personal_id}",
                 'avatar': f"{user.avatar}",
@@ -187,7 +187,14 @@ class AccountView(APIView):
         content = {
             'isSuccess': f"{isSuccess}",
             'data': {
-                'message': '用户信息更改成功'
+                'user_id': f"{user.user_id}",
+                'realname': f"{user.realname}",
+                'email': f"{user.email}",
+                'university_name': f"{user.university_id.university_name}",
+                'school_name': f"{user.school_id.school_name}",
+                'character': f"{user.character}",
+                'personal_id': f"{user.personal_id}",
+                'avatar': f"{user.avatar}",
             }
         }
         return Response(content, status=200)
