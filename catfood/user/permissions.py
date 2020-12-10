@@ -9,6 +9,7 @@ class IsChargingTeacher(BasePermission):
     def has_permission(self, request, view):
         if request.user.is_anonymous:
             return False
+            # return True
         else:
             return bool(request.user and request.user.character and request.user.character == 1)
 

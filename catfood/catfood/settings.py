@@ -125,7 +125,7 @@ REST_FRAMEWORK = {
         'user.permissions.IsChargingTeacher',
         'user.permissions.IsTeacher',
         'user.permissions.IsTeachingAssistant',
-        'user.permissions.IsStudent',
+        'user.permissions.IsStudent'
     ]
 }
 

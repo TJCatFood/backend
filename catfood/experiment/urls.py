@@ -8,7 +8,7 @@ urlpatterns = [
     path('experiment-database/list/', views.experiment_case_list),
     path('experiment-database/detail/<int:pk>', views.experiment_case_detail),
     path('course-cases/list/<int:course_id>', views.course_case_list),
-    path('course-cases/detail/<int:pk>', views.CourseCasesDetail.as_view()),
+    path('course-cases/detail/<int:pk>', views.course_case_detail),
     path('assignments/student/list/', views.assignment_student_list),
     path('assignments/student/detail/<int:pk>',
          views.assignment_student_detail),
