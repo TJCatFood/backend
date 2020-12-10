@@ -7,7 +7,10 @@ class IsChargingTeacher(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.character and request.user.character == 1)
+        if request.user.is_anonymous:
+            return False
+        else:
+            return bool(request.user and request.user.character and request.user.character == 1)
 
     def has_object_permission(self, request, view, obj):
         return True
@@ -19,7 +22,10 @@ class IsTeacher(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.character and request.user.character == 2)
+        if request.user.is_anonymous:
+            return False
+        else:
+            return bool(request.user and request.user.character and request.user.character == 2)
 
     def has_object_permission(self, request, view, obj):
         return True
@@ -31,7 +37,10 @@ class IsTeachingAssistant(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.character and request.user.character == 3)
+        if request.user.is_anonymous:
+            return False
+        else:
+            return bool(request.user and request.user.character and request.user.character == 3)
 
     def has_object_permission(self, request, view, obj):
         return True
@@ -43,7 +52,10 @@ class IsStudent(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.character and request.user.character == 4)
+        if request.user.is_anonymous:
+            return False
+        else:
+            return bool(request.user and request.user.character and request.user.character == 4)
 
     def has_object_permission(self, request, view, obj):
         return True
