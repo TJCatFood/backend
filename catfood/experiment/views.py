@@ -15,7 +15,7 @@ from rest_framework.permissions import AllowAny
 from user.authentication import CatfoodAuthentication
 from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 
-from experiment.utils import generate_response, dict_filter, student_assignments_filter, is_submission_valid, is_submission_retrieve_valid, is_submission_delete_valid
+from experiment import utils
 
 
 class TestView(APIView):
@@ -40,14 +40,14 @@ def experiment_case_list(request):
         # TODO: 分页
         cases = ExperimentCaseDatabase.objects.all()
         serializer = ExperimentCaseDatabaseSerializer(cases, many=True)
-        return Response(generate_response(serializer.data, True))
+        return Response(utils.generate_response(serializer.data, True))
     elif request.method == 'POST':
         serializer = ExperimentCaseDatabaseSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(generate_response(serializer.data, True), status=status.HTTP_201_CREATED)
+            return Response(utils.generate_response(serializer.data, True), status=status.HTTP_201_CREATED)
         else:
-            return Response(generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
+            return Response(utils.generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -61,24 +61,24 @@ def experiment_case_detail(request, pk):
         case = ExperimentCaseDatabase.objects.get(pk=pk)
     except ExperimentCaseDatabase.DoesNotExist:
         error_data = {"detail": "not exist"}
-        return Response(generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
+        return Response(utils.generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = ExperimentCaseDatabaseSerializer(case)
-        return Response(generate_response(serializer.data, True))
+        return Response(utils.generate_response(serializer.data, True))
 
     elif request.method == 'PUT':
         serializer = ExperimentCaseDatabaseSerializer(
             case, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(generate_response(serializer.data, True))
-        return Response(generate_response(cserializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
+            return Response(utils.generate_response(serializer.data, True))
+        return Response(utils.generate_response(cserializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         case.delete()
         response_data = {"detail": "have delete"}
-        return Response(generate_response(response_data, True), status=status.HTTP_204_NO_CONTENT)
+        return Response(utils.generate_response(response_data, True), status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET', 'POST'])
@@ -92,14 +92,14 @@ def course_case_list(request, course_id):
         cases = CourseCase.objects.all()
         cases = cases.filter(course_id=course_id)
         serializer = CourseCaseSerializer(cases, many=True)
-        return Response(generate_response(serializer.data, True))
+        return Response(utils.generate_response(serializer.data, True))
 
     elif request.method == 'POST':
         serializer = CourseCaseSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(generate_response(serializer.data, True), status=status.HTTP_201_CREATED)
-        return Response(generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
+            return Response(utils.generate_response(serializer.data, True), status=status.HTTP_201_CREATED)
+        return Response(utils.generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -113,24 +113,24 @@ def course_case_detail(request, pk):
         case = CourseCase.objects.get(pk=pk)
     except CourseCase.DoesNotExist:
         error_data = {"detail": "not exist"}
-        return Response(generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
+        return Response(utils.generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = CourseCaseSerializer(case)
-        return Response(generate_response(serializer.data, True))
+        return Response(utils.generate_response(serializer.data, True))
 
     elif request.method == 'PUT':
         serializer = CourseCaseSerializer(
             case, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(generate_response(serializer.data, True))
-        return Response(generate_response(cserializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
+            return Response(utils.generate_response(serializer.data, True))
+        return Response(utils.generate_response(cserializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         case.delete()
         response_data = {"detail": "have delete"}
-        return Response(generate_response(response_data, True), status=status.HTTP_204_NO_CONTENT)
+        return Response(utils.generate_response(response_data, True), status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET', 'POST'])
@@ -146,17 +146,17 @@ def assignment_student_list(request):
         # TODO: 获取学生信息，用于过滤
         # assignments = assignments.filter()
         serializer = ExperimentAssignmentSerializer(assignments, many=True)
-        return Response(generate_response(student_assignments_filter(serializer.data)), True)
+        return Response(utils.generate_response(utils.student_assignments_filter(serializer.data)), True)
 
     elif request.method == 'POST':
         # TODO: 鉴权
         serializer = ExperimentAssignmentSerializer(data=request.data)
-        if not is_submission_valid(request.data):
-            return Response(generate_response({"error_msg": 'permission denied'}, False), status=status.HTTP_400_BAD_REQUEST)
+        if not utils.is_submission_valid(request.data):
+            return Response(utils.generate_response({"error_msg": 'permission denied'}, False), status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
             serializer.save()
-            return Response(generate_response(serializer.data, True), status=status.HTTP_201_CREATED)
-        return Response(generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
+            return Response(utils.generate_response(serializer.data, True), status=status.HTTP_201_CREATED)
+        return Response(utils.generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -169,31 +169,31 @@ def assignment_student_detail(request, pk):
         assignment = ExperimentAssignment.objects.get(pk=pk)
     except ExperimentAssignment.DoesNotExist:
         error_data = {"detail": "not exist"}
-        return Response(generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
+        return Response(utils.generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = ExperimentAssignmentSerializer(assignment)
-        return Response(generate_response(student_assignments_filter([serializer.data])[0]), True)
+        return Response(utils.generate_response(utils.student_assignments_filter([serializer.data])[0]), True)
 
     elif request.method == 'PUT':
         old_assignment = ExperimentAssignmentSerializer(assignment).data
-        if not is_submission_retrieve_valid(old_assignment, request.data):
-            return Response(generate_response({"error_msg": 'permission denied'}, False), status=status.HTTP_400_BAD_REQUEST)
+        if not utils.is_submission_retrieve_valid(old_assignment, request.data):
+            return Response(utils.generate_response({"error_msg": 'permission denied'}, False), status=status.HTTP_400_BAD_REQUEST)
         serializer = ExperimentAssignmentSerializer(
             assignment, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(generate_response(serializer.data), True)
-        return Response(generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
+            return Response(utils.generate_response(serializer.data), True)
+        return Response(utils.generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
-        if not is_submission_delete_valid(
+        if not utils.is_submission_delete_valid(
                 ExperimentAssignmentSerializer(assignment).data):
             response_data = {"error_msg": 'permission denied'}
-            return Response(generate_response(response_data, False), status=status.HTTP_400_BAD_REQUEST)
+            return Response(utils.generate_response(response_data, False), status=status.HTTP_400_BAD_REQUEST)
         assignment.delete()
         response_data = {"detail": "have delete"}
-        return Response(generate_response(response_data, True), status=status.HTTP_204_NO_CONTENT)
+        return Response(utils.generate_response(response_data, True), status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET'])
@@ -207,7 +207,7 @@ def assignment_teacher_list(request, course_case_id):
         # TODO: 鉴权
         assignments = assignments.filter(course_case_id=course_case_id)
         serializer = ExperimentAssignmentSerializer(assignments, many=True)
-        return Response(generate_response(serializer.data), True)
+        return Response(utils.generate_response(serializer.data), True)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -219,21 +219,21 @@ def assignment_teacher_detail(request, pk):
         assignment = ExperimentAssignment.objects.get(pk=pk)
     except ExperimentAssignment.DoesNotExist:
         error_data = {"detail": "not exist"}
-        return Response(generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
+        return Response(utils.generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = ExperimentAssignmentSerializer(assignment)
-        return Response(generate_response(serializer.data), True)
+        return Response(utils.generate_response(serializer.data), True)
 
     elif request.method == 'PUT':
         serializer = ExperimentAssignmentSerializer(
             assignment, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(generate_response(serializer.data), True)
-        return Response(generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
+            return Response(utils.generate_response(serializer.data), True)
+        return Response(utils.generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         assignment.delete()
         response_data = {"detail": "have delete"}
-        return Response(generate_response(response_data, True), status=status.HTTP_204_NO_CONTENT)
+        return Response(utils.generate_response(response_data, True), status=status.HTTP_204_NO_CONTENT)
