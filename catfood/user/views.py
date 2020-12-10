@@ -83,7 +83,8 @@ class LoginView(APIView):
 
 class LogoutView(APIView):
     authentication_classes = [CatfoodAuthentication]
-    permission_classes = [IsStudent | IsTeachingAssistant | IsTeacher | IsChargingTeacher]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def post(self, request):
         try:
@@ -151,7 +152,8 @@ class RegisterView(APIView):
 
 class AccountView(APIView):
     authentication_classes = [CatfoodAuthentication]
-    permission_classes = [IsStudent | IsTeachingAssistant | IsTeacher | IsChargingTeacher]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, format=None):
         user = request.user
@@ -191,7 +193,8 @@ class AccountView(APIView):
 
 class PasswordView(APIView):
     authentication_classes = [CatfoodAuthentication]
-    permission_classes = [IsStudent | IsTeachingAssistant | IsTeacher | IsChargingTeacher]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def patch(self, request, format=None):
         user = request.user

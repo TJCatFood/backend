@@ -12,6 +12,7 @@ from rest_framework import generics
 from rest_framework.parsers import JSONParser
 from django.http import HttpResponse, JsonResponse
 
+
 @api_view(['GET', 'POST'])
 def courses_list(request):
     """
@@ -31,6 +32,7 @@ def courses_list(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def course_detail(request, course_id):
@@ -56,6 +58,3 @@ def course_detail(request, course_id):
     elif request.method == 'DELETE':
         course.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-

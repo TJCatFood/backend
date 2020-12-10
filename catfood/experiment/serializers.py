@@ -2,6 +2,8 @@ from rest_framework import serializers
 from course_database.models import ExperimentCaseDatabase
 from experiment.models import CourseCase, ExperimentAssignment
 from course.models import Course
+
+
 class ExperimentCaseDatabaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExperimentCaseDatabase
@@ -13,7 +15,8 @@ class ExperimentCaseDatabaseSerializer(serializers.ModelSerializer):
             'experiment_case_file_token',
             'answer_file_token',
         ]
- 
+
+
 class CourseCaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseCase
@@ -24,6 +27,7 @@ class CourseCaseSerializer(serializers.ModelSerializer):
             'case_end_timestamp',
             'course_case_id'
         ]
+
 
 class ExperimentAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,4 +42,3 @@ class ExperimentAssignmentSerializer(serializers.ModelSerializer):
             'submission_is_public',
             'submission_case_id'
         ]
-

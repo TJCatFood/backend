@@ -4,6 +4,7 @@ def generate_response(data, isSuccess):
         "data": data
     }
 
+
 def dict_filter(old_dict, keys):
     ans = {}
     for key in keys:

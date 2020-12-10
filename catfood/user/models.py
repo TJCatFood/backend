@@ -4,7 +4,8 @@ from django.db import models
 from django import forms
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-user_character = ((1, 'is_charging_teacher'), (2, 'is_teacher'), (3, 'is_teaching_assistant'), (4, 'is_student'))
+user_character = ((1, 'is_charging_teacher'), (2, 'is_teacher'),
+                  (3, 'is_teaching_assistant'), (4, 'is_student'))
 
 
 class UserManager(BaseUserManager):

@@ -15,10 +15,12 @@ from rest_framework.permissions import AllowAny
 from user.authentication import CatfoodAuthentication
 from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 
-from experiment.utils import generate_response, dict_filter, student_assignments_filter, is_submission_valid, is_submission_retrieve_valid, is_submission_delete_valid 
+from experiment.utils import generate_response, dict_filter, student_assignments_filter, is_submission_valid, is_submission_retrieve_valid, is_submission_delete_valid
+
 
 class TestView(APIView):
     permission_classes = (AllowAny,)
+
     def get(self, request, format=None):
         response = 'test succeed!'
         content = {
@@ -37,7 +39,7 @@ def experiment_case_list(request):
     if request.method == 'GET':
         # TODO: 分页
         cases = ExperimentCaseDatabase.objects.all()
-        serializer = ExperimentCaseDatabaseSerializer(cases, many=True) 
+        serializer = ExperimentCaseDatabaseSerializer(cases, many=True)
         return Response(generate_response(serializer.data, True))
     elif request.method == 'POST':
         serializer = ExperimentCaseDatabaseSerializer(data=request.data)
@@ -59,7 +61,7 @@ def experiment_case_detail(request, pk):
         case = ExperimentCaseDatabase.objects.get(pk=pk)
     except ExperimentCaseDatabase.DoesNotExist:
         error_data = {"detail": "not exist"}
-        return Response(generate_response(error_data, False),status=status.HTTP_404_NOT_FOUND)
+        return Response(generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = ExperimentCaseDatabaseSerializer(case)
@@ -111,7 +113,7 @@ def course_case_detail(request, pk):
         case = CourseCase.objects.get(pk=pk)
     except CourseCase.DoesNotExist:
         error_data = {"detail": "not exist"}
-        return Response(generate_response(error_data, False),status=status.HTTP_404_NOT_FOUND)
+        return Response(generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = CourseCaseSerializer(case)
@@ -167,8 +169,8 @@ def assignment_student_detail(request, pk):
         assignment = ExperimentAssignment.objects.get(pk=pk)
     except ExperimentAssignment.DoesNotExist:
         error_data = {"detail": "not exist"}
-        return Response(generate_response(error_data, False),status=status.HTTP_404_NOT_FOUND)
-        
+        return Response(generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
+
     if request.method == 'GET':
         serializer = ExperimentAssignmentSerializer(assignment)
         return Response(generate_response(student_assignments_filter([serializer.data])[0]), True)
@@ -217,7 +219,7 @@ def assignment_teacher_detail(request, pk):
         assignment = ExperimentAssignment.objects.get(pk=pk)
     except ExperimentAssignment.DoesNotExist:
         error_data = {"detail": "not exist"}
-        return Response(generate_response(error_data, False),status=status.HTTP_404_NOT_FOUND)
+        return Response(generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = ExperimentAssignmentSerializer(assignment)
@@ -235,7 +237,3 @@ def assignment_teacher_detail(request, pk):
         assignment.delete()
         response_data = {"detail": "have delete"}
         return Response(generate_response(response_data, True), status=status.HTTP_204_NO_CONTENT)
-
-
-
-

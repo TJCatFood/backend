@@ -19,7 +19,8 @@ class ExperimentAssignment(models.Model):
 
 
 class CourseCase(models.Model):
-    case_id = models.ForeignKey('course_database.ExperimentCaseDatabase', on_delete=models.CASCADE)
+    case_id = models.ForeignKey(
+        'course_database.ExperimentCaseDatabase', on_delete=models.CASCADE)
     course_id = models.ForeignKey('course.Course', on_delete=models.CASCADE)
     case_start_timestamp = models.DateTimeField()
     case_end_timestamp = models.DateTimeField()
