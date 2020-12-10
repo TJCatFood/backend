@@ -13,6 +13,7 @@ class UserTests(TestCase):
         cls.school_id = cls.mySchool.school_id
 
     def testUser(self):
+        # FIXME: This DOES NOT guarantee the normal running of user module.
         testApiPrefix = '/api/v1/user/'
         testUserPassword = '123456'
         responseRegister = self.client.post(testApiPrefix + 'register/',
