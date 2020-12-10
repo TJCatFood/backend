@@ -11,9 +11,13 @@ from course.serializers import CourseSerializers
 from rest_framework import generics
 from rest_framework.parsers import JSONParser
 from django.http import HttpResponse, JsonResponse
+from rest_framework.permissions import AllowAny
+from user.authentication import CatfoodAuthentication
+from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 
 
 @api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
 def courses_list(request):
     """
     List all courses, or create a new course.
@@ -35,6 +39,7 @@ def courses_list(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([AllowAny])
 def course_detail(request, course_id):
     """
     Retrieve, update or delete a course instance.
