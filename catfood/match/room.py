@@ -2,7 +2,6 @@ from enum import Enum
 from queue import Queue
 import uuid
 
-
 class RoomStatus(Enum):
 
     WAIT = 1
@@ -12,8 +11,8 @@ class RoomStatus(Enum):
 
 class Room():
     
-    def __init__(self, user, total_count):
-        self.user_list = [user]
+    def __init__(self, user_id, total_count):
+        self.user_id_list = [user_id]
         self.channel_id = uuid.uuid4().int & (1 << 64) - 1
         self.total_count = total_count
         self.cur_count = 1
@@ -22,8 +21,8 @@ class Room():
         self.status = RoomStatus.WAIT
         
 
-    def add_user(self, user):
-        self.user_list.append(user)
+    def add_user(self, user_id):
+        self.user_id_list.append(user_id)
         self.cur_count += 1
 
     def bis_empty(self):
@@ -32,12 +31,19 @@ class Room():
     def bis_full(self):
         return self.cur_count == self.total_count
 
-    def delete_user(self, user):
-        return self.user_list.remove(user)
+    def delete_user(self, user_id):
+        self.cur_count -= 1
+        return self.user_id_list.remove(user_id)
 
-    def user_ready(self, user):
+    def delete_user_index(self, index):
+        if(index >= self.total_count):
+            return
+        self.cur_count -= 1
+        del self.user_id_list[index]
+
+    def user_ready(self, user_id):
         try:
-            index = self.user_list.index(user)
+            index = self.user_id_list.index(user_id)
         except:
             print('user not found!')
             return None
