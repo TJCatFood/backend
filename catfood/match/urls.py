@@ -7,4 +7,6 @@ urlpatterns = [
     path('', views.TestView.as_view()),
     path('start', views.StartView.as_view()),
     path('cancel', views.CancelView.as_view()),
+    path('userindex', views.IndexView.as_view()),
+    path('ready', views.ReadyView.as_view()),
 ]

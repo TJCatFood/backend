@@ -11,7 +11,7 @@ class RoomStatus(Enum):
 
 class Room():
     
-    def __init__(self, user_id, total_count):
+    def __init__(self, user_id, total_count, contest_id):
         self.user_id_list = [user_id]
         self.channel_id = uuid.uuid4().int & (1 << 64) - 1
         self.total_count = total_count
@@ -19,6 +19,7 @@ class Room():
         self.ready_count = 0
         self.ready_list = [False] * total_count
         self.status = RoomStatus.WAIT
+        self.contest_id = contest_id
         
 
     def add_user(self, user_id):
@@ -50,6 +51,7 @@ class Room():
         else:
             self.ready_list[index] = true
             self.ready_count += 1
+            return user_id
 
     def clear_ready(self):
         for item in self.ready_list:
@@ -61,6 +63,14 @@ class Room():
 
     def set_status(self, status):
         self.status = status
+
+    def get_user_index(self, user_id):
+        try:
+            index = self.user_id_list.index(user_id)
+        except:
+            return -1
+        else:
+            return index
 
 
 class ContestRooms:
