@@ -117,13 +117,13 @@ docker-compose down
 
 ### 注册用户
 
-预留了 localhost:8000/api/v1/user/university/ 和 localhost:8000/api/v1/user/school/ 两个接口来设置大学和学院，在注册用户之前请确认是否有大学和学院（用户的外码）。
+预留了 `localhost:8000/api/v1/user/university/` 和 `localhost:8000/api/v1/user/school/` 两个接口来设置大学和学院，在注册用户之前请确认是否有大学和学院（用户的外码）。
 
-对university表进行了修改，现在里面包含三个字段（university_id，official_id，university_name）添加了字段official_id，用于表示官方编号系统对大学的编号。
+对university表进行了修改，现在里面包含三个字段 `university_id`，`official_id`，`university_name` 添加了字段 `official_id`，用于表示官方编号系统对大学的编号。
 
 ### 用户鉴权
 
-#### 不需要鉴权(允许任何人访问及使用)
+#### 不需要鉴权(允许任何人访问及使用)：
 
  - 类形式：
 
@@ -137,7 +137,7 @@ permission_classes = [AllowAny]
 @permission_classes([AllowAny])
 ```
 
-#### 需要鉴权
+#### 需要鉴权：
 
  - 类形式：
 
