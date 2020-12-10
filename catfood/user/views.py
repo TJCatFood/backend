@@ -12,6 +12,7 @@ from rest_framework import status
 from .models import User, University, School
 from .serializers import UniversitySerializer, SchoolSerializer
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.datastructures import MultiValueDictKeyError
 
 
 class LoginView(APIView):
@@ -39,8 +40,14 @@ class LoginView(APIView):
                 return Response(content)
 
         # login with user_id and password
-        user_id = request.POST.get('user_id')
-        password = request.POST.get('password')
+        try:
+            user_id = request.data["user_id"]
+        except(MultiValueDictKeyError):
+            user_id = None
+        try:
+            password = request.data["password"]
+        except(MultiValueDictKeyError):
+            password = None
         # check the user_id
         try:
             user = User.objects.get(user_id=user_id)
@@ -106,44 +113,14 @@ class RegisterView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request, format=None):
-        password = request.POST.get('password')
-        realname = request.POST.get('realname')
-        email = request.POST.get('email')
-        university_id = request.POST.get('university_id')
-        school_id = request.POST.get('school_id')
-        character = request.POST.get('character')
-        personal_id = request.POST.get('personal_id')
-        avatar = request.POST.get('avatar')
-
-        if password:
-            try:
-                user = User.objects.create(password=password, realname=realname,
-                                           email=email, university_id=university_id, school_id=school_id, character=character,
-                                           personal_id=personal_id, avatar=avatar)
-            except(ObjectDoesNotExist):
-                content = {
-                    'isSuccess': False,
-                    'error': {
-                        'message': "大学或学院编号不符合外码约束"
-                    }
-                }
-                return Response(content, status=400)
-            request.session.flush()
-            content = {
-                'isSuccess': True,
-                'data': {
-                    'user_id': f"{user.user_id}",
-                    'realname': f"{user.realname}",
-                    'email': f"{user.email}",
-                    'university_name': f"{user.university_id.university_name}",
-                    'school_name': f"{user.school_id.school_name}",
-                    'character': f"{user.character}",
-                    'personal_id': f"{user.personal_id}",
-                    'avatar': f"{user.avatar}",
-                }
-            }
-            return Response(content, status=201)
-        else:
+        try:
+            password = request.data['password']
+            realname = request.data['realname']
+            university_id = request.data['university_id']
+            school_id = request.data['school_id']
+            character = request.data['character']
+            personal_id = request.data['personal_id']
+        except(MultiValueDictKeyError):
             content = {
                 'isSuccess': False,
                 'data': {
@@ -151,6 +128,43 @@ class RegisterView(APIView):
                 }
             }
             return Response(content, status=400)
+
+        try:
+            avatar = request.data["avatar"]
+        except(MultiValueDictKeyError):
+            avatar = None
+        try:
+            email = request.data["email"]
+        except(MultiValueDictKeyError):
+            email = None
+
+        try:
+            user = User.objects.create(password=password, realname=realname,
+                                       email=email, university_id=university_id, school_id=school_id, character=character,
+                                       personal_id=personal_id, avatar=avatar)
+        except(ObjectDoesNotExist):
+            content = {
+                'isSuccess': False,
+                'error': {
+                    'message': "大学或学院编号不符合外码约束"
+                }
+            }
+            return Response(content, status=400)
+        request.session.flush()
+        content = {
+            'isSuccess': True,
+            'data': {
+                'user_id': f"{user.user_id}",
+                'realname': f"{user.realname}",
+                'email': f"{user.email}",
+                'university_name': f"{user.university_id.university_name}",
+                'school_name': f"{user.school_id.school_name}",
+                'character': f"{user.character}",
+                'personal_id': f"{user.personal_id}",
+                'avatar': f"{user.avatar}",
+            }
+        }
+        return Response(content, status=201)
 
 
 class AccountView(APIView):
@@ -176,8 +190,14 @@ class AccountView(APIView):
 
     def patch(self, request, format=None):
         user = request.user
-        email = request.POST.get("email")
-        avatar = request.POST.get("avatar")
+        try:
+            email = request.data["email"]
+        except(MultiValueDictKeyError):
+            email = None
+        try:
+            avatar = request.data["avatar"]
+        except(MultiValueDictKeyError):
+            avatar = None
         if email:
             user.email = User.objects.normalize_email(email)
         if avatar:
@@ -206,7 +226,10 @@ class PasswordView(APIView):
 
     def patch(self, request, format=None):
         user = request.user
-        old_password = request.POST.get("old_password")
+        try:
+            old_password = request.data["old_password"]
+        except(MultiValueDictKeyError):
+            old_password = None
         if not user.check_password(old_password):
             content = {
                 'isSuccess': False,
@@ -215,8 +238,10 @@ class PasswordView(APIView):
                 }
             }
             return Response(content, status=400)
-        password = request.POST.get("password")
-        # User.objects.change_password(user.user_id, password)
+        try:
+            password = request.data["password"]
+        except(MultiValueDictKeyError):
+            password = None
         user.set_password(password)
         user.save()
         request.session.flush()

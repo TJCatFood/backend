@@ -17,7 +17,8 @@ class UserTests(TestCase):
         testApiPrefix = '/api/v1/user/'
         testUserPassword = '123456'
         responseRegister = self.client.post(testApiPrefix + 'register/',
-                                            {'password': testUserPassword, 'university_id': self.university_id, 'school_id': self.school_id})
+                                            {'password': testUserPassword, 'university_id': self.university_id, 'school_id': self.school_id,
+                                             'realname': 'Never', 'personal_id': 1888888, "character": 4})
         self.assertEqual(responseRegister.status_code, 201)
         testUserID = responseRegister.data["data"]["user_id"]
         responseLogin = self.client.post(testApiPrefix + 'login/',
