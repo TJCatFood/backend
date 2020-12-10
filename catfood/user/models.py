@@ -5,24 +5,14 @@ user_character = ((1, 'is_charging_teacher'), (2, 'is_teacher'), (3, 'is_teachin
 
 
 class UserManager(BaseUserManager):
-    def create(self, password, realname=None, email=None, university_id=None,
-               school_id=None, character=None, personal_id=None, avatar=None):
-        if realname is None:
-            realname = ''
-        if email is None:
-            email = ''
-        if personal_id is None:
-            personal_id = ''
-        if university_id is None:
-            university_id = 0
-        if school_id is None:
-            school_id = 0
-        if character is None:
-            character = 4
-        if avatar is None:
-            avatar = ''
+    def create(self, password, realname, university_id,
+               school_id, character, personal_id, avatar=None, email=None):
         university = University.objects.get(university_id=university_id)
         school = School.objects.get(school_id=school_id)
+        if avatar is None:
+            avatar = ''
+        if email is None:
+            email = ''
         user = self.model(
             realname=realname,
             email=User.objects.normalize_email(email),

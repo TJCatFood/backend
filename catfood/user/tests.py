@@ -1,4 +1,5 @@
-from django.test import TestCase, Client
+from django.test import TestCase
+from rest_framework.test import APIClient
 from .models import University, School
 
 
@@ -13,19 +14,24 @@ class UserTests(TestCase):
         cls.school_id = cls.mySchool.school_id
 
     def testUser(self):
+        client = APIClient()
         # FIXME: This DOES NOT guarantee the normal running of user module.
         testApiPrefix = '/api/v1/user/'
         testUserPassword = '123456'
-        responseRegister = self.client.post(testApiPrefix + 'register/',
+        responseRegister = client.post(testApiPrefix + 'register/',
                                             {'password': testUserPassword, 'university_id': self.university_id, 'school_id': self.school_id,
                                              'realname': 'Never', 'personal_id': 1888888, "character": 4})
         self.assertEqual(responseRegister.status_code, 201)
         testUserID = responseRegister.data["data"]["user_id"]
-        responseLogin = self.client.post(testApiPrefix + 'login/',
+        responseLogin = client.post(testApiPrefix + 'login/',
                                          {'password': testUserPassword, 'user_id': testUserID})
         self.assertEqual(responseLogin.status_code, 200)
-        responseGetAccount = self.client.get(testApiPrefix + 'account/')
+        responseGetAvatar = client.patch(testApiPrefix + 'account/',
+                                              {'avatar': "www.baidu.com"})
+        self.assertEqual(responseGetAvatar.status_code, 200)                                      
+        responseGetAccount = client.get(testApiPrefix + 'account/')
         self.assertEqual(responseGetAccount.data["data"]["university_name"], "Tongji")
         self.assertEqual(responseGetAccount.data["data"]["school_name"], "SSE")
-        responseLogout = self.client.post(testApiPrefix + 'logout/')
+        self.assertEqual(responseGetAccount.data["data"]["avatar"], "www.baidu.com")
+        responseLogout = client.post(testApiPrefix + 'logout/')
         self.assertEqual(responseLogout.status_code, 201)
