@@ -1,0 +1,77 @@
+version: "3"
+services:
+  db:
+    image: postgres:13-alpine
+    restart: always
+    volumes:
+      - "./.persistence/db:/var/lib/postgresql/data"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5432:5432
+
+  redis:
+    image: redis:6-alpine
+    restart: always
+    ports:
+      - 6379:6379
+
+  minio:
+    image: minio/minio:latest
+    restart: always
+    volumes:
+      - "./.persistence/minio/data:/data"
+      - "./.persistence/minio/config/:/root/.minio"
+    environment:
+      - MINIO_ACCESS_KEY=minio
+      - MINIO_SECRET_KEY=minio123
+    ports:
+      - 9000:9000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    command: server /data
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web.dev
+    environment:
+      - SECRET_KEY=EatingOurOwnCatFood
+      - DEBUG=1
+      - DB_HOST=db
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_PORT=5432
+      - REDIS=redis://redis:6379
+      - MINIO_ACCESS_KEY=minio
+      - MINIO_SECRET_KEY=minio123
+      - MINIO_ADDRESS=minio:9000
+    command: "python manage.py runserver 0.0.0.0:8000"
+    user: "${USER_ID}:${GROUP_ID}"
+    volumes:
+      - "./catfood:/code/catfood:rw"
+    ports:
+      - 8000:8000
+      - 13222:13222
+    depends_on:
+      - db
+      - redis
+      - minio
+
+  nchan:
+    build:
+      context: .
+      dockerfile: Dockerfile.nchan.dev
+    volumes:
+      - "./nchan/nchan.conf:/etc/nginx/sites-enabled/default"
+    ports:
+      - 8080:8080
+      - 8081:8081
+    depends_on:
+      - web
