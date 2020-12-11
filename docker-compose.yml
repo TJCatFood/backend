@@ -1,5 +1,5 @@
-version: "3"
-services:
+version: '3'
+services: 
   db:
     image: postgres:13-alpine
     restart: always
@@ -11,11 +11,11 @@ services:
       - POSTGRES_PASSWORD=postgres
     ports:
       - 5432:5432
-
+  
   redis:
     image: redis:6-alpine
     restart: always
-    ports:
+    ports: 
       - 6379:6379
 
   minio:
@@ -27,7 +27,7 @@ services:
     environment:
       - MINIO_ACCESS_KEY=minio
       - MINIO_SECRET_KEY=minio123
-    ports:
+    ports: 
       - 9000:9000
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
@@ -54,24 +54,24 @@ services:
       - MINIO_ADDRESS=minio:9000
     command: "python manage.py runserver 0.0.0.0:8000"
     user: "${USER_ID}:${GROUP_ID}"
-    volumes:
+    volumes: 
       - "./catfood:/code/catfood:rw"
     ports:
       - 8000:8000
-      - 13222:13222
     depends_on:
       - db
-      - redis
+      - redis 
       - minio
 
   nchan:
     build:
       context: .
       dockerfile: Dockerfile.nchan.dev
-    volumes:
+    volumes: 
       - "./nchan/nchan.conf:/etc/nginx/sites-enabled/default"
     ports:
       - 8080:8080
       - 8081:8081
-    depends_on:
+    depends_on: 
       - web
+      
