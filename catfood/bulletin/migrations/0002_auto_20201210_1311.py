@@ -11,17 +11,19 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('class', '0001_initial'),
+        ('bulletin', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='teach',
-            name='teacher_id',
+            model_name='announcement',
+            name='announcement_sender_id',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
-        migrations.AlterUniqueTogether(
-            name='teach',
-            unique_together={('teacher_id', 'course_id')},
+        migrations.AddField(
+            model_name='announcement',
+            name='course_id',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='course.course'),
         ),
     ]

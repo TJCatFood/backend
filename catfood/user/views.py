@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib import auth
-
+from django.db.models import Max
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
@@ -11,6 +11,8 @@ from django.db.models.query import EmptyQuerySet
 from rest_framework import status
 from .models import User, University, School
 from .serializers import UniversitySerializer, SchoolSerializer
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils.datastructures import MultiValueDictKeyError
 
 
 class LoginView(APIView):
@@ -23,13 +25,13 @@ class LoginView(APIView):
             user = User.objects.get(user_id=user_id)
             if request.session.get("password") == user.password:
                 content = {
-                    'isSuccess': "true",
+                    'isSuccess': True,
                     'data': {
                         'user_id': f"{user.user_id}",
                         'realname': f"{user.realname}",
                         'email': f"{user.email}",
-                        'university_id': f"{user.university_id.university_name}",
-                        'school_id': f"{user.school_id.school_name}",
+                        'university_name': f"{user.university_id.university_name}",
+                        'school_name': f"{user.school_id.school_name}",
                         'character': f"{user.character}",
                         'personal_id': f"{user.personal_id}",
                         'avatar': f"{user.avatar}",
@@ -38,14 +40,20 @@ class LoginView(APIView):
                 return Response(content)
 
         # login with user_id and password
-        user_id = request.POST.get('user_id')
-        password = request.POST.get('password')
+        try:
+            user_id = request.data["user_id"]
+        except(MultiValueDictKeyError):
+            user_id = None
+        try:
+            password = request.data["password"]
+        except(MultiValueDictKeyError):
+            password = None
         # check the user_id
         try:
             user = User.objects.get(user_id=user_id)
-        except(Exception):
+        except(ObjectDoesNotExist):
             content = {
-                'isSuccess': "false",
+                'isSuccess': False,
                 'error': {
                     'message': "输入的用户ID不存在"
                 }
@@ -55,7 +63,7 @@ class LoginView(APIView):
         # check the password
         if not user.check_password(password):
             content = {
-                'isSuccess': "false",
+                'isSuccess': False,
                 'error': {
                     'message': "用户ID与密码不匹配"
                 }
@@ -63,13 +71,13 @@ class LoginView(APIView):
             return Response(content, status=400)
 
         content = {
-            'isSuccess': "true",
+            'isSuccess': True,
             'data': {
                 'user_id': f"{user.user_id}",
                 'realname': f"{user.realname}",
                 'email': f"{user.email}",
-                'university_id': f"{user.university_id}",
-                'school_id': f"{user.school_id}",
+                'university_name': f"{user.university_id.university_name}",
+                'school_name': f"{user.school_id.school_name}",
                 'character': f"{user.character}",
                 'personal_id': f"{user.personal_id}",
                 'avatar': f"{user.avatar}",
@@ -94,7 +102,7 @@ class LogoutView(APIView):
             pass
         request.session.flush()
         content = {
-            'isSuccess': "true",
+            'isSuccess': True,
             'date': {
                 'message': "登出成功"
             }
@@ -103,51 +111,62 @@ class LogoutView(APIView):
 
 
 class RegisterView(APIView):
+    # FIXME: remove student registration and add invitation codes
     permission_classes = (AllowAny,)
 
     def post(self, request, format=None):
-        # print('*'*40)
-        print(request.data)
-        user_id, password = request.data['user_id'], request.data['password']
-        # user_id, password = request.POST.get('user_id'), request.POST.get('password')
-        # print('*'*30, user_id, password)
-        if User.objects.filter(user_id=user_id).count() != 0:
+        try:
+            password = request.data['password']
+            realname = request.data['realname']
+            university_id = request.data['university_id']
+            school_id = request.data['school_id']
+            character = request.data['character']
+            personal_id = request.data['personal_id']
+        except(MultiValueDictKeyError):
             content = {
-                'isSuccess': "false",
-                'error': {
-                    'message': "用户ID已被注册"
+                'isSuccess': False,
+                'data': {
+                    'message': "缺少必填信息"
                 }
             }
             return Response(content, status=400)
 
-        realname = request.POST.get('realname')
-        email = request.POST.get('email')
-        university_id = request.POST.get('university_id')
-        school_id = request.POST.get('school_id')
-        character = request.POST.get('character')
-        personal_id = request.POST.get('personal_id')
-        avatar = request.POST.get('avatar')
-        print('*'*30, user_id, password)
-        if user_id and password:
-            User.objects.create(user_id=user_id, password=password, realname=realname,
-                                email=email, university_id=university_id, school_id=school_id, character=character,
-                                personal_id=personal_id, avatar=avatar)
-            request.session.flush()
+        try:
+            avatar = request.data["avatar"]
+        except(MultiValueDictKeyError):
+            avatar = None
+        try:
+            email = request.data["email"]
+        except(MultiValueDictKeyError):
+            email = None
+
+        try:
+            user = User.objects.create(password=password, realname=realname,
+                                       email=email, university_id=university_id, school_id=school_id, character=character,
+                                       personal_id=personal_id, avatar=avatar)
+        except(ObjectDoesNotExist):
             content = {
-                'isSuccess': "true",
-                'data': {
-                    'message': "注册成功"
-                }
-            }
-            return Response(content, status=201)
-        else:
-            content = {
-                'isSuccess': "false",
-                'data': {
-                    'message': "缺少用户ID或密码"
+                'isSuccess': False,
+                'error': {
+                    'message': "大学或学院编号不符合外码约束"
                 }
             }
             return Response(content, status=400)
+        request.session.flush()
+        content = {
+            'isSuccess': True,
+            'data': {
+                'user_id': f"{user.user_id}",
+                'realname': f"{user.realname}",
+                'email': f"{user.email}",
+                'university_name': f"{user.university_id.university_name}",
+                'school_name': f"{user.school_id.school_name}",
+                'character': f"{user.character}",
+                'personal_id': f"{user.personal_id}",
+                'avatar': f"{user.avatar}",
+            }
+        }
+        return Response(content, status=201)
 
 
 class AccountView(APIView):
@@ -158,13 +177,13 @@ class AccountView(APIView):
     def get(self, request, format=None):
         user = request.user
         content = {
-            'isSuccess': "true",
+            'isSuccess': True,
             'data': {
                 'user_id': f"{user.user_id}",
                 'realname': f"{user.realname}",
                 'email': f"{user.email}",
-                'university_id': f"{user.university_id.university_name}",
-                'school_id': f"{user.school_id.school_name}",
+                'university_name': f"{user.university_id.university_name}",
+                'school_name': f"{user.school_id.school_name}",
                 'character': f"{user.character}",
                 'personal_id': f"{user.personal_id}",
                 'avatar': f"{user.avatar}",
@@ -174,8 +193,14 @@ class AccountView(APIView):
 
     def patch(self, request, format=None):
         user = request.user
-        email = request.POST.get("email")
-        avatar = request.POST.get("avatar")
+        try:
+            email = request.data["email"]
+        except(MultiValueDictKeyError):
+            email = None
+        try:
+            avatar = request.data["avatar"]
+        except(MultiValueDictKeyError):
+            avatar = None
         if email:
             user.email = User.objects.normalize_email(email)
         if avatar:
@@ -185,7 +210,14 @@ class AccountView(APIView):
         content = {
             'isSuccess': f"{isSuccess}",
             'data': {
-                'message': '用户信息更改成功'
+                'user_id': f"{user.user_id}",
+                'realname': f"{user.realname}",
+                'email': f"{user.email}",
+                'university_name': f"{user.university_id.university_name}",
+                'school_name': f"{user.school_id.school_name}",
+                'character': f"{user.character}",
+                'personal_id': f"{user.personal_id}",
+                'avatar': f"{user.avatar}",
             }
         }
         return Response(content, status=200)
@@ -198,17 +230,22 @@ class PasswordView(APIView):
 
     def patch(self, request, format=None):
         user = request.user
-        old_password = request.POST.get("old_password")
+        try:
+            old_password = request.data["old_password"]
+        except(MultiValueDictKeyError):
+            old_password = None
         if not user.check_password(old_password):
             content = {
-                'isSuccess': "false",
+                'isSuccess': False,
                 'error': {
                     'message': "旧密码错误"
                 }
             }
             return Response(content, status=400)
-        password = request.POST.get("password")
-        # User.objects.change_password(user.user_id, password)
+        try:
+            password = request.data["password"]
+        except(MultiValueDictKeyError):
+            password = None
         user.set_password(password)
         user.save()
         request.session.flush()
@@ -222,18 +259,17 @@ class PasswordView(APIView):
 
 
 class AccountsView(APIView):
-    def get(self, request, format=None):
-        return Response('this is the accounts page')
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsChargingTeacher]
 
     def post(self, request, format=None):
-        # TODO： User Authentication
         content = {
             'isSuccess': 'true',
             'data': {
-                'message': 'accounts appended successfully'
+                'message': '账户导入成功'
             }
         }
-        return Response(content)
+        return Response(content, status=status.HTTP_201_CREATED)
 
 
 class UniversityView(APIView):
