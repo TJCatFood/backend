@@ -8,7 +8,7 @@ class FileUsage(models.TextChoices):
 
 class HomeworkList(models.Model):
     homework_id = models.AutoField(primary_key=True)
-    course_id = models.ForeignKey('class.Course', on_delete=models.CASCADE)
+    course_id = models.ForeignKey('course.Course', on_delete=models.CASCADE)
     homework_creator = models.ForeignKey('user.User', on_delete=models.CASCADE)
     homework_description = models.CharField(max_length=1024)
     homework_attachment_link = models.CharField(max_length=200)

@@ -6,14 +6,13 @@ class ExperimentCaseDatabase(models.Model):
     experiment_name = models.CharField(max_length=50)
     experiment_case_name = models.CharField(max_length=50)
     experiment_case_description = models.CharField(max_length=1024, null=True)
-    experiment_case_file_link = models.CharField(max_length=256)
-    answer_file_link = models.CharField(max_length=256)
-    component_id = models.IntegerField
+    experiment_case_file_token = models.CharField(max_length=256)
+    answer_file_token = models.CharField(max_length=256)
 
 
 class CourseDocument(models.Model):
     file_course_document_id = models.AutoField(primary_key=True)
-    course_id = models.ForeignKey('class.Course', on_delete=models.CASCADE)
+    course_id = models.ForeignKey('course.Course', on_delete=models.CASCADE)
     file_uploader = models.ForeignKey('user.User', on_delete=models.CASCADE)
     file_usage = models.CharField(max_length=100)
     file_timestamp = models.DateTimeField(auto_now=True)

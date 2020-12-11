@@ -13,7 +13,7 @@ class Course(models.Model):
     course_name = models.CharField(max_length=50)
     course_description = models.CharField(max_length=512, null=True)
     course_credit = models.IntegerField(default=0)
-    course_study_time_needed = models.IntegerField
+    course_study_time_needed = models.IntegerField(default=0)
     course_type = models.CharField(max_length=20)
     course_start_time = models.DateTimeField()
     course_end_time = models.DateTimeField()
