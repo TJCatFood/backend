@@ -74,4 +74,3 @@ services:
       - 8081:8081
     depends_on: 
       - web
-      
