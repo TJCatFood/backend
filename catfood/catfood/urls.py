@@ -7,5 +7,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('status/', views.CatFoodStatusView.as_view()),
     path('api/v1/contest/', include('contest.urls')),
+    path('api/v1/experiment/', include('experiment.urls')),
+    path('api/v1/course/', include('course.urls')),
     path('api/v1/user/', include('user.urls')),
 ]
