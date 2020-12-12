@@ -6,10 +6,10 @@ class ContestSerializer(ModelSerializer):
     class Meta:
         model = Contest
         fields = [
-            'contest_id', 
-            'course_id', 
-            'publisher_id', 
-            'title', 
+            'contest_id',
+            'course_id',
+            'publisher_id',
+            'title',
             'participant_number',
             'start_time',
             'end_time',

@@ -54,8 +54,8 @@ class ContestView(APIView):
         serializer = ContestSerializer(data=data['contest'])
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer._data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MatchesVIew(APIView):
@@ -73,14 +73,14 @@ class MatchesVIew(APIView):
 
     def get_contest_matches(self, contest_id):
         content = {
-            "contest_id": f"{contest_id}",
+            "contestId": f"{contest_id}",
             "response": 'get_contest_matches test succeed'
         }
         return Response(content)
 
     def get_student_matches(self, contest_id):
         content = {
-            "contest_id": f"{contest_id}",
+            "contestId": f"{contest_id}",
             "response": 'get_student_matches test succeed'
         }
         return Response(content)
