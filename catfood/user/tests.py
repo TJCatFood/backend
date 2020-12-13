@@ -50,3 +50,4 @@ class UserTests(TestCase):
         self.assertEqual(responseLogin.status_code, 200)
         responseGetAccount = client.get(testApiPrefix + 'account/')
         self.assertEqual(responseGetAccount.data["data"]["character"], '1')
+        
