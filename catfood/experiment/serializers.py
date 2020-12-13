@@ -14,6 +14,7 @@ class ExperimentCaseDatabaseSerializer(serializers.ModelSerializer):
             'experiment_case_description',
             'experiment_case_file_token',
             'answer_file_token',
+            'case_created_timestamp',
         ]
 
 
