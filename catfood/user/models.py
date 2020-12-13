@@ -20,6 +20,7 @@ class UserManager(BaseUserManager):
             university_id=university,
             school_id=school,
             personal_id=personal_id,
+            character=character,
             avatar=avatar,
         )
         user.set_password(password)
