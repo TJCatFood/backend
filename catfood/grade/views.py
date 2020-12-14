@@ -9,6 +9,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 from .models import Grade, GradeProportion
 from user.models import TakeCourse
 from .serializers import GradeProportionSerializer, GradeSerializer
+from course.models import Teach
 
 
 # Create your views here.
