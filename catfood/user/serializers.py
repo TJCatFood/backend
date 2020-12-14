@@ -21,6 +21,7 @@ class SchoolSerializer(serializers.ModelSerializer):
             'university_id',
         ]
 
+
 class TakeCourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = TakeCourse

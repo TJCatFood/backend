@@ -45,9 +45,10 @@ class UserTests(TestCase):
         self.assertEqual(responseGetAccount.data["data"]["school_name"], "SSE")
         self.assertEqual(responseGetAccount.data["data"]["avatar"], "www.baidu.com")
         responseLogout = client.post(testApiPrefix + 'logout/')
-        self.assertEqual(responseLogout.status_code, 201)
+        self.assertEqual(responseLogout.status_code, 200)
 
     def testTeacher(self):
+        # FIXME: This DOES NOT guarantee the normal running of user module.
         client = APIClient()
         testApiPrefix = '/api/v1/user/'
         testUserPassword = '123456'
@@ -67,4 +68,13 @@ class UserTests(TestCase):
         ]
         responseCourses = client.post(
             testApiPrefix + 'courses/', data=json.dumps(CoursesData), content_type='application/json')
+        self.assertEqual(responseCourses.status_code, 201)
+        usersData = [
+            {"password": "123456", "realname": "rika", "personal_id": "1852036", "university_id": 1,
+                "email": "WHY@WHY.COM", "school_id": 1, "avatar": "www.baidu.com", "character": 4},
+            {"password": "123456", "realname": "rika", "personal_id": "1852037", "university_id": 1,
+                "email": "WHY@WHY.COM", "school_id": 1, "avatar": "www.baidu.com", "character": 4},
+        ]
+        responseCourses = client.post(
+            testApiPrefix + 'accounts/', data=json.dumps(usersData), content_type='application/json')
         self.assertEqual(responseCourses.status_code, 201)

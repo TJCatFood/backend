@@ -104,11 +104,11 @@ class LogoutView(APIView):
         request.session.flush()
         content = {
             'isSuccess': True,
-            'date': {
+            'data': {
                 'message': "登出成功"
             }
         }
-        return Response(content, status=201)
+        return Response(content)
 
 
 class RegisterView(APIView):
@@ -126,7 +126,7 @@ class RegisterView(APIView):
         except(MultiValueDictKeyError):
             content = {
                 'isSuccess': False,
-                'data': {
+                'error': {
                     'message': "缺少必填信息"
                 }
             }
@@ -263,11 +263,56 @@ class AccountsView(APIView):
     permission_classes = [IsChargingTeacher]
 
     def post(self, request, format=None):
+        for student in request.data:
+            try:
+                password = student['password']
+                realname = student['realname']
+                university_id = student['university_id']
+                school_id = student['school_id']
+                character = student['character']
+                personal_id = student['personal_id']
+            except(KeyError):
+                content = {
+                    'isSuccess': False,
+                    'error': {
+                        'message': "待导入学生缺少必需信息"
+                    }
+                }
+                return Response(content, status=400)
+            try:
+                avatar = student["avatar"]
+            except(KeyError):
+                avatar = None
+            try:
+                email = student["email"]
+            except(KeyError):
+                email = None
+
+            try:
+                University.objects.get(university_id=university_id)
+                School.objects.get(school_id=school_id)
+            except(ObjectDoesNotExist):
+                content = {
+                    'isSuccess': False,
+                    'error': {
+                        'message': "大学或学院编号不符合外码约束"
+                    }
+                }
+                return Response(content, status=400)
+
+        responseData = []
+        for student in request.data:
+            user = User.objects.create(password=password, realname=realname,
+                                       email=email, university_id=university_id, school_id=school_id, character=character,
+                                       personal_id=personal_id, avatar=avatar)
+            responseData.append({"user_id": user.user_id, 'realname': user.realname, 'email': user.email,
+                                 'university_name': user.university_id.university_name,
+                                 'school_name': user.school_id.school_name, 'character': user.character,
+                                 'personal_id': user.personal_id, 'avatar': user.avatar})
+
         content = {
             'isSuccess': True,
-            'data': {
-                'message': '账户导入成功'
-            }
+            'data': responseData,
         }
         return Response(content, status=status.HTTP_201_CREATED)
 
