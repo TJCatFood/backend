@@ -128,13 +128,11 @@ REST_FRAMEWORK = {
         'user.permissions.IsTeachingAssistant',
         'user.permissions.IsStudent'
     ],
-
-     'DEFAULT_RENDERER_CLASSES': (
+    'DEFAULT_RENDERER_CLASSES': (
         'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
         'djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer',
         # Any other renders
     ),
-
     'DEFAULT_PARSER_CLASSES': (
         # If you use MultiPartFormParser or FormParser, we also have a camel case version
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
@@ -142,7 +140,6 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseJSONParser',
         # Any other parsers
     ),
-
     'JSON_UNDERSCOREIZE': {
         'no_underscore_before_number': True,
     }
