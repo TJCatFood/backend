@@ -1,10 +1,9 @@
 from django.urls import path
-from . import templates, contest_question_database_views, course_database_views, experiment_file_database_views
+from . import contest_question_database_views, course_database_views, experiment_file_database_views
 from rest_framework import routers
 
 router = routers.DefaultRouter()
 urlpatterns = [
-    path('', templates.AliveView.as_view()),
     # course file database starts
     path('course-file-database/course/<int:course_id>', course_database_views.CourseView.as_view()),
     path('course-file-database/course/<int:course_id>/count', course_database_views.CourseFileCountView.as_view()),
