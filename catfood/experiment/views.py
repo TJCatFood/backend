@@ -146,7 +146,7 @@ def assignment_student_list(request):
         # TODO: 获取学生信息，用于过滤
         # assignments = assignments.filter()
         serializer = ExperimentAssignmentSerializer(assignments, many=True)
-        return Response(utils.generate_response(utils.student_assignments_filter(serializer.data)), True)
+        return Response(utils.generate_response(utils.student_assignments_filter(serializer.data), True))
 
     elif request.method == 'POST':
         # TODO: 鉴权
@@ -173,7 +173,7 @@ def assignment_student_detail(request, pk):
 
     if request.method == 'GET':
         serializer = ExperimentAssignmentSerializer(assignment)
-        return Response(utils.generate_response(utils.student_assignments_filter([serializer.data])[0]), True)
+        return Response(utils.generate_response(utils.student_assignments_filter([serializer.data])[0], True))
 
     elif request.method == 'PUT':
         old_assignment = ExperimentAssignmentSerializer(assignment).data
@@ -183,7 +183,7 @@ def assignment_student_detail(request, pk):
             assignment, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(utils.generate_response(serializer.data), True)
+            return Response(utils.generate_response(serializer.data, True))
         return Response(utils.generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
@@ -207,7 +207,7 @@ def assignment_teacher_list(request, course_case_id):
         # TODO: 鉴权
         assignments = assignments.filter(course_case_id=course_case_id)
         serializer = ExperimentAssignmentSerializer(assignments, many=True)
-        return Response(utils.generate_response(serializer.data), True)
+        return Response(utils.generate_response(serializer.data, True))
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -223,14 +223,14 @@ def assignment_teacher_detail(request, pk):
 
     if request.method == 'GET':
         serializer = ExperimentAssignmentSerializer(assignment)
-        return Response(utils.generate_response(serializer.data), True)
+        return Response(utils.generate_response(serializer.data, True))
 
     elif request.method == 'PUT':
         serializer = ExperimentAssignmentSerializer(
             assignment, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(utils.generate_response(serializer.data), True)
+            return Response(utils.generate_response(serializer.data, True))
         return Response(utils.generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':

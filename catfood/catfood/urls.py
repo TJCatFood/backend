@@ -10,5 +10,6 @@ urlpatterns = [
     path('api/v1/experiment/', include('experiment.urls')),
     path('api/v1/course/', include('course.urls')),
     path('api/v1/user/', include('user.urls')),
+    path('api/v1/match/', include('match.urls')),
     path('api/v1/grade/', include('grade.urls')),
 ]
