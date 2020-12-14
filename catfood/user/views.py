@@ -27,14 +27,14 @@ class LoginView(APIView):
                 content = {
                     'isSuccess': True,
                     'data': {
-                        'user_id': f"{user.user_id}",
-                        'realname': f"{user.realname}",
-                        'email': f"{user.email}",
-                        'university_name': f"{user.university_id.university_name}",
-                        'school_name': f"{user.school_id.school_name}",
-                        'character': f"{user.character}",
-                        'personal_id': f"{user.personal_id}",
-                        'avatar': f"{user.avatar}",
+                        'user_id': user.user_id,
+                        'realname': user.realname,
+                        'email': user.email,
+                        'university_name': user.university_id.university_name,
+                        'school_name': user.school_id.school_name,
+                        'character': user.character,
+                        'personal_id': user.personal_id,
+                        'avatar': user.avatar,
                     }
                 }
                 return Response(content)
@@ -73,14 +73,14 @@ class LoginView(APIView):
         content = {
             'isSuccess': True,
             'data': {
-                'user_id': f"{user.user_id}",
-                'realname': f"{user.realname}",
-                'email': f"{user.email}",
-                'university_name': f"{user.university_id.university_name}",
-                'school_name': f"{user.school_id.school_name}",
-                'character': f"{user.character}",
-                'personal_id': f"{user.personal_id}",
-                'avatar': f"{user.avatar}",
+                'user_id': user.user_id,
+                'realname': user.realname,
+                'email': user.email,
+                'university_name': user.university_id.university_name,
+                'school_name': user.school_id.school_name,
+                'character': user.character,
+                'personal_id': user.personal_id,
+                'avatar': user.avatar,
             }
         }
         request.session['user_id'] = user.user_id
@@ -156,14 +156,14 @@ class RegisterView(APIView):
         content = {
             'isSuccess': True,
             'data': {
-                'user_id': f"{user.user_id}",
-                'realname': f"{user.realname}",
-                'email': f"{user.email}",
-                'university_name': f"{user.university_id.university_name}",
-                'school_name': f"{user.school_id.school_name}",
-                'character': f"{user.character}",
-                'personal_id': f"{user.personal_id}",
-                'avatar': f"{user.avatar}",
+                'user_id': user.user_id,
+                'realname': user.realname,
+                'email': user.email,
+                'university_name': user.university_id.university_name,
+                'school_name': user.school_id.school_name,
+                'character': user.character,
+                'personal_id': user.personal_id,
+                'avatar': user.avatar,
             }
         }
         return Response(content, status=201)
@@ -179,14 +179,14 @@ class AccountView(APIView):
         content = {
             'isSuccess': True,
             'data': {
-                'user_id': f"{user.user_id}",
-                'realname': f"{user.realname}",
-                'email': f"{user.email}",
-                'university_name': f"{user.university_id.university_name}",
-                'school_name': f"{user.school_id.school_name}",
-                'character': f"{user.character}",
-                'personal_id': f"{user.personal_id}",
-                'avatar': f"{user.avatar}",
+                'user_id': user.user_id,
+                'realname': user.realname,
+                'email': user.email,
+                'university_name': user.university_id.university_name,
+                'school_name': user.school_id.school_name,
+                'character': user.character,
+                'personal_id': user.personal_id,
+                'avatar': user.avatar,
             }
         }
         return Response(content)
@@ -206,18 +206,17 @@ class AccountView(APIView):
         if avatar:
             user.avatar = avatar
         user.save()
-        isSuccess = 'true'
         content = {
-            'isSuccess': f"{isSuccess}",
+            'isSuccess': True,
             'data': {
-                'user_id': f"{user.user_id}",
-                'realname': f"{user.realname}",
-                'email': f"{user.email}",
-                'university_name': f"{user.university_id.university_name}",
-                'school_name': f"{user.school_id.school_name}",
-                'character': f"{user.character}",
-                'personal_id': f"{user.personal_id}",
-                'avatar': f"{user.avatar}",
+                'user_id': user.user_id,
+                'realname': user.realname,
+                'email': user.email,
+                'university_name': user.university_id.university_name,
+                'school_name': user.school_id.school_name,
+                'character': user.character,
+                'personal_id': user.personal_id,
+                'avatar': user.avatar,
             }
         }
         return Response(content, status=200)
@@ -250,7 +249,7 @@ class PasswordView(APIView):
         user.save()
         request.session.flush()
         content = {
-            'isSuccess': 'true',
+            'isSuccess': True,
             'data': {
                 'message': '密码更改成功'
             }
@@ -264,13 +263,25 @@ class AccountsView(APIView):
 
     def post(self, request, format=None):
         content = {
-            'isSuccess': 'true',
+            'isSuccess': True,
             'data': {
                 'message': '账户导入成功'
             }
         }
         return Response(content, status=status.HTTP_201_CREATED)
 
+class CoursesView(APIView):
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsChargingTeacher]
+
+    def post(self, request, format=None):
+        content = {
+            'isSuccess': True,
+            'data': {
+                'message': '账户导入成功'
+            }
+        }
+        return Response(content, status=status.HTTP_201_CREATED)
 
 class UniversityView(APIView):
     permission_classes = (AllowAny,)
