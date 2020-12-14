@@ -50,3 +50,7 @@ class CourseChapterDescrption(models.Model):
     # FIXME: change back when course module completed
     # course_id = models.ForeignKey('class.Course', on_delete=models.CASCADE)
     course_id = models.IntegerField()
+    course_chapter_id = models.IntegerField()
+    course_chapter_title = models.CharField(max_length=64)
+    course_chapter_mooc_link = models.CharField(max_length=200)
+    
