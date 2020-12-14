@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class ExperimentCase(models.Model):
+class ExperimentCaseDatabase(models.Model):
     experiment_case_id = models.AutoField(primary_key=True)
     experiment_name = models.CharField(max_length=50)
     experiment_case_name = models.CharField(max_length=50)
