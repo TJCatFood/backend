@@ -110,7 +110,7 @@ class AnnouncementCountView(APIView):
     def get(self, request, course_id, format=None):
         response = {
             "courseId": course_id,
-            "announcementCount": Announcement.objects.count()
+            "announcementCount": Announcement.objects.filter(course_id=course_id).count()
         }
         return Response(response)
 
