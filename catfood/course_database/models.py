@@ -6,9 +6,9 @@ class ExperimentCase(models.Model):
     experiment_name = models.CharField(max_length=50)
     experiment_case_name = models.CharField(max_length=50)
     experiment_case_description = models.CharField(max_length=1024, null=True)
-    experiment_case_file_link = models.CharField(max_length=256)
-    answer_file_link = models.CharField(max_length=256)
-    component_id = models.IntegerField()
+    experiment_case_file_token = models.CharField(max_length=256)
+    answer_file_token = models.CharField(max_length=256)
+    case_created_timestamp = models.DateTimeField(auto_now_add=True)
 
 
 class CourseDocument(models.Model):

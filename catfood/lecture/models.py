@@ -9,7 +9,7 @@ class FileUsage(models.TextChoices):
 class Homework(models.Model):
     homework_id = models.AutoField(primary_key=True)
     # FIXME: change back when course module completed
-    # course_id = models.ForeignKey('class.Course', on_delete=models.CASCADE)
+    # course_id = models.ForeignKey('course.Course', on_delete=models.CASCADE)
     course_id = models.IntegerField()
     # FIXME: change back when user module completed
     # homework_creator = models.ForeignKey('user.User', on_delete=models.CASCADE)

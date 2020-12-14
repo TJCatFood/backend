@@ -36,6 +36,16 @@ services:
       retries: 3
     command: server /data
 
+  nchan:
+    build:
+      context: .
+      dockerfile: Dockerfile.nchan.dev
+    volumes: 
+      - "./nchan/nchan.conf:/etc/nginx/sites-enabled/default"
+    ports:
+      - 8080:8080
+      - 8081:8081
+
   web:
     build:
       context: .
@@ -62,15 +72,4 @@ services:
       - db
       - redis 
       - minio
-
-  nchan:
-    build:
-      context: .
-      dockerfile: Dockerfile.nchan.dev
-    volumes: 
-      - "./nchan/nchan.conf:/etc/nginx/sites-enabled/default"
-    ports:
-      - 8080:8080
-      - 8081:8081
-    depends_on: 
-      - web
+      - nchan

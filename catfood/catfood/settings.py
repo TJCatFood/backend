@@ -42,12 +42,13 @@ INSTALLED_APPS = [
     'bulletin',
     'user',
     'contest',
-    'class',
+    'course',
     'grade',
     'course_database',
     'lecture',
     'experiment',
     'quiz',
+    'match',
 ]
 
 MIDDLEWARE = [
@@ -125,7 +126,7 @@ REST_FRAMEWORK = {
         'user.permissions.IsChargingTeacher',
         'user.permissions.IsTeacher',
         'user.permissions.IsTeachingAssistant',
-        'user.permissions.IsStudent',
+        'user.permissions.IsStudent'
     ]
 }
 

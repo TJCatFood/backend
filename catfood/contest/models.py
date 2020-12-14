@@ -10,7 +10,7 @@ class QuestionType(models.TextChoices):
 
 class Contest(models.Model):
     contest_id = models.AutoField(primary_key=True)
-    course_id = models.ForeignKey('class.Course', on_delete=models.CASCADE)
+    course_id = models.ForeignKey('course.Course', on_delete=models.CASCADE)
     publisher_id = models.ForeignKey('user.User', on_delete=models.CASCADE)
     title = models.CharField(max_length=100, null=True)
     participant_number = models.IntegerField()
