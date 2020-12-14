@@ -7,11 +7,18 @@ WORKDIR /code/catfood
 RUN mkdir -p /home/code
 RUN mkdir -p /code/catfood
 
-# Install packages
+# Install pypi packages
 COPY ./requirements/dev.txt /code
 RUN pip install pip -U
 RUN pip config set global.index-url https://mirrors.cloud.tencent.com/pypi/simple
 RUN pip install -r /code/dev.txt
+
+# Install Prerequisite for port fowarding
+COPY ./assets/sources.list.tencent /etc/apt/sources.list
+RUN apt update && \
+    apt install -y socat && \
+    apt autoremove -y && \
+    apt autoclean
 
 # Prepare to use non-root
 ## root:mypasswd
