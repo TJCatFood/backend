@@ -181,7 +181,7 @@ class CourseFileMetaView(APIView):
                 "courseId": course_id,
                 "fileId": file_id
             }), status=404)
-        file_queried.announcement_title = request_body["fileComments"]
+        file_queried.file_comment = request_body["fileComment"]
         file_queried.save()
         return Response(CourseDocumentSerializer(file_queried).data)
 
@@ -196,7 +196,7 @@ class CourseFileMetaView(APIView):
             file_to_delete.delete()
         except CourseDocument.DoesNotExist:
             return Response(dict({
-                "msg": "Requested announcement does not exist.",
+                "msg": "Requested course document does not exist.",
                 "courseId": course_id,
                 "fileId": file_id
             }), status=404)

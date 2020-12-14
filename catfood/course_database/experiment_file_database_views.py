@@ -181,7 +181,7 @@ class ExperimentFileMetaView(APIView):
                 "experimentId": experiment_id,
                 "fileId": file_id
             }), status=404)
-        file_queried.announcement_title = request_body["fileComments"]
+        file_queried.file_comment = request_body["fileComment"]
         file_queried.save()
         return Response(ExperimentDocumentSerializer(file_queried).data)
 
@@ -196,7 +196,7 @@ class ExperimentFileMetaView(APIView):
             file_to_delete.delete()
         except ExperimentDocument.DoesNotExist:
             return Response(dict({
-                "msg": "Requested announcement does not exist.",
+                "msg": "Requested experiment document does not exist.",
                 "experimentId": experiment_id,
                 "fileId": file_id
             }), status=404)
