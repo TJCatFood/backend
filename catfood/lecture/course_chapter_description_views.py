@@ -23,7 +23,7 @@ class ChapterDescriptionView(APIView):
         need_pagination = False
         pagination_page_size = -1
         pagination_page_num = -1
-        
+
         request_body_unicode = request.body.decode('utf-8')
         if len(request_body_unicode) != 0:
             try:
@@ -61,25 +61,25 @@ class ChapterDescriptionView(APIView):
         request_body_unicode = request.body.decode('utf-8')
         request_body = json.loads(request_body_unicode)
         new_courseChapterDescrption = CourseChapterDescrption(
-            course_id = course_id,
-            course_chapter_id = request_body["courseChapterId"],
-            course_chapter_title = request_body["courseChapterTitle"],
-            course_chapter_mooc_link = request_body["courseChapterMoocLink"],
+            course_id=course_id,
+            course_chapter_id=request_body["courseChapterId"],
+            course_chapter_title=request_body["courseChapterTitle"],
+            course_chapter_mooc_link=request_body["courseChapterMoocLink"],
         )
 
         if CourseChapterDescrption.objects\
-            .filter(course_id=new_courseChapterDescrption.course_id, course_chapter_id=new_courseChapterDescrption.course_chapter_id).exists():
+                .filter(course_id=new_courseChapterDescrption.course_id, course_chapter_id=new_courseChapterDescrption.course_chapter_id).exists():
             return Response(dict({
-                    "error": "Course chapter already existed, use another API if you want to modify it."
-                }), status=400)
+                "error": "Course chapter already existed, use another API if you want to modify it."
+            }), status=400)
         else:
             new_courseChapterDescrption.save()
 
         return Response(CourseChapterDescrptionSerializer(new_courseChapterDescrption).data, status=status.HTTP_201_CREATED)
 
-    
+
 class ChapterDescriptionIdView(APIView):
-    
+
     # FIXME: this permission is for testing purpose only
     permission_classes = (AllowAny,)
 
@@ -93,7 +93,6 @@ class ChapterDescriptionIdView(APIView):
                 "course_chapter_id": course_chapter_id
             }), status=status.HTTP_404_NOT_FOUND)
         return Response(CourseChapterDescrptionSerializer(selected_courseChapterDescrption).data, status=status.HTTP_200_OK)
-
 
     def put(self, request, course_id, course_chapter_id, format=None):
 

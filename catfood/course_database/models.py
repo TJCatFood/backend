@@ -25,6 +25,7 @@ class CourseDocument(models.Model):
     file_uploader = models.IntegerField()
     file_token = models.CharField(max_length=200)
 
+
 class ExperimentDocument(models.Model):
     file_course_document_id = models.AutoField(primary_key=True)
     # FIXME: change back when experiment module completed

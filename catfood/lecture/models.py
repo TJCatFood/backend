@@ -53,4 +53,3 @@ class CourseChapterDescrption(models.Model):
     course_chapter_id = models.IntegerField()
     course_chapter_title = models.CharField(max_length=64)
     course_chapter_mooc_link = models.CharField(max_length=200)
-    

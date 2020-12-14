@@ -12,4 +12,3 @@ class CourseChapterDescrptionSerializer(serializers.ModelSerializer):
             'course_chapter_title',
             'course_chapter_mooc_link',
         ]
-        
