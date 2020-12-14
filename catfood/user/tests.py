@@ -1,6 +1,9 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 from .models import University, School
+from course.models import Course
+from django.utils import timezone as datetime
+import json
 
 
 class UserTests(TestCase):
@@ -12,6 +15,14 @@ class UserTests(TestCase):
         cls.mySchool = School.objects.create(school_name="SSE",
                                              university_id=cls.myUniversity)
         cls.school_id = cls.mySchool.school_id
+        cls.myCourseA = Course.objects.create(course_creator_school_id="魔法学院", course_name="卖弱心理学",
+                                              course_start_time=datetime.now(), course_end_time=datetime.now(),
+                                              course_description="", course_type="必修", course_avatar="")
+        cls.course_id_a = cls.myCourseA.course_id
+        cls.myCourseB = Course.objects.create(course_creator_school_id="魔法学院", course_name="恋爱心理学",
+                                              course_start_time=datetime.now(), course_end_time=datetime.now(),
+                                              course_description="", course_type="必修", course_avatar="")
+        cls.course_id_b = cls.myCourseB.course_id
 
     def testUser(self):
         # FIXME: This DOES NOT guarantee the normal running of user module.
@@ -50,3 +61,10 @@ class UserTests(TestCase):
         self.assertEqual(responseLogin.status_code, 200)
         responseGetAccount = client.get(testApiPrefix + 'account/')
         self.assertEqual(responseGetAccount.data["data"]["character"], 1)
+        CoursesData = [
+            {"student_id": testUserID, "course_id": self.course_id_a, "active": True},
+            {"student_id": testUserID, "course_id": self.course_id_b, "active": False}
+        ]
+        responseCourses = client.post(
+            testApiPrefix + 'courses/', data=json.dumps(CoursesData), content_type='application/json')
+        self.assertEqual(responseCourses.status_code, 201)

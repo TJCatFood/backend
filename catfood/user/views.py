@@ -9,10 +9,11 @@ from user.authentication import CatfoodAuthentication
 from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 from django.db.models.query import EmptyQuerySet
 from rest_framework import status
-from .models import User, University, School
-from .serializers import UniversitySerializer, SchoolSerializer
+from .models import User, University, School, TakeCourse
+from .serializers import UniversitySerializer, SchoolSerializer, TakeCourseSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.datastructures import MultiValueDictKeyError
+from course.models import Course
 
 
 class LoginView(APIView):
@@ -270,18 +271,60 @@ class AccountsView(APIView):
         }
         return Response(content, status=status.HTTP_201_CREATED)
 
+
 class CoursesView(APIView):
     authentication_classes = [CatfoodAuthentication]
     permission_classes = [IsChargingTeacher]
 
     def post(self, request, format=None):
+        for takeCourse in request.data:
+            try:
+                student_id = takeCourse["student_id"]
+                course_id = takeCourse["course_id"]
+            except(KeyError, TypeError):
+                content = {
+                    'isSuccess': False,
+                    'error': {
+                        'message': "缺少用户号或课号"
+                    }
+                }
+                return Response(content, status=400)
+            try:
+                student = User.objects.get(user_id=student_id)
+                course = Course.objects.get(course_id=course_id)
+            except(ObjectDoesNotExist):
+                content = {
+                    'isSuccess': False,
+                    'error': {
+                        'message': "用户号或课号不满足外码约束"
+                    }
+                }
+                return Response(content, status=400)
+            try:
+                takeCourseItem = TakeCourse.objects.get(student_id=student, course_id=course)
+            except(ObjectDoesNotExist):
+                serializer = TakeCourseSerializer(data=takeCourse)
+            else:
+                serializer = TakeCourseSerializer(takeCourseItem, data=takeCourse)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                content = {
+                    'isSuccess': False,
+                    'error': {
+                        'message': "选课情况解析失败"
+                    }
+                }
+                return Response(content, status=400)
+
         content = {
             'isSuccess': True,
             'data': {
-                'message': '账户导入成功'
+                'message': '选课情况导入成功'
             }
         }
         return Response(content, status=status.HTTP_201_CREATED)
+
 
 class UniversityView(APIView):
     permission_classes = (AllowAny,)
@@ -312,6 +355,7 @@ class SchoolView(APIView):
     def post(self, request, format=None):
         serializer = SchoolSerializer(data=request.data)
         if serializer.is_valid():
+            print(serializer)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
