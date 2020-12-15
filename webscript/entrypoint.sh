@@ -15,8 +15,4 @@ if [ $? -ne 0 ]; then
   echo "failed to useradd code"
 fi
 
-# port forwarding to MinIO at 9000
-
-socat TCP-LISTEN:9000,fork TCP:minio:9000 &
-
 $@
