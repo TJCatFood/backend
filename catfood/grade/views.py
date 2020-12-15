@@ -9,7 +9,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 from .models import Grade, GradeProportion
 from user.models import TakeCourse
 from .serializers import GradeProportionSerializer, GradeSerializer
-from course.models import Teach
+from course.models import Teach, Role
 
 
 # Create your views here.
@@ -38,19 +38,19 @@ class GradeWeightView(APIView):
                     'attendance': f"{attendance}",
                 }
             }
-            return Response(content)
-        except:
+            return Response(content, status=status.HTTP_200_OK)
+        except Exception:
             content = {
                 'isSuccess': False,
                 'data': {
                     'message': "no such course"
                 }
             }
-            return Response(content)
+            return Response(content, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, course_id):
-        if request.user.character == 4:
-            # FIXME: 4->1
+        # should be done when the course is created
+        if request.user.character == 1:
             weight = GradeProportion(course_id=course_id, assignment=1, exam1=1, exam2=1, experiment=1, contest=1,
                                      attendance=1)
             weight.save()
@@ -60,7 +60,7 @@ class GradeWeightView(APIView):
                     'message': f"grade weight of {course_id} created successfully"
                 }
             }
-            return Response(content)
+            return Response(content, status=status.HTTP_201_CREATED)
         else:
             content = {
                 'isSuccess': False,
@@ -68,63 +68,69 @@ class GradeWeightView(APIView):
                     'message': "you are not the charging teacher"
                 }
             }
-            return Response(content)
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
 
     def put(self, request, course_id):
-        print(request.user.character)
-        if request.user.character == 4 or request.user.character == 2:
-            # FIXME: 4->1
-            # TODO: judge whether the teacher is teaching this course
-            if request.user.character == 4:
-                # FIXME: just for easier test, should do the judgement above
-                try:
-                    assignment = request.data['assignment']
-                    exam1 = request.data['exam1']
-                    exam2 = request.data['exam2']
-                    experiment = request.data['experiment']
-                    contest = request.data['contest']
-                    attendance = request.data['attendance']
-                except MultiValueDictKeyError:
-                    content = {
-                        'isSuccess': False,
-                        'data': {
-                            'message': "缺少必填信息"
-                        }
-                    }
-                    return Response(content, status=400)
-            try:
-                weight = GradeProportion.objects.get(course_id=course_id)
-                weight.assignment = assignment
-                weight.exam1 = exam1
-                weight.exam2 = exam2
-                weight.experiment = experiment
-                weight.contest = contest
-                weight.attendance = attendance
-                weight.save()
-                content = {
-                    'isSuccess': True,
-                    'data': {
-                        'message': "updated successfully"
-                    }
-                }
-                return Response(content)
-            except:
+        try:
+            teach = Teach.objects.get(course_id=course_id)
+            if teach.teacher_id == request.user.user_id and teach.role == Role.TEACHER:
+                pass
+            else:
                 content = {
                     'isSuccess': False,
                     'data': {
-                        'message': "no such course"
+                        'message': "you don't have the competence"
                     }
                 }
-                return Response(content)
-
-        else:
+                return Response(content, status=status.HTTP_403_FORBIDDEN)
+        except Exception:
             content = {
                 'isSuccess': False,
                 'data': {
                     'message': "you don't have the competence"
                 }
             }
-            return Response(content)
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
+        try:
+            assignment = request.data['assignment']
+            exam1 = request.data['exam1']
+            exam2 = request.data['exam2']
+            experiment = request.data['experiment']
+            contest = request.data['contest']
+            attendance = request.data['attendance']
+        except MultiValueDictKeyError:
+            content = {
+                'isSuccess': False,
+                'data': {
+                    'message': "缺少必填信息"
+                }
+            }
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            weight = GradeProportion.objects.get(course_id=course_id)
+            weight.assignment = assignment
+            weight.exam1 = exam1
+            weight.exam2 = exam2
+            weight.experiment = experiment
+            weight.contest = contest
+            weight.attendance = attendance
+            weight.save()
+            content = {
+                'isSuccess': True,
+                'data': {
+                    'message': "updated successfully"
+                }
+            }
+            return Response(content, status=status.HTTP_201_CREATED)
+        except Exception:
+            content = {
+                'isSuccess': False,
+                'data': {
+                    'message': "no such course"
+                }
+            }
+            return Response(content, status=status.HTTP_404_NOT_FOUND)
 
 
 class GradeView(APIView):
@@ -153,7 +159,7 @@ class GradeView(APIView):
                         'total_point': f"{grade[0].total_point}",
                     }
                 }
-                return Response(content)
+                return Response(content, status=status.HTTP_200_OK)
             else:
                 content = {
                     'isSuccess': False,
@@ -161,7 +167,7 @@ class GradeView(APIView):
                         'message': "no such course or student hasn't took the course or the grade hasn't been released"
                     }
                 }
-                return Response(content)
+                return Response(content, status=status.HTTP_404_NOT_FOUND)
         else:
             content = {
                 'isSuccess': False,
@@ -169,17 +175,35 @@ class GradeView(APIView):
                     'message': "you don't have the competence"
                 }
             }
-            return Response(content)
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
 
 
 class GradesView(APIView):
     authentication_classes = [CatfoodAuthentication]
-    permission_classes = [IsStudent | IsTeacher | IsChargingTeacher]
-
-    # FIXME: delete the student above
+    permission_classes = [IsTeacher | IsChargingTeacher]
 
     def get(self, request, course_id):
         # TODO: judge whether the teacher is teaching this course
+        try:
+            teach = Teach.objects.get(course_id=course_id)
+            if teach.teacher_id == request.user.user_id and teach.role == Role.TEACHER:
+                pass
+            else:
+                content = {
+                    'isSuccess': False,
+                    'data': {
+                        'message': "you don't have the competence"
+                    }
+                }
+                return Response(content, status=status.HTTP_403_FORBIDDEN)
+        except Exception:
+            content = {
+                'isSuccess': False,
+                'data': {
+                    'message': "you don't have the competence"
+                }
+            }
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
         grades = Grade.objects.filter(course_id=course_id)
         if grades:
             all_grades = []
@@ -200,7 +224,7 @@ class GradesView(APIView):
                 'isSuccess': True,
                 'data': all_grades
             }
-            return Response(content)
+            return Response(content, status=status.HTTP_200_OK)
         else:
             content = {
                 'isSuccess': False,
@@ -208,10 +232,30 @@ class GradesView(APIView):
                     'message': "no such course or the grade hasn't been released"
                 }
             }
-            return Response(content)
+            return Response(content, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, course_id):
         # TODO: judge whether the teacher is teaching this course
+        try:
+            teach = Teach.objects.get(course_id=course_id)
+            if teach.teacher_id == request.user.user_id and teach.role == Role.TEACHER:
+                pass
+            else:
+                content = {
+                    'isSuccess': False,
+                    'data': {
+                        'message': "you don't have the competence"
+                    }
+                }
+                return Response(content, status=status.HTTP_403_FORBIDDEN)
+        except Exception:
+            content = {
+                'isSuccess': False,
+                'data': {
+                    'message': "you don't have the competence"
+                }
+            }
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
         take_courses = TakeCourse.objects.filter(course_id=course_id)
         if take_courses:
             for take_course in take_courses:
@@ -225,13 +269,13 @@ class GradesView(APIView):
                     contest_point = 90
                     attendance_point = 90
                     bonus_point = 0
-                except:
+                except Exception:
                     assignment_point = 0
                     exam1_point = 0
                     exam2_point = 0
                     experiment_point = 0
                     contest_point = 0
-                    attendance_point = 0
+                    attendance_point = 100
                     bonus_point = 0
                 try:
                     weight = GradeProportion.objects.get(course_id=course_id)
@@ -241,14 +285,15 @@ class GradesView(APIView):
                     experiment = weight.experiment
                     contest = weight.contest
                     attendance = weight.attendance
-                except:
+                except Exception:
                     content = {
                         'isSuccess': False,
                         'data': {
                             'message': "no weight set"
                         }
                     }
-                total_weight = assignment + exam1 + exam2 + experiment + content + attendance
+                    return Response(content, status=status.HTTP_404_NOT_FOUND)
+                total_weight = assignment + exam1 + exam2 + experiment + contest + attendance
                 total_point = assignment_point * (assignment / total_weight) + exam1_point * (
                         exam1 / total_weight) + exam2_point * (exam2 / total_weight) + experiment_point * (
                                       experiment / total_weight) + contest_point * (
@@ -265,7 +310,7 @@ class GradesView(APIView):
                     'message': f"grades of course {course_id} have been released"
                 }
             }
-            return Response(content)
+            return Response(content, status=status.HTTP_201_CREATED)
         else:
             content = {
                 'isSuccess': False,
@@ -273,7 +318,7 @@ class GradesView(APIView):
                     'message': "no such course"
                 }
             }
-            return Response(content)
+            return Response(content, status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, course_id):
         # TODO: judge whether the teacher is teaching this course
@@ -290,13 +335,13 @@ class GradesView(APIView):
                     contest_point = 90
                     attendance_point = 90
                     bonus_point = 0
-                except:
+                except Exception:
                     assignment_point = 0
                     exam1_point = 0
                     exam2_point = 0
                     experiment_point = 0
                     contest_point = 0
-                    attendance_point = 0
+                    attendance_point = 100
                     bonus_point = 0
                 try:
                     weight = GradeProportion.objects.get(course_id=course_id)
@@ -306,14 +351,15 @@ class GradesView(APIView):
                     experiment = weight.experiment
                     contest = weight.contest
                     attendance = weight.attendance
-                except:
+                except Exception:
                     content = {
                         'isSuccess': False,
                         'data': {
                             'message': "no weight set"
                         }
                     }
-                total_weight = assignment + exam1 + exam2 + experiment + content + attendance
+                    return Response(content, status=status.HTTP_400_BAD_REQUEST)
+                total_weight = assignment + exam1 + exam2 + experiment + contest + attendance
                 total_point = assignment_point * (assignment / total_weight) + exam1_point * (
                         exam1 / total_weight) + exam2_point * (exam2 / total_weight) + experiment_point * (
                                       experiment / total_weight) + contest_point * (
@@ -334,7 +380,7 @@ class GradesView(APIView):
                     'message': f"grades of course {course_id} have been updated"
                 }
             }
-            return Response(content)
+            return Response(content, status=status.HTTP_201_CREATED)
         else:
             content = {
                 'isSuccess': False,
@@ -342,27 +388,25 @@ class GradesView(APIView):
                     'message': "no such course"
                 }
             }
-            return Response(content)
+            return Response(content, status=status.HTTP_404_NOT_FOUND)
 
 
 class BonusView(APIView):
     authentication_classes = [CatfoodAuthentication]
-    permission_classes = [IsStudent | IsTeacher | IsChargingTeacher]
-
-    # FIXME: delete the student above
+    permission_classes = [IsTeacher | IsChargingTeacher]
 
     def post(self, request, course_id, student_id):
         # TODO: judge whether the teacher is teaching this course
         try:
             bonus_point = request.data["bonus_point"]
-        except:
+        except Exception:
             content = {
                 'isSuccess': False,
                 'data': {
                     'message': "bonus point needed"
                 }
             }
-            return Response(content)
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
         search_dict = dict()
         search_dict['course_id'] = course_id
         search_dict['student_id'] = student_id
@@ -376,7 +420,7 @@ class BonusView(APIView):
                     'message': "bonus set successfully"
                 }
             }
-            return Response(content)
+            return Response(content, status=status.HTTP_201_CREATED)
         else:
             content = {
                 'isSuccess': False,
@@ -384,4 +428,4 @@ class BonusView(APIView):
                     'message': "please release the grades first"
                 }
             }
-            return Response(content)
+            return Response(content, status=status.HTTP_404_NOT_FOUND)
