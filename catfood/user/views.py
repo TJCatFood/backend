@@ -9,10 +9,11 @@ from user.authentication import CatfoodAuthentication
 from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 from django.db.models.query import EmptyQuerySet
 from rest_framework import status
-from .models import User, University, School
-from .serializers import UniversitySerializer, SchoolSerializer
+from .models import User, University, School, TakeCourse
+from .serializers import UniversitySerializer, SchoolSerializer, TakeCourseSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.datastructures import MultiValueDictKeyError
+from course.models import Course
 
 
 class LoginView(APIView):
@@ -27,14 +28,14 @@ class LoginView(APIView):
                 content = {
                     'isSuccess': True,
                     'data': {
-                        'user_id': f"{user.user_id}",
-                        'realname': f"{user.realname}",
-                        'email': f"{user.email}",
-                        'university_name': f"{user.university_id.university_name}",
-                        'school_name': f"{user.school_id.school_name}",
-                        'character': f"{user.character}",
-                        'personal_id': f"{user.personal_id}",
-                        'avatar': f"{user.avatar}",
+                        'user_id': user.user_id,
+                        'realname': user.realname,
+                        'email': user.email,
+                        'university_name': user.university_id.university_name,
+                        'school_name': user.school_id.school_name,
+                        'character': user.character,
+                        'personal_id': user.personal_id,
+                        'avatar': user.avatar,
                     }
                 }
                 return Response(content)
@@ -73,14 +74,14 @@ class LoginView(APIView):
         content = {
             'isSuccess': True,
             'data': {
-                'user_id': f"{user.user_id}",
-                'realname': f"{user.realname}",
-                'email': f"{user.email}",
-                'university_name': f"{user.university_id.university_name}",
-                'school_name': f"{user.school_id.school_name}",
-                'character': f"{user.character}",
-                'personal_id': f"{user.personal_id}",
-                'avatar': f"{user.avatar}",
+                'user_id': user.user_id,
+                'realname': user.realname,
+                'email': user.email,
+                'university_name': user.university_id.university_name,
+                'school_name': user.school_id.school_name,
+                'character': user.character,
+                'personal_id': user.personal_id,
+                'avatar': user.avatar,
             }
         }
         request.session['user_id'] = user.user_id
@@ -103,11 +104,11 @@ class LogoutView(APIView):
         request.session.flush()
         content = {
             'isSuccess': True,
-            'date': {
+            'data': {
                 'message': "登出成功"
             }
         }
-        return Response(content, status=201)
+        return Response(content)
 
 
 class RegisterView(APIView):
@@ -125,7 +126,7 @@ class RegisterView(APIView):
         except(MultiValueDictKeyError):
             content = {
                 'isSuccess': False,
-                'data': {
+                'error': {
                     'message': "缺少必填信息"
                 }
             }
@@ -156,14 +157,14 @@ class RegisterView(APIView):
         content = {
             'isSuccess': True,
             'data': {
-                'user_id': f"{user.user_id}",
-                'realname': f"{user.realname}",
-                'email': f"{user.email}",
-                'university_name': f"{user.university_id.university_name}",
-                'school_name': f"{user.school_id.school_name}",
-                'character': f"{user.character}",
-                'personal_id': f"{user.personal_id}",
-                'avatar': f"{user.avatar}",
+                'user_id': user.user_id,
+                'realname': user.realname,
+                'email': user.email,
+                'university_name': user.university_id.university_name,
+                'school_name': user.school_id.school_name,
+                'character': user.character,
+                'personal_id': user.personal_id,
+                'avatar': user.avatar,
             }
         }
         return Response(content, status=201)
@@ -179,14 +180,14 @@ class AccountView(APIView):
         content = {
             'isSuccess': True,
             'data': {
-                'user_id': f"{user.user_id}",
-                'realname': f"{user.realname}",
-                'email': f"{user.email}",
-                'university_name': f"{user.university_id.university_name}",
-                'school_name': f"{user.school_id.school_name}",
-                'character': f"{user.character}",
-                'personal_id': f"{user.personal_id}",
-                'avatar': f"{user.avatar}",
+                'user_id': user.user_id,
+                'realname': user.realname,
+                'email': user.email,
+                'university_name': user.university_id.university_name,
+                'school_name': user.school_id.school_name,
+                'character': user.character,
+                'personal_id': user.personal_id,
+                'avatar': user.avatar,
             }
         }
         return Response(content)
@@ -206,18 +207,17 @@ class AccountView(APIView):
         if avatar:
             user.avatar = avatar
         user.save()
-        isSuccess = 'true'
         content = {
-            'isSuccess': f"{isSuccess}",
+            'isSuccess': True,
             'data': {
-                'user_id': f"{user.user_id}",
-                'realname': f"{user.realname}",
-                'email': f"{user.email}",
-                'university_name': f"{user.university_id.university_name}",
-                'school_name': f"{user.school_id.school_name}",
-                'character': f"{user.character}",
-                'personal_id': f"{user.personal_id}",
-                'avatar': f"{user.avatar}",
+                'user_id': user.user_id,
+                'realname': user.realname,
+                'email': user.email,
+                'university_name': user.university_id.university_name,
+                'school_name': user.school_id.school_name,
+                'character': user.character,
+                'personal_id': user.personal_id,
+                'avatar': user.avatar,
             }
         }
         return Response(content, status=200)
@@ -250,7 +250,7 @@ class PasswordView(APIView):
         user.save()
         request.session.flush()
         content = {
-            'isSuccess': 'true',
+            'isSuccess': True,
             'data': {
                 'message': '密码更改成功'
             }
@@ -263,10 +263,109 @@ class AccountsView(APIView):
     permission_classes = [IsChargingTeacher]
 
     def post(self, request, format=None):
+        for student in request.data:
+            try:
+                password = student['password']
+                realname = student['realname']
+                university_id = student['university_id']
+                school_id = student['school_id']
+                character = student['character']
+                personal_id = student['personal_id']
+            except(KeyError):
+                content = {
+                    'isSuccess': False,
+                    'error': {
+                        'message': "待导入学生缺少必需信息"
+                    }
+                }
+                return Response(content, status=400)
+            try:
+                avatar = student["avatar"]
+            except(KeyError):
+                avatar = None
+            try:
+                email = student["email"]
+            except(KeyError):
+                email = None
+
+            try:
+                University.objects.get(university_id=university_id)
+                School.objects.get(school_id=school_id)
+            except(ObjectDoesNotExist):
+                content = {
+                    'isSuccess': False,
+                    'error': {
+                        'message': "大学或学院编号不符合外码约束"
+                    }
+                }
+                return Response(content, status=400)
+
+        responseData = []
+        for student in request.data:
+            user = User.objects.create(password=password, realname=realname,
+                                       email=email, university_id=university_id, school_id=school_id, character=character,
+                                       personal_id=personal_id, avatar=avatar)
+            responseData.append({"user_id": user.user_id, 'realname': user.realname, 'email': user.email,
+                                 'university_name': user.university_id.university_name,
+                                 'school_name': user.school_id.school_name, 'character': user.character,
+                                 'personal_id': user.personal_id, 'avatar': user.avatar})
+
         content = {
-            'isSuccess': 'true',
+            'isSuccess': True,
+            'data': responseData,
+        }
+        return Response(content, status=status.HTTP_201_CREATED)
+
+
+class CoursesView(APIView):
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsChargingTeacher]
+
+    def post(self, request, format=None):
+        for takeCourse in request.data:
+            try:
+                student_id = takeCourse["student_id"]
+                course_id = takeCourse["course_id"]
+            except(KeyError, TypeError):
+                content = {
+                    'isSuccess': False,
+                    'error': {
+                        'message': "缺少用户号或课号"
+                    }
+                }
+                return Response(content, status=400)
+            try:
+                student = User.objects.get(user_id=student_id)
+                course = Course.objects.get(course_id=course_id)
+            except(ObjectDoesNotExist):
+                content = {
+                    'isSuccess': False,
+                    'error': {
+                        'message': "用户号或课号不满足外码约束"
+                    }
+                }
+                return Response(content, status=400)
+            try:
+                takeCourseItem = TakeCourse.objects.get(student_id=student, course_id=course)
+            except(ObjectDoesNotExist):
+                serializer = TakeCourseSerializer(data=takeCourse)
+            else:
+                serializer = TakeCourseSerializer(takeCourseItem, data=takeCourse)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                content = {
+                    'isSuccess': False,
+                    'error': {
+                        'message': "选课情况解析失败"
+                    }
+                }
+                return Response(content, status=400)
+
+        content = {
+            'isSuccess': True,
             'data': {
-                'message': '账户导入成功'
+                'message': '选课情况导入成功'
             }
         }
         return Response(content, status=status.HTTP_201_CREATED)
@@ -301,6 +400,7 @@ class SchoolView(APIView):
     def post(self, request, format=None):
         serializer = SchoolSerializer(data=request.data)
         if serializer.is_valid():
+            print(serializer)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
