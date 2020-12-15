@@ -61,7 +61,7 @@ services:
       - REDIS=redis://redis:6379
       - MINIO_ACCESS_KEY=minio
       - MINIO_SECRET_KEY=minio123
-      - MINIO_ADDRESS=minio:9000
+      - MINIO_ADDRESS=$MINIO_ADDRESS
     command: "python manage.py runserver 0.0.0.0:8000"
     user: "${USER_ID}:${GROUP_ID}"
     volumes: 
