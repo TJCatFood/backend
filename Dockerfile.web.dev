@@ -7,7 +7,7 @@ WORKDIR /code/catfood
 RUN mkdir -p /home/code
 RUN mkdir -p /code/catfood
 
-# Install pypi packages
+# Install packages
 COPY ./requirements/dev.txt /code
 RUN pip install pip -U
 RUN pip config set global.index-url https://mirrors.cloud.tencent.com/pypi/simple
