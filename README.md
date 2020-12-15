@@ -64,7 +64,23 @@
 进入代码根目录，运行
 
 ```
-USER_ID=`id -u` GROUP_ID=`id -g` docker-compose up
+USER_ID=`id -u` GROUP_ID=`id -g` MINIO_ADDRESS=<ip of a specific NIC on your host> docker-compose up
+```
+
+你可以手动查看自己网卡的 IP
+
+```
+ip addr
+```
+
+或者使用以下脚本匹配第一个可用网卡的 IP
+
+```
+alias myip="ip -4 addr | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v 127.0.0.1 | head -n 1"
+```
+
+```
+USER_ID=`id -u` GROUP_ID=`id -g` MINIO_ADDRESS=`myip` docker-compose up
 ```
 
 不要关闭终端，使用代码编辑器修改代码
