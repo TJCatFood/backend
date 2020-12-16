@@ -9,9 +9,31 @@ from django.utils.datastructures import MultiValueDictKeyError
 from .models import Grade, GradeProportion
 from user.models import TakeCourse
 from .serializers import GradeProportionSerializer, GradeSerializer
-from course.models import Teach, Role
+from course.models import Teach
+from experiment.models import ExperimentAssignment
+from lecture.models import HomeworkScoreList
+from quiz.models import AttendQuiz
+from contest.models import AttendContest
 
 
+def get_experiment(course_Id, student_id):
+    pass
+
+
+def get_contest(course_Id, student_id):
+    pass
+
+
+def get_assignment(course_Id, student_id):
+    pass
+
+
+def get_exam1(course_Id, student_id):
+    pass
+
+
+def get_exam2(course_Id, student_id):
+    pass
 # Create your views here.
 
 class GradeWeightView(APIView):
@@ -68,12 +90,12 @@ class GradeWeightView(APIView):
                     'message': "you are not the charging teacher"
                 }
             }
-            return Response(content, status=status.HTTP_403_FORBIDDEN)
+            return Response(content, status=status.HTTP_200_OK)
 
     def put(self, request, course_id):
         try:
             teach = Teach.objects.get(course_id=course_id)
-            if teach.teacher_id == request.user.user_id and teach.role == Role.TEACHER:
+            if teach.teacher_id == request.user.user_id and request.user.character != 3:
                 pass
             else:
                 content = {
@@ -82,7 +104,7 @@ class GradeWeightView(APIView):
                         'message': "you don't have the competence"
                     }
                 }
-                return Response(content, status=status.HTTP_403_FORBIDDEN)
+                return Response(content, status=status.HTTP_200_OK)
         except Exception:
             content = {
                 'isSuccess': False,
@@ -90,7 +112,7 @@ class GradeWeightView(APIView):
                     'message': "you don't have the competence"
                 }
             }
-            return Response(content, status=status.HTTP_403_FORBIDDEN)
+            return Response(content, status=status.HTTP_200_OK)
         try:
             assignment = request.data['assignment']
             exam1 = request.data['exam1']
@@ -175,7 +197,7 @@ class GradeView(APIView):
                     'message': "you don't have the competence"
                 }
             }
-            return Response(content, status=status.HTTP_403_FORBIDDEN)
+            return Response(content, status=status.HTTP_200_OK)
 
 
 class GradesView(APIView):
@@ -186,7 +208,7 @@ class GradesView(APIView):
         # TODO: judge whether the teacher is teaching this course
         try:
             teach = Teach.objects.get(course_id=course_id)
-            if teach.teacher_id == request.user.user_id and teach.role == Role.TEACHER:
+            if teach.teacher_id == request.user.user_id and request.user.character != 3:
                 pass
             else:
                 content = {
@@ -195,7 +217,7 @@ class GradesView(APIView):
                         'message': "you don't have the competence"
                     }
                 }
-                return Response(content, status=status.HTTP_403_FORBIDDEN)
+                return Response(content, status=status.HTTP_200_OK)
         except Exception:
             content = {
                 'isSuccess': False,
@@ -203,7 +225,7 @@ class GradesView(APIView):
                     'message': "you don't have the competence"
                 }
             }
-            return Response(content, status=status.HTTP_403_FORBIDDEN)
+            return Response(content, status=status.HTTP_200_OK)
         grades = Grade.objects.filter(course_id=course_id)
         if grades:
             all_grades = []
@@ -238,7 +260,7 @@ class GradesView(APIView):
         # TODO: judge whether the teacher is teaching this course
         try:
             teach = Teach.objects.get(course_id=course_id)
-            if teach.teacher_id == request.user.user_id and teach.role == Role.TEACHER:
+            if teach.teacher_id == request.user.user_id and request.user.character != 3:
                 pass
             else:
                 content = {
@@ -247,7 +269,7 @@ class GradesView(APIView):
                         'message': "you don't have the competence"
                     }
                 }
-                return Response(content, status=status.HTTP_403_FORBIDDEN)
+                return Response(content, status=status.HTTP_200_OK)
         except Exception:
             content = {
                 'isSuccess': False,
@@ -255,7 +277,7 @@ class GradesView(APIView):
                     'message': "you don't have the competence"
                 }
             }
-            return Response(content, status=status.HTTP_403_FORBIDDEN)
+            return Response(content, status=status.HTTP_200_OK)
         take_courses = TakeCourse.objects.filter(course_id=course_id)
         if take_courses:
             for take_course in take_courses:
@@ -322,6 +344,26 @@ class GradesView(APIView):
 
     def put(self, request, course_id):
         # TODO: judge whether the teacher is teaching this course
+        try:
+            teach = Teach.objects.get(course_id=course_id)
+            if teach.teacher_id == request.user.user_id and request.user.character != 3:
+                pass
+            else:
+                content = {
+                    'isSuccess': False,
+                    'data': {
+                        'message': "you don't have the competence"
+                    }
+                }
+                return Response(content, status=status.HTTP_200_OK)
+        except Exception:
+            content = {
+                'isSuccess': False,
+                'data': {
+                    'message': "you don't have the competence"
+                }
+            }
+            return Response(content, status=status.HTTP_200_OK)
         grades = Grade.objects.filter(course_id=course_id)
         if grades:
             for grade in grades:
@@ -397,6 +439,26 @@ class BonusView(APIView):
 
     def post(self, request, course_id, student_id):
         # TODO: judge whether the teacher is teaching this course
+        try:
+            teach = Teach.objects.get(course_id=course_id)
+            if teach.teacher_id == request.user.user_id and request.user.character != 3:
+                pass
+            else:
+                content = {
+                    'isSuccess': False,
+                    'data': {
+                        'message': "you don't have the competence"
+                    }
+                }
+                return Response(content, status=status.HTTP_200_OK)
+        except Exception:
+            content = {
+                'isSuccess': False,
+                'data': {
+                    'message': "you don't have the competence"
+                }
+            }
+            return Response(content, status=status.HTTP_200_OK)
         try:
             bonus_point = request.data["bonus_point"]
         except Exception:
