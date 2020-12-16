@@ -5,5 +5,7 @@ from rest_framework import routers
 router = routers.DefaultRouter()
 urlpatterns = [
     path('course-info/', views.courses_list),
-    path('course-info/<int:course_id>', views.course_detail)
+    path('course-info/<int:course_id>', views.course_detail),
+    path('teach/', views.teach_list),
+    path('teach/<int:teach_id>', views.teach_detail)
 ]
