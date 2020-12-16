@@ -42,13 +42,13 @@ class StartView(APIView):
 
     def post(self, request, format=None):
         data = request.data
-        if 'studentId' in data:
-            student_id = data['studentId']
+        if 'student_id' in data:
+            student_id = data['student_id']
         else:
             return Response('bad request1')
 
-        if 'contestId' in data:
-            contest_id = data['contestId']
+        if 'contest_id' in data:
+            contest_id = data['contest_id']
         else:
             return Response('bad request2')
 
@@ -147,12 +147,12 @@ class CancelView(APIView):
 
     def post(self, request, format=None):
         data = request.data
-        if 'studentId' in data:
-            student_id = data['studentId']
+        if 'student_id' in data:
+            student_id = data['student_id']
         else:
             return Response('bad request1')
-        if 'channelId' in data:
-            channel_id = data['channelId']
+        if 'channel_id' in data:
+            channel_id = data['channel_id']
         else:
             return Response('bad request2')
 
@@ -164,7 +164,7 @@ class CancelView(APIView):
         if channel_id in rooms:
             room = rooms[channel_id]
         else:
-            return Response('bad request3')
+            return Response('bad request4')
 
         room.delete_user(student_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -192,18 +192,18 @@ class IndexView(APIView):
         try:
             user = User.objects.get(pk=student_id)
         except User.DoesNotExist:
-            return Response('bad request3')
+            return Response('bad request4')
 
         if channel_id in rooms:
             room = rooms[channel_id]
         else:
-            return Response('bad request3')
+            return Response('bad request5')
 
         index = room.get_user_index(student_id)
         if index >= 0:
             return Response({"index": f"{index}"})
         else:
-            return Response('bad request4')
+            return Response('bad request6')
 
 
 class ReadyView(APIView):
@@ -211,13 +211,13 @@ class ReadyView(APIView):
 
     def post(self, request, format=None):
         data = request.data
-        if 'studentId' in data:
-            student_id = data['studentId']
+        if 'student_id' in data:
+            student_id = data['student_id']
         else:
             return Response('bad request1')
 
-        if 'channelId' in data:
-            channel_id = data['channelId']
+        if 'channel_id' in data:
+            channel_id = data['channel_id']
         else:
             return Response('bad request1')
 

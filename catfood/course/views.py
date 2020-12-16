@@ -20,27 +20,25 @@ from course.utils import generate_response
 
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant | IsStudent])
-@authentication_classes([CatfoodAuthentication])
+@permission_classes([AllowAny])
 def courses_list(request):
     """
     List all courses, or create a new course.
     """
+    # TODO: 鉴权
     if request.method == 'GET':
+
+        # TODO: 分页
         courses = Course.objects.all()
         serializer = CourseSerializers(courses, many=True)
-        return Response(generate_response(serializer.data, True))
+        return Response(serializer.data)
 
     elif request.method == 'POST':
-        teacher = User.objects.get(user_id=request.user.user_id)
-        if teacher.character not in [1]:
-            error_msg = {"detail": "没有权限"}
-            return Response(generate_response(error_msg, False), status=status.HTTP_400_BAD_REQUEST)
         serializer = CourseSerializers(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(generate_response(serializer.data, True), status=status.HTTP_201_CREATED)
-        return Response(generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT'])
