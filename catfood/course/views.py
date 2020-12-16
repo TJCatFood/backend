@@ -18,6 +18,7 @@ from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargi
 from user.models import User
 from course.utils import generate_response
 
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant | IsStudent])
 @authentication_classes([CatfoodAuthentication])
@@ -52,7 +53,7 @@ def course_detail(request, course_id):
     try:
         course = Course.objects.get(pk=course_id)
     except Course.DoesNotExist:
-        error_msg = {"detail":"object not exists"}
+        error_msg = {"detail": "object not exists"}
         return Response(generate_response(error_msg, False), status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
@@ -108,9 +109,9 @@ def teach_detail(request, teach_id):
     try:
         teach = Teach.objects.get(pk=teach_id)
     except Teach.DoesNotExist:
-        error_msg = {"detail":"object not exists"}
+        error_msg = {"detail": "object not exists"}
         return Response(generate_response(error_msg, False), status=status.HTTP_404_NOT_FOUND)
 
     teach.delete()
-    msg = {"detail":"has been deleted successfully"}
+    msg = {"detail": "has been deleted successfully"}
     return Response(generate_response(msg, True), status=status.HTTP_204_NO_CONTENT)
