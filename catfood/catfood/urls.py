@@ -10,6 +10,12 @@ urlpatterns = [
     path('api/v1/experiment/', include('experiment.urls')),
     path('api/v1/course/', include('course.urls')),
     path('api/v1/user/', include('user.urls')),
+    # includes course file database and experiment file database
+    path('api/v1/course-database/', include('course_database.urls')),
+    # includes course homework and course description
+    path('api/v1/lecture/', include('lecture.urls')),
+    # includes course bulletin
+    path('api/v1/course-bulletin/', include('bulletin.urls')),
     path('api/v1/match/', include('match.urls')),
     path('api/v1/grade/', include('grade.urls')),
 ]
