@@ -9,4 +9,5 @@ urlpatterns = [
     path('cancel', views.CancelView.as_view()),
     path('userindex', views.IndexView.as_view()),
     path('ready', views.ReadyView.as_view()),
+    path('channel', views.ChannelView.as_view()),
 ]

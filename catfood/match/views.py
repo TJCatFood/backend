@@ -166,6 +166,10 @@ class CancelView(APIView):
         else:
             return Response('bad request4')
 
+        if room.get_user_index(student_id) < 0:
+            return Response("user not in room!")
+
+        cache.delete(student_id)
         room.delete_user(student_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -297,3 +301,29 @@ class ReadyView(APIView):
 
     def contest_start(self, room):
         return 1
+
+
+class ChannelView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(sele, request, format=None):
+        data = request.query_params.dict()
+        if 'studentId' in data:
+            student_id = data['studentId']
+        else:
+            return Response('bad request1')
+
+        try:
+            student_id = int(student_id)
+        except TypeError:
+            return Response('bad request3')
+        try:
+            user = User.objects.get(pk=student_id)
+        except User.DoesNotExist:
+            return Response('bad request4')
+
+        channel_id = cache.get(student_id)
+        if channel_id is None:
+            return Response('user has not channel_id!')
+        else:
+            return Response({"channelId": f"{channel_id}"})
