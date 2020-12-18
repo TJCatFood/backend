@@ -12,24 +12,28 @@ from .serializers import GradeProportionSerializer, GradeSerializer
 from course.models import Teach, Course
 
 
-def get_experiment(course_Id, student_id):
-    pass
+def get_experiment(course_id, student_id):
+    return 90
 
 
-def get_contest(course_Id, student_id):
-    pass
+def get_contest(course_id, student_id):
+    return 90
 
 
-def get_assignment(course_Id, student_id):
-    pass
+def get_assignment(course_id, student_id):
+    return 90
 
 
-def get_exam1(course_Id, student_id):
-    pass
+def get_exam1(course_id, student_id):
+    return 90
 
 
-def get_exam2(course_Id, student_id):
-    pass
+def get_exam2(course_id, student_id):
+    return 90
+
+
+def get_attendance(course_id, student_id):
+    return 100
 
 
 # Create your views here.
@@ -222,7 +226,7 @@ class GradesView(APIView):
     permission_classes = [IsTeacher | IsChargingTeacher]
 
     def get(self, request, course_id):
-        # TODO: judge whether the teacher is teaching this course
+        # judge whether the teacher is teaching this course
         try:
             teach = Teach.objects.get(course_id=course_id)
             if teach.teacher_id.user_id == request.user.user_id and request.user.character != 3:
@@ -274,7 +278,7 @@ class GradesView(APIView):
             return Response(content, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, course_id):
-        # TODO: judge whether the teacher is teaching this course
+        # judge whether the teacher is teaching this course
         try:
             teach = Teach.objects.get(course_id=course_id)
             if teach.teacher_id.user_id == request.user.user_id and request.user.character != 3:
@@ -317,21 +321,20 @@ class GradesView(APIView):
                 student_id = take_course.student_id
                 try:
                     # TODO: get all the grades
-                    assignment_point = 90
-                    exam1_point = 90
-                    exam2_point = 90
-                    experiment_point = 90
-                    contest_point = 90
-                    attendance_point = 90
-                    bonus_point = 0
+                    assignment_point = get_assignment(course_id, student_id)
+                    exam1_point = get_exam1(course_id, student_id)
+                    exam2_point = get_exam2(course_id, student_id)
+                    experiment_point = get_experiment(course_id, student_id)
+                    contest_point = get_contest(course_id, student_id)
+                    attendance_point = get_attendance(course_id, student_id)
                 except Exception:
                     assignment_point = 0
                     exam1_point = 0
                     exam2_point = 0
                     experiment_point = 0
                     contest_point = 0
-                    attendance_point = 100
-                    bonus_point = 0
+                    attendance_point = 0
+                bonus_point = 0
                 total_weight = assignment + exam1 + exam2 + experiment + contest + attendance
                 total_point = assignment_point * (assignment / total_weight) + exam1_point * (
                         exam1 / total_weight) + exam2_point * (exam2 / total_weight) + experiment_point * (
@@ -361,7 +364,7 @@ class GradesView(APIView):
             return Response(content, status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, course_id):
-        # TODO: judge whether the teacher is teaching this course
+        # judge whether the teacher is teaching this course
         try:
             teach = Teach.objects.get(course_id=course_id)
             if teach.teacher_id.user_id == request.user.user_id and request.user.character != 3:
@@ -404,21 +407,20 @@ class GradesView(APIView):
                 student_id = grade.student_id
                 try:
                     # TODO: get all the grades
-                    assignment_point = 90
-                    exam1_point = 90
-                    exam2_point = 90
-                    experiment_point = 90
-                    contest_point = 90
-                    attendance_point = 90
-                    bonus_point = grade.bonus_point
+                    assignment_point = get_assignment(course_id, student_id)
+                    exam1_point = get_exam1(course_id, student_id)
+                    exam2_point = get_exam2(course_id, student_id)
+                    experiment_point = get_experiment(course_id, student_id)
+                    contest_point = get_contest(course_id, student_id)
+                    attendance_point = get_attendance(course_id, student_id)
                 except Exception:
                     assignment_point = 0
                     exam1_point = 0
                     exam2_point = 0
                     experiment_point = 0
                     contest_point = 0
-                    attendance_point = 100
-                    bonus_point = 0
+                    attendance_point = 0
+                bonus_point = grade.bonus_point
                 total_weight = assignment + exam1 + exam2 + experiment + contest + attendance
                 total_point = assignment_point * (assignment / total_weight) + exam1_point * (
                         exam1 / total_weight) + exam2_point * (exam2 / total_weight) + experiment_point * (
@@ -431,7 +433,6 @@ class GradesView(APIView):
                 grade.experiment_point = experiment_point
                 grade.contest_point = contest_point
                 grade.attendance_point = attendance_point
-                grade.bonus_point = bonus_point
                 grade.total_point = total_point
                 grade.save()
             content = {
@@ -456,7 +457,7 @@ class BonusView(APIView):
     permission_classes = [IsTeacher | IsChargingTeacher]
 
     def post(self, request, course_id, student_id):
-        # TODO: judge whether the teacher is teaching this course
+        # judge whether the teacher is teaching this course
         try:
             teach = Teach.objects.get(course_id=course_id)
             if teach.teacher_id.user_id == request.user.user_id and request.user.character != 3:
