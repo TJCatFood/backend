@@ -301,51 +301,13 @@ class GradesView(APIView):
             return Response(content, status=status.HTTP_200_OK)
         take_courses = TakeCourse.objects.filter(course_id=course_id)
         if take_courses:
-            try:
-                weight = GradeProportion.objects.get(course_id=course_id)
-                assignment = weight.assignment
-                exam1 = weight.exam1
-                exam2 = weight.exam2
-                experiment = weight.experiment
-                contest = weight.contest
-                attendance = weight.attendance
-            except Exception:
-                content = {
-                    'isSuccess': False,
-                    'data': {
-                        'message': "no weight set"
-                    }
-                }
-                return Response(content, status=status.HTTP_404_NOT_FOUND)
+            course = Course.objects.get(course_id=course_id)
             for take_course in take_courses:
                 student_id = take_course.student_id
-                try:
-                    # TODO: get all the grades
-                    assignment_point = get_assignment(course_id, student_id)
-                    exam1_point = get_exam1(course_id, student_id)
-                    exam2_point = get_exam2(course_id, student_id)
-                    experiment_point = get_experiment(course_id, student_id)
-                    contest_point = get_contest(course_id, student_id)
-                    attendance_point = get_attendance(course_id, student_id)
-                except Exception:
-                    assignment_point = 0
-                    exam1_point = 0
-                    exam2_point = 0
-                    experiment_point = 0
-                    contest_point = 0
-                    attendance_point = 0
-                bonus_point = 0
-                total_weight = assignment + exam1 + exam2 + experiment + contest + attendance
-                total_point = assignment_point * (assignment / total_weight) + exam1_point * (
-                        exam1 / total_weight) + exam2_point * (exam2 / total_weight) + experiment_point * (
-                                      experiment / total_weight) + contest_point * (
-                                      contest / total_weight) + attendance_point * (
-                                      attendance / total_weight) + bonus_point
-                course = Course.objects.get(course_id=course_id)
-                grade = Grade(course_id=course, student_id=student_id, assignment_point=assignment_point,
-                              exam1_point=exam1_point, exam2_point=exam2_point, experiment_point=experiment_point,
-                              contest_point=contest_point, attendance_point=attendance_point, bonus_point=bonus_point,
-                              total_point=total_point)
+                grade = Grade(course_id=course, student_id=student_id, assignment_point=0,
+                              exam1_point=0, exam2_point=0, experiment_point=0,
+                              contest_point=0, attendance_point=0, bonus_point=0,
+                              total_point=0)
                 grade.save()
             content = {
                 'isSuccess': True,
