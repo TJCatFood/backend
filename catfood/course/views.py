@@ -32,7 +32,7 @@ def courses_list(request):
         return Response(generate_response(serializer.data, True))
 
     elif request.method == 'POST':
-        teacher = User.objects.get(user_id=request.data['teacher_id'])
+        teacher = User.objects.get(user_id=request.user.user_id)
         if teacher.character not in [1]:
             error_msg = {"detail": "没有权限"}
             return Response(generate_response(error_msg, False), status=status.HTTP_400_BAD_REQUEST)
@@ -61,7 +61,7 @@ def course_detail(request, course_id):
         return Response(generate_response(serializer.data, True))
 
     elif request.method == 'PUT':
-        teacher = User.objects.get(user_id=request.data['teacher_id'])
+        teacher = User.objects.get(user_id=request.user.user_id)
         if teacher.character not in [1]:
             error_msg = {"detail": "没有权限"}
             return Response(generate_response(error_msg, False), status=status.HTTP_400_BAD_REQUEST)

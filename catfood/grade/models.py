@@ -2,8 +2,8 @@ from django.db import models
 
 
 class Grade(models.Model):
-    #course_id = models.ForeignKey('course.Course', on_delete=models.CASCADE)
-    course_id = models.IntegerField()
+    course_id = models.ForeignKey('course.Course', on_delete=models.CASCADE)
+    # course_id = models.IntegerField()
     student_id = models.ForeignKey('user.User', on_delete=models.CASCADE)
     assignment_point = models.IntegerField(null=True)
     exam1_point = models.IntegerField(null=True)
@@ -19,8 +19,8 @@ class Grade(models.Model):
 
 
 class GradeProportion(models.Model):
-    #course_id = models.OneToOneField('course.Course', on_delete=models.CASCADE, primary_key=True)
-    course_id = models.IntegerField(primary_key=True)
+    course_id = models.OneToOneField('course.Course', on_delete=models.CASCADE, primary_key=True)
+    # course_id = models.IntegerField(primary_key=True)
     assignment = models.PositiveIntegerField(null=True)
     exam1 = models.PositiveIntegerField(null=True)
     exam2 = models.PositiveIntegerField(null=True)
