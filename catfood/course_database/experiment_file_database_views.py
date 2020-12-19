@@ -58,30 +58,25 @@ class ExperimentView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request, experiment_id, format=None):
-        request_body = None
-        request_has_body = False
+        query_dict = request.query_params
+
         need_pagination = False
         pagination_page_size = -1
         pagination_page_num = -1
 
-        request_body_unicode = request.body.decode('utf-8')
-        if len(request_body_unicode) != 0:
-            try:
-                request_body = json.loads(request_body_unicode)
-                request_has_body = True
-            except json.decoder.JSONDecodeError:
-                return Response(dict({
-                    "msg": "Invalid JSON string provided."
-                }), status=400)
-
-        if request_has_body:
+        if query_dict:
             # find out whether the user requested for pagination
             try:
-                pagination_page_size = request_body["itemCountOnOnePage"]
-                pagination_page_num = request_body["pageIndex"]
+                pagination_page_size = int(query_dict["itemCountOnOnePage"])
+                pagination_page_num = int(query_dict["pageIndex"])
                 need_pagination = True
             except KeyError:
                 pass
+            except ValueError:
+                # not an int
+                return Response(dict({
+                    "msg": "Invaild pagination request."
+                }), status=400)
 
         all_files = ExperimentDocument.objects.filter(experiment_id=experiment_id)
         # newly updated file on top
