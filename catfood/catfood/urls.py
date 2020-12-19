@@ -17,4 +17,5 @@ urlpatterns = [
     # includes course bulletin
     path('api/v1/course-bulletin/', include('bulletin.urls')),
     path('api/v1/match/', include('match.urls')),
+    path('api/v1/grade/', include('grade.urls')),
 ]
