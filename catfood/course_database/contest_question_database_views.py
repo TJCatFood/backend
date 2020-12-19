@@ -50,40 +50,34 @@ class QuestionView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request, format=None):
+        query_dict = request.query_params
 
-        request_body = None
-        request_has_body = False
         need_filter = False
         requested_question_type = -1
         need_pagination = False
         pagination_page_size = -1
         pagination_page_num = -1
 
-        request_body_unicode = request.body.decode('utf-8')
-        if len(request_body_unicode) != 0:
-            try:
-                request_body = json.loads(request_body_unicode)
-                request_has_body = True
-            except json.decoder.JSONDecodeError:
-                return Response(dict({
-                    "msg": "Invalid JSON string provided."
-                }), status=400)
-
-        if request_has_body:
+        if query_dict:
             # find out whether the user requested for specific type of question
             try:
-                requested_question_type = request_body["questionType"]
+                requested_question_type = query_dict["questionType"]
                 need_filter = True
             except KeyError:
                 pass
 
             # find out whether the user requested for pagination
             try:
-                pagination_page_size = request_body["pageSize"]
-                pagination_page_num = request_body["pageNum"]
+                pagination_page_size = int(query_dict["pageSize"])
+                pagination_page_num = int(query_dict["pageNum"])
                 need_pagination = True
             except KeyError:
                 pass
+            except ValueError:
+                # not an int
+                return Response(dict({
+                    "msg": "Invaild pagination request."
+                }), status=400)
 
         all_questions = []
         if need_filter:

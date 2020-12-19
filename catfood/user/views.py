@@ -351,9 +351,7 @@ class CoursesView(APIView):
                 serializer = TakeCourseSerializer(data=takeCourse)
             else:
                 serializer = TakeCourseSerializer(takeCourseItem, data=takeCourse)
-            if serializer.is_valid():
-                serializer.save()
-            else:
+            if not serializer.is_valid():
                 content = {
                     'isSuccess': False,
                     'error': {
@@ -361,6 +359,18 @@ class CoursesView(APIView):
                     }
                 }
                 return Response(content, status=400)
+
+        for takeCourse in request.data:
+            student = User.objects.get(user_id=student_id)
+            course = Course.objects.get(course_id=course_id)
+            try:
+                takeCourseItem = TakeCourse.objects.get(student_id=student, course_id=course)
+            except(ObjectDoesNotExist):
+                serializer = TakeCourseSerializer(data=takeCourse)
+            else:
+                serializer = TakeCourseSerializer(takeCourseItem, data=takeCourse)
+            if serializer.is_valid():
+                serializer.save()
 
         content = {
             'isSuccess': True,
