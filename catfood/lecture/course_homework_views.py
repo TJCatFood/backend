@@ -3,14 +3,16 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 
+from django.http.response import HttpResponseRedirect
+
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 
 from django.utils import timezone as datetime
 
-from .models import Homework, HomeworkFile
-from .serializers import HomeworkFileSerializer, HomeworkSerializer
+from .models import Homework, HomeworkFile, HomeworkScore
+from .serializers import HomeworkFileSerializer, HomeworkSerializer, HomeworkScoreSerializer
 
 import json
 
@@ -326,3 +328,90 @@ class HomeworkDataFileCountView(APIView):
             "courseHomeworkFileCount": HomeworkFile.objects.filter(homework_id=homework_id).count()
         }
         return Response(response)
+
+
+class HomeworkFileView(APIView):
+
+    # FIXME: this permission is for testing purpose only
+    permission_classes = (AllowAny,)
+
+    # /{courseId}/homework/{homeworkId}/file/{homeworkFileId} 获取作业文件
+    def get(self, request, course_id, homework_id, file_homework_id, format=None):
+        file_queried: HomeworkFile
+        try:
+            file_queried = HomeworkFile.objects.get(homework_id=homework_id, file_homework_id=file_homework_id)
+        except HomeworkFile.DoesNotExist:
+            return Response(dict({
+                "msg": "Requested homework file does not exist.",
+                "courseId": course_id,
+                "homeworkFileId": file_homework_id
+            }), status=404)
+
+        file_token = file_queried.file_token
+        result_url = local_minio_client.presigned_url("GET",
+                                                      DEFAULT_BUCKET,
+                                                      file_token,
+                                                      expires=DEFAULT_FILE_URL_TIMEOUT)
+
+        return HttpResponseRedirect(redirect_to=result_url)
+
+
+class HomeworkFileScoreView(APIView):
+
+    # FIXME: this permission is for testing purpose only
+    permission_classes = (AllowAny,)
+
+    # /{courseId}/homework/{homeworkId}/file/{homeworkFileId}/score 获取作业分数
+    def get(self, request, course_id, homework_id, file_homework_id, format=None):
+
+        # FIXME: get student id from token.
+        try:
+            file_queried = HomeworkScore.objects.get(homework_id=homework_id, student_id=TEST_USER)
+        except HomeworkScore.DoesNotExist:
+            return Response(dict({
+                "msg": "Requested homework file does not exist.",
+                "courseId": course_id,
+                "homeworkId": homework_id
+            }), status=404)
+        
+        return Response(HomeworkScoreSerializer(file_queried).data, status=status.HTTP_200_OK)
+
+    # /{courseId}/homework/{homeworkId}/file/{homeworkFileId}/score 根据文件 ID 登记分数
+    def put(self, request, course_id, homework_id, file_homework_id, format=None):
+        
+        request_body_unicode = request.body.decode('utf-8')
+        request_body = None
+        if len(request_body_unicode) != 0:
+            try:
+                request_body = json.loads(request_body_unicode)
+            except json.decoder.JSONDecodeError:
+                return Response(dict({
+                    "msg": "Invalid JSON string provided."
+                }), status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            file_queried = HomeworkFile.objects.get(file_homework_id=file_homework_id)
+        except HomeworkFile.DoesNotExist:
+            return Response(dict({
+                "msg": "Requested homework file does not exist.",
+                "courseId": course_id,
+                "homeworkFileId": file_homework_id
+            }), status=404)
+
+        try:
+            file_score_queried = HomeworkScore.objects.get(homework_id=homework_id, student_id=file_queried.file_uploader)
+            file_score_queried.homework_score = request_body["homeworkScore"]
+            file_score_queried.homework_teachers_comments = request_body["homeworkTeachersComment"]
+            file_score_queried.homework_is_grade_available_to_students=request_body["homeworkIsGradeAvailable"],
+            file_score_queried.save()
+        except HomeworkScore.DoesNotExist:
+            file_score_queried = HomeworkScore(
+                homework_id=homework_id,
+                student_id=file_queried.file_uploader,
+                homework_score=request_body["homeworkScore"],
+                homework_teachers_comments=request_body["homeworkTeachersComment"],
+                homework_is_grade_available_to_students=request_body["homeworkIsGradeAvailable"],
+            )
+            file_score_queried.save()
+
+        return Response(HomeworkScoreSerializer(file_score_queried).data, status=status.HTTP_200_OK)
