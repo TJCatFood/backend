@@ -1,11 +1,6 @@
 from django.db import models
 
 
-class FileUsage(models.TextChoices):
-    EXPERIMENT = 'Experiment', 'Experiment'
-    LECTURE = 'Lecture', 'Lecture'
-
-
 class Homework(models.Model):
     homework_id = models.AutoField(primary_key=True)
     # FIXME: change back when course module completed
@@ -15,8 +10,8 @@ class Homework(models.Model):
     # homework_creator = models.ForeignKey('user.User', on_delete=models.CASCADE)
     homework_creator = models.IntegerField()
     homework_description = models.CharField(max_length=1024)
-    homework_attachment_link = models.CharField(max_length=200)
     homework_start_timestamp = models.DateTimeField()
+    homework_end_timestamp = models.DateTimeField()
 
 
 class HomeworkScore(models.Model):
@@ -37,12 +32,8 @@ class HomeworkFile(models.Model):
     # FIXME: change back when user module completed
     # file_uploader = models.ForeignKey('user.User', on_delete=models.CASCADE)
     file_uploader = models.IntegerField()
-    file_usage = models.CharField(
-        max_length=100,
-        choices=FileUsage.choices
-    )
     file_timestamp = models.DateField(auto_now=True)
-    file_link = models.CharField(max_length=200)
+    file_token = models.CharField(max_length=200)
 
 
 class CourseChapterDescrption(models.Model):

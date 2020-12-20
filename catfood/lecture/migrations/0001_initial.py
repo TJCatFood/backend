@@ -42,8 +42,8 @@ class Migration(migrations.Migration):
                 ('course_id', models.IntegerField()),
                 ('homework_creator', models.IntegerField()),
                 ('homework_description', models.CharField(max_length=1024)),
-                ('homework_attachment_link', models.CharField(max_length=200)),
                 ('homework_start_timestamp', models.DateTimeField()),
+                ('homework_end_timestamp', models.DateTimeField()),
             ],
         ),
         migrations.CreateModel(
