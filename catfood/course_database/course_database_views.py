@@ -109,7 +109,7 @@ class CourseView(APIView):
             file_uploader=114514,
             file_token=file_token)
         new_course_file.file_token = file_token
-        post_url = local_minio_client.presigned_url("PUT",
+        post_url = local_minio_client.presigned_url("POST",
                                                     DEFAULT_BUCKET,
                                                     file_token,
                                                     expires=DEFAULT_FILE_URL_TIMEOUT)
