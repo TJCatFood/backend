@@ -26,7 +26,7 @@ def get_assignment(course_id, student_id) -> float:
     total_score = 0
     student_homework_queryset = HomeworkScore.objects.filter(course_id=course_id, student_id=student_id)
     for homework in student_homework_queryset:
-        total_score += homework.homework_student_grade
+        total_score += homework.homework_score
     return (total_score / homework_count)
 
 

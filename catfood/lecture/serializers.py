@@ -36,7 +36,7 @@ class HomeworkScoreSerializer(serializers.ModelSerializer):
         fields = [
             'homework_id',
             'student_id',
-            'homework_student_grade',
+            'homework_score',
             'homework_teachers_comments',
             'homework_is_grade_available_to_students',
         ]

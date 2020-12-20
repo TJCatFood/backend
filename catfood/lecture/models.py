@@ -29,6 +29,7 @@ class HomeworkScore(models.Model):
     course_id = models.IntegerField()
     homework_teachers_comments = models.CharField(max_length=2048)
     homework_is_grade_available_to_students = models.BooleanField(default=False)
+    homework_score = models.IntegerField()
 
 
 class HomeworkFile(models.Model):
