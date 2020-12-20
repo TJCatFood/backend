@@ -20,8 +20,11 @@ class HomeworkSerializer(serializers.ModelSerializer):
         fields = [
             'homework_id',
             'course_id',
+            'homework_title',
             'homework_creator',
             'homework_description',
+            'homework_create_timestamp',
+            'homework_update_timestamp',
             'homework_start_timestamp',
             'homework_end_timestamp',
         ]
@@ -45,6 +48,8 @@ class HomeworkFileSerializer(serializers.ModelSerializer):
         fields = [
             'file_homework_id',
             'homework_id',
+            'file_display_name',
+            'file_comment',
             'file_uploader',
             'file_timestamp',
             'file_token',
