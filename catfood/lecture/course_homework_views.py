@@ -193,7 +193,7 @@ class HomeworkDataView(APIView):
         try:
             homework = Homework.objects.get(course_id=course_id, homework_id=homework_id)
             homework.delete()
-            # FIXME: 外码约束
+            # FIXME: 外码约束，删除文件和学生提交记录和分数
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Homework.DoesNotExist:
             return Response(dict({
@@ -336,15 +336,15 @@ class HomeworkFileView(APIView):
     permission_classes = (AllowAny,)
 
     # /{courseId}/homework/{homeworkId}/file/{homeworkFileId} 获取作业文件
-    def get(self, request, course_id, homework_id, file_homework_id, format=None):
+    def get(self, request, course_id, homework_id, homework_file_id, format=None):
         file_queried: HomeworkFile
         try:
-            file_queried = HomeworkFile.objects.get(homework_id=homework_id, file_homework_id=file_homework_id)
+            file_queried = HomeworkFile.objects.get(homework_id=homework_id, file_homework_id=homework_file_id)
         except HomeworkFile.DoesNotExist:
             return Response(dict({
                 "msg": "Requested homework file does not exist.",
                 "courseId": course_id,
-                "homeworkFileId": file_homework_id
+                "homeworkFileId": homework_file_id
             }), status=404)
 
         file_token = file_queried.file_token
@@ -362,7 +362,7 @@ class HomeworkFileScoreView(APIView):
     permission_classes = (AllowAny,)
 
     # /{courseId}/homework/{homeworkId}/file/{homeworkFileId}/score 获取作业分数
-    def get(self, request, course_id, homework_id, file_homework_id, format=None):
+    def get(self, request, course_id, homework_id, homework_file_id, format=None):
 
         # FIXME: get student id from token.
         try:
@@ -373,12 +373,12 @@ class HomeworkFileScoreView(APIView):
                 "courseId": course_id,
                 "homeworkId": homework_id
             }), status=404)
-        
+
         return Response(HomeworkScoreSerializer(file_queried).data, status=status.HTTP_200_OK)
 
     # /{courseId}/homework/{homeworkId}/file/{homeworkFileId}/score 根据文件 ID 登记分数
-    def put(self, request, course_id, homework_id, file_homework_id, format=None):
-        
+    def put(self, request, course_id, homework_id, homework_file_id, format=None):
+
         request_body_unicode = request.body.decode('utf-8')
         request_body = None
         if len(request_body_unicode) != 0:
@@ -390,24 +390,26 @@ class HomeworkFileScoreView(APIView):
                 }), status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            file_queried = HomeworkFile.objects.get(file_homework_id=file_homework_id)
-        except HomeworkFile.DoesNotExist:
+            file_queried = HomeworkFile.objects.get(file_homework_id=homework_file_id)
+        except HomeworkFile.DoesNotExist as e:
+            print(e.with_traceback)
             return Response(dict({
                 "msg": "Requested homework file does not exist.",
                 "courseId": course_id,
-                "homeworkFileId": file_homework_id
+                "homeworkFileId": homework_file_id
             }), status=404)
 
         try:
             file_score_queried = HomeworkScore.objects.get(homework_id=homework_id, student_id=file_queried.file_uploader)
             file_score_queried.homework_score = request_body["homeworkScore"]
             file_score_queried.homework_teachers_comments = request_body["homeworkTeachersComment"]
-            file_score_queried.homework_is_grade_available_to_students=request_body["homeworkIsGradeAvailable"],
+            file_score_queried.homework_is_grade_available_to_students = request_body["homeworkIsGradeAvailable"]
             file_score_queried.save()
         except HomeworkScore.DoesNotExist:
             file_score_queried = HomeworkScore(
-                homework_id=homework_id,
+                homework_id=(Homework.objects.get(homework_id=homework_id)),
                 student_id=file_queried.file_uploader,
+                course_id=course_id,
                 homework_score=request_body["homeworkScore"],
                 homework_teachers_comments=request_body["homeworkTeachersComment"],
                 homework_is_grade_available_to_students=request_body["homeworkIsGradeAvailable"],

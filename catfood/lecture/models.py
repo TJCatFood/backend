@@ -18,8 +18,8 @@ class Homework(models.Model):
 
 
 class HomeworkScore(models.Model):
-    class Meta:
-        managed = False
+    # class Meta:
+    #     managed = False
     homework_id = models.ForeignKey('Homework', on_delete=models.DO_NOTHING)
     # FIXME: change back when user module completed
     # student_id = models.ForeignKey('user.User', on_delete=models.CASCADE)
