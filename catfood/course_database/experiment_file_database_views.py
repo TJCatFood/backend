@@ -114,7 +114,7 @@ class ExperimentView(APIView):
         new_experiment_file.file_token = file_token
         path = default_storage.save('catfood/alive', ContentFile(MINIO_FILE_PLACEHOLDER))
         default_storage.delete(path)
-        post_url = local_minio_client.presigned_url("POST",
+        post_url = local_minio_client.presigned_url("PUT",
                                                     DEFAULT_BUCKET,
                                                     file_token,
                                                     expires=DEFAULT_FILE_URL_TIMEOUT)

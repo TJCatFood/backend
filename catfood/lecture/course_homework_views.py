@@ -105,7 +105,7 @@ class HomeworkView(APIView):
         request_body = json.loads(request_body_unicode)
         new_homework = Homework(
             course_id=course_id,
-            homework_creator=request_body["homeworkCreatorId"],
+            homework_creator=TEST_USER,
             homework_title=request_body["homeworkTitle"],
             homework_description=request_body["homeworkDescription"],
             homework_start_timestamp=request_body["homeworkStartTime"],
@@ -239,7 +239,7 @@ class HomeworkDataFileView(APIView):
         new_course_file.file_token = file_token
         path = default_storage.save('catfood/alive', ContentFile(MINIO_FILE_PLACEHOLDER))
         default_storage.delete(path)
-        post_url = local_minio_client.presigned_url("POST",
+        post_url = local_minio_client.presigned_url("PUT",
                                                     DEFAULT_BUCKET,
                                                     file_token,
                                                     expires=DEFAULT_FILE_URL_TIMEOUT)
