@@ -139,7 +139,7 @@ class QuestionView(APIView):
 
     def post(self, request, format=None):
         request_body_unicode = request.body.decode('utf-8')
-        request_body = json.loads(request_body_unicode)
+        request_body = json.loads(request_body_unicode)["question"]
         try:
             question_type = request_body["questionType"]
             if question_type == QuestionType.SINGLE_CHOICE:
@@ -194,9 +194,33 @@ class QuestionIdView(APIView):
     # FIXME: this permission is for testing purpose only
     permission_classes = (AllowAny,)
 
+    def get(self, request, question_type, question_id, format=None):
+        item = None
+        if question_type == QuestionType.SINGLE_CHOICE:
+            item = SingleChoiceQuestion.objects.get(question_id=question_id)
+
+        elif question_type == QuestionType.MULTIPLE_CHOICE:
+            item = MultipleChoiceQuestion.objects.get(question_id=question_id)
+        else:
+            return Response(dict({
+                "msg": "question_type wants to fuck you"
+            }), status=400)
+        response = {
+            "questionId": item.question_id,
+            "questionType": question_type,
+            "questionChapter": item.question_chapter,
+            "questionContent": item.question_content,
+            "questionChoiceAContent": item.question_choice_a_content,
+            "questionChoiceBContent": item.question_choice_b_content,
+            "questionChoiceCContent": item.question_choice_c_content,
+            "questionChoiceDContent": item.question_choice_d_content,
+            "questionAnswer": item.question_answer,
+        }
+        return Response(response)
+
     def put(self, request, question_type, question_id, format=None):
         request_body_unicode = request.body.decode('utf-8')
-        request_body = json.loads(request_body_unicode)
+        request_body = json.loads(request_body_unicode)["question"]
         try:
             if question_type == QuestionType.SINGLE_CHOICE:
                 old_question = SingleChoiceQuestion.objects.get(question_id=question_id)

@@ -5,6 +5,6 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 
 from .models import Homework, HomeworkFile, HomeworkScore
-from .serializers import CourseChapterDescrptionSerializer
+from .serializers import HomeworkScoreSerializer, HomeworkFileSerializer, HomeworkSerializer
 
 import json
