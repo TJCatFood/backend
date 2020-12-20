@@ -250,10 +250,10 @@ class HomeworkDataFileView(APIView):
 
         if replace_flag:
             return Response(HomeworkFileSerializer(new_course_file).data,
-                        headers=response_headers, status=status.HTTP_200_OK)
+                            headers=response_headers, status=status.HTTP_200_OK)
         else:
             return Response(HomeworkFileSerializer(new_course_file).data,
-                        headers=response_headers, status=status.HTTP_201_CREATED)
+                            headers=response_headers, status=status.HTTP_201_CREATED)
 
     # /{courseId}/homework/{homeworkId} 删除该学生这次作业的提交
     def delete(self, request, course_id, homework_id, format=None):

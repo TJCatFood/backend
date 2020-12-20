@@ -9,8 +9,8 @@ urlpatterns = [
     path('course-homework/<int:course_id>/homework/', course_homework_views.HomeworkView.as_view()),
     path('course-homework/<int:course_id>/homework/count', course_homework_views.HomeworkCountView.as_view()),
     path('course-homework/<int:course_id>/homework/<int:homework_id>', course_homework_views.HomeworkDataView.as_view()),
-    path('course-homework/<int:course_id>/homework/<int:homework_id>/count', templates.CourseIdHomeworkIdTemplate.as_view()),
     path('course-homework/<int:course_id>/homework/<int:homework_id>/file', course_homework_views.HomeworkDataFileView.as_view()),
+    path('course-homework/<int:course_id>/homework/<int:homework_id>/file/count', course_homework_views.HomeworkDataFileCountView.as_view()),
     path('course-homework/<int:course_id>/homework/<int:homework_id>/file/<int:homework_file_id>', templates.CIHIHFI.as_view()),
     path('course-homework/<int:course_id>/homework/<int:homework_id>/file/<int:homework_file_id>/score', templates.CIHIHFI.as_view()),
     # course homework ends
