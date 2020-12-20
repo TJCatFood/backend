@@ -10,6 +10,9 @@ from rest_framework.decorators import api_view
 
 from rest_framework.permissions import AllowAny
 
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+
 from .models import ExperimentDocument
 from .serializers import ExperimentDocumentSerializer
 
@@ -109,6 +112,8 @@ class ExperimentView(APIView):
             file_uploader=114514,
             file_token=file_token)
         new_experiment_file.file_token = file_token
+        path = default_storage.save('catfood/alive', ContentFile(MINIO_FILE_PLACEHOLDER))
+        default_storage.delete(path)
         post_url = local_minio_client.presigned_url("POST",
                                                     DEFAULT_BUCKET,
                                                     file_token,
