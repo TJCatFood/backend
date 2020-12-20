@@ -34,6 +34,7 @@ class HomeworkScoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomeworkScore
         fields = [
+            'course_id',
             'homework_id',
             'student_id',
             'homework_score',
