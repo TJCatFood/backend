@@ -3,9 +3,9 @@ from django.db import models
 # Create your models here.
 
 
-class QuestionType(models.TextChoices):
-    SINGLE = 'SingleAnswer', 'SingleAnswer'
-    MULTIPLE = 'MultipleAnswer', 'MultipleAnswer'
+class QuestionType(models.IntegerChoices):
+    SINGLE = 0
+    MULTIPLE = 1
 
 
 class Contest(models.Model):
@@ -48,6 +48,7 @@ class Match(models.Model):
     contest_id = models.ForeignKey('Contest', on_delete=models.CASCADE)
     user_id = models.ForeignKey('user.User', on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
+    match_tag = models.IntegerField(default=0)
 
 
 class ContestSubmission(models.Model):
