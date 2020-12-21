@@ -30,6 +30,46 @@ def get_match(request, match_id):
     return Response(content)
 
 
+@api_view(['GET'])
+def get_matches_student(request):
+    params = request.query_params
+    content = {
+        "matchId": f"{match_id}",
+        "response": 'get_match test succeed'
+    }
+    return Response(content)
+
+
+@api_view(['GET'])
+def get_matchid(request):
+    params = request.query_params
+    content = {
+        "matchId": f"{match_id}",
+        "response": 'get_match test succeed'
+    }
+    return Response(content)
+
+
+@api_view(['GET'])
+def get_contest_questions(request, contest_id):
+    params = request.query_params
+    content = {
+        "matchId": f"{match_id}",
+        "response": 'get_match test succeed'
+    }
+    return Response(content)
+
+
+@api_view(['GET'])
+def get_contest_end(request):
+    params = request.query_params
+    content = {
+        "matchId": f"{match_id}",
+        "response": 'get_match test succeed'
+    }
+    return Response(content)
+
+
 class TestView(APIView):
     permission_classes = (AllowAny,)
 
@@ -58,7 +98,7 @@ class ContestView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MatchesVIew(APIView):
+class MatchesView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request, contest_id, format=None):
