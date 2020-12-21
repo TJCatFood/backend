@@ -10,6 +10,7 @@ from .models import Grade, GradeProportion
 from user.models import TakeCourse
 from .serializers import GradeProportionSerializer, GradeSerializer
 from course.models import Teach, Course
+from lecture.models import Homework, HomeworkScore
 
 
 def get_experiment(course_id, student_id):
@@ -20,8 +21,13 @@ def get_contest(course_id, student_id):
     return 90
 
 
-def get_assignment(course_id, student_id):
-    return 90
+def get_assignment(course_id, student_id) -> float:
+    homework_count = Homework.objects.filter(course_id=course_id).count()
+    total_score = 0
+    student_homework_queryset = HomeworkScore.objects.filter(course_id=course_id, student_id=student_id)
+    for homework in student_homework_queryset:
+        total_score += homework.homework_score
+    return (total_score / homework_count)
 
 
 def get_exam1(course_id, student_id):
@@ -385,10 +391,10 @@ class GradesView(APIView):
                 bonus_point = grade.bonus_point
                 total_weight = assignment + exam1 + exam2 + experiment + contest + attendance
                 total_point = assignment_point * (assignment / total_weight) + exam1_point * (
-                        exam1 / total_weight) + exam2_point * (exam2 / total_weight) + experiment_point * (
-                                      experiment / total_weight) + contest_point * (
-                                      contest / total_weight) + attendance_point * (
-                                      attendance / total_weight) + bonus_point
+                    exam1 / total_weight) + exam2_point * (exam2 / total_weight) + experiment_point * (
+                    experiment / total_weight) + contest_point * (
+                    contest / total_weight) + attendance_point * (
+                    attendance / total_weight) + bonus_point
                 grade.assignment_point = assignment_point
                 grade.exam1_point = exam1_point
                 grade.exam2_point = exam2_point
