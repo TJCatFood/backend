@@ -51,7 +51,7 @@ def experiment_case_list(request):
 
 
 @api_view(['GET', 'PUT'])
-@permission_classes([IsChargingTeacher | IsTeacher])
+@permission_classes([IsChargingTeacher | IsTeacher ])
 @authentication_classes([CatfoodAuthentication])
 def experiment_case_detail(request, pk):
     """
@@ -75,6 +75,83 @@ def experiment_case_detail(request, pk):
             return Response(utils.generate_response(serializer.data, True))
         return Response(utils.generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET'])
+@permission_classes([IsStudent])
+@authentication_classes([CatfoodAuthentication])
+def student_get_case_detail(request, course_case_id):
+    """
+    get a course case detail info for student
+    """
+    try:
+        course_case = CourseCase.objects.get(course_case_id=course_case_id)
+    except CourseCase.DoesNotExist:
+        error_data = {"detail": "not exist"}
+        return Response(utils.generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        course_case_serializer = CourseCaseSerializer(course_case)
+        case_id = course_case_serializer['case_id']
+        # 补充案例信息
+
+        case = ExperimentCaseDatabase.objects.get(experiment_case_id=case_id.value)        
+        case_serializer = ExperimentCaseDatabaseSerializer(case)
+        answer = dict(course_case_serializer.data)
+        answer['experiment_name'] = case_serializer.data['experiment_name']
+        answer['experiment_case_name'] = case_serializer.data['experiment_case_name']
+        answer['experiment_case_description'] = case_serializer.data['experiment_case_description']
+        # 补充提交信息
+        try:
+            answer['is_submit'] = True
+            assignment = ExperimentAssignment.objects.get(course_case_id=course_case_id, submission_uploader=request.user.user_id)
+            assignment_serializer = ExperimentAssignmentSerializer(assignment)
+            answer['is_public_score'] = assignment_serializer.data['submission_is_public']
+            answer['comment'] = assignment_serializer.data['submission_comments']
+            answer['score'] = assignment_serializer.data['submission_score']
+            answer['answer'] = assignment_serializer.data['submission_file_token']
+        except ExperimentAssignment.DoesNotExist:
+            answer['is_submit'] = False
+        return Response(utils.generate_response(answer, True))
+
+@api_view(['GET'])
+@permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant])
+@authentication_classes([CatfoodAuthentication])
+def teacher_get_assignment_detail(request, submission_id):
+    try:
+        print('hello')
+        assignment = ExperimentAssignment.objects.get(submission_case_id=submission_id)
+    except ExperimentAssignment.DoesNotExist:
+        error_data = {"detail": "not exist"}
+        return Response(utils.generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        assignment_serializer = ExperimentAssignmentSerializer(assignment)
+        answer = dict(assignment_serializer.data)
+        case_id = answer['submission_case_id']
+        case = ExperimentCaseDatabase.objects.get(experiment_case_id=case_id)
+        case_serializer = ExperimentCaseDatabaseSerializer(case)
+        answer['experiment_name'] = case_serializer.data['experiment_name']
+        answer['experiment_case_name'] = case_serializer.data['experiment_case_name']
+        answer['experiment_case_description'] = case_serializer.data['experiment_case_description']
+        return Response(utils.generate_response(answer, True))
+
+@api_view(['GET'])
+@permission_classes([IsChargingTeacher])
+@authentication_classes([CatfoodAuthentication])
+def teacher_public_all_assignments(request, course_case_id):
+    if request.method == 'PUT':
+        assignment_list = ExperimentAssignment.objects.all()
+        assignment_list = assignment_list.filter(course_case_id=course_case_id)
+        assignment_list = ExperimentAssignmentSerializer(assignment_list, many=True)
+        for index, assignment in enumerate(assignment_list.data):
+            change_data = {
+                'submission_case_id': assignment['submission_case_id'],
+                'submission_is_public': True
+            }
+            assignment_serializer = ExperimentAssignmentSerializer(assignment_serializer)
+            if assignment_serializer.is_valid():
+                 serializer.save()
+            else:
+                error_data = {"detail": "update error"}
+                return Response(utils.generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
+        return Response(utils.generate_response(' ', True), status=status.HTTP_201_CREATED)
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant | IsStudent])
