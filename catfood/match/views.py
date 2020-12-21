@@ -45,22 +45,26 @@ class StartView(APIView):
         if 'student_id' in data:
             student_id = data['student_id']
         else:
-            return Response('bad request1')
+            error = Error('Bad Request: student_id needed!')
+            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
         if 'contest_id' in data:
             contest_id = data['contest_id']
         else:
-            return Response('bad request2')
+            error = Error('Bad Request: contest_id needed!')
+            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             contest = Contest.objects.get(pk=contest_id)
         except Contest.DoesNotExist:
-            return Response('bad request3')
+            error = Error('Not Found: contest not found!')
+            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
         try:
             user = User.objects.get(pk=student_id)
         except User.DoesNotExist:
-            return Response('bad request3')
+            error = Error('Not Found: student not found!')
+            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
         if cache.get(student_id) is not None:
             return Response('User has already matched!')
@@ -131,6 +135,7 @@ class StartView(APIView):
                 del_cnt += 1
                 cache.delete(user_id)
         room.clear_ready()
+        room.set_status(RoomStatus.WAIT)
         contest_rooms = contests[room.contest_id]
         contest_rooms.wait_rooms.put(room)
         channel_id = room.channel_id
@@ -150,24 +155,29 @@ class CancelView(APIView):
         if 'student_id' in data:
             student_id = data['student_id']
         else:
-            return Response('bad request1')
+            error = Error('Bad Request: student_id needed!')
+            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
         if 'channel_id' in data:
             channel_id = data['channel_id']
         else:
-            return Response('bad request2')
+            error = Error('Bad Request: channle_id needed!')
+            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             user = User.objects.get(pk=student_id)
         except User.DoesNotExist:
-            return Response('bad request3')
+            error = Error('Not Found: student not found!')
+            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
         if channel_id in rooms:
             room = rooms[channel_id]
         else:
-            return Response('bad request4')
+            error = Error('Not Found: room not found!')
+            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
         if room.get_user_index(student_id) < 0:
-            return Response("user not in room!")
+            error = Error('Not Found: user not in room!')
+            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
         cache.delete(student_id)
         room.delete_user(student_id)
@@ -182,32 +192,38 @@ class IndexView(APIView):
         if 'studentId' in data:
             student_id = data['studentId']
         else:
-            return Response('bad request1')
+            error = Error('Bad Request: student_id needed!')
+            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
         if 'channelId' in data:
             channel_id = data['channelId']
         else:
-            return Response('bad request2')
+            error = Error('Bad Request: channel_id needed!')
+            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             student_id = int(student_id)
         except TypeError:
-            return Response('bad request3')
+            error = Error('Bad Request: student_id illegal!')
+            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
         try:
             user = User.objects.get(pk=student_id)
         except User.DoesNotExist:
-            return Response('bad request4')
+            error = Error('Not Found: student not found!')
+            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
         if channel_id in rooms:
             room = rooms[channel_id]
         else:
-            return Response('bad request5')
+            error = Error('Not Found: room not found!')
+            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
         index = room.get_user_index(student_id)
         if index >= 0:
             return Response({"index": f"{index}"})
         else:
-            return Response('bad request6')
+            error = Error('Not Found: student not in room!')
+            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
 
 class ReadyView(APIView):
@@ -218,41 +234,50 @@ class ReadyView(APIView):
         if 'student_id' in data:
             student_id = data['student_id']
         else:
-            return Response('bad request1')
+            error = Error('Bad Request: student_id needed!')
+            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
         if 'channel_id' in data:
             channel_id = data['channel_id']
         else:
-            return Response('bad request1')
+            error = Error('Bad Request: channel_id needed!')
+            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
         if 'status' in data:
             ready_status = data['status']
             if not isinstance(ready_status, bool):
-                return Response('bad request1')
+                error = Error('Bad Request: status illegal!')
+                return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response('bad request1')
+            error = Error('Bad Request: status needed!')
+            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             user = User.objects.get(pk=student_id)
         except User.DoesNotExist:
-            return Response('bad request3')
+            error = Error('Not Found: student not found!')
+            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
         if channel_id in rooms:
             room = rooms[channel_id]
         else:
-            return Response('bad request3')
+            error = Error('Not Found: room not found!')
+            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
         if room.status != RoomStatus.READY:
-            return Response('bad request4')
+            error = Error('Bad Request: Cannot prepare for the room!')
+            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
         if ready_status is False:
-            room_clear(room)
+            self.room_clear(room)
         else:
             res = room.user_ready(student_id)
             if res is None:
-                return Response('bad request4')
+                error = Error('Not Found: student not in room!')
+                return Response(error.error, status=status.HTTP_404_NOT_FOUND)
             if res == -1:
-                return Response('User already ready')
+                error = Error('Bad Request: The user has already ready!')
+                return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
             if room.bis_all_ready():
                 self.all_ready(room)
             else:
@@ -272,9 +297,11 @@ class ReadyView(APIView):
         del_cnt = 0
         for i in range(sz):
             if ready_list[i] is False:
-                room.delete_user_index(i - del_cnt)
+                user_id = room.delete_user_index(i - del_cnt)
                 del_cnt += 1
+                cache.delete(user_id)
         room.clear_ready()
+        room.set_status(RoomStatus.WAIT)
         contest_rooms = contests[room.contest_id]
         contest_rooms.wait_rooms.put(room)
         channel_id = room.channel_id
@@ -311,19 +338,33 @@ class ChannelView(APIView):
         if 'studentId' in data:
             student_id = data['studentId']
         else:
-            return Response('bad request1')
+            error = Error('Bad Request: student_id needed!')
+            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             student_id = int(student_id)
         except TypeError:
-            return Response('bad request3')
+            error = Error('Bad Request: student_id illegal!')
+            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
         try:
             user = User.objects.get(pk=student_id)
         except User.DoesNotExist:
-            return Response('bad request4')
+            error = Error('Not Found: student not found!')
+            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
         channel_id = cache.get(student_id)
         if channel_id is None:
-            return Response('user has not channel_id!')
+            error = Error('Not Found: student not in room!')
+            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response({"channelId": f"{channel_id}"})
+
+
+class Error():
+
+    def __init__(self, msg):
+        self.error = {
+            "error": {
+                "message": f"{msg}"
+            }
+        }
