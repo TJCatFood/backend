@@ -27,7 +27,7 @@ def get_matches(request):
     if course_id is None:
         error = Error('Bad Request: courseId needed!')
         return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
-    
+
     try:
         student_id = int(student_id)
         course_id = int(course_id)
@@ -68,17 +68,17 @@ def get_matches(request):
 def get_match(request, match_id):
     try:
         match = models.Match.objects.get(pk=match_id)
-    except:
+    except models.Match.DoesNotExist:
         error = Error('Not Found: match not found!')
         return Response(error.error, status=status.HTTP_404_NOT_FOUND)
-    
+
     user_id = match.user_id
     contest_id = match.contest_id
 
     try:
         user = User.objects.get(pk=user_id)
         contest = models.Contest.objects.get(pk=contest_id)
-    except:
+    except models.Contest.DoesNotExist:
         error = Error('Not Found: user or contest not found!')
         return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
@@ -86,28 +86,27 @@ def get_match(request, match_id):
     if attend.count <= 0:
         error = Error('Bad Request: The match is not over yet!')
         return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
-    
+
     question_and_answers = []
     questions = models.ContestQuestion.objects.filter(contest_id=contest_id)
     for q in questions:
         q_type = q.question_type
         q_id = q.question_id
         try:
-            submission = models.ContestSubmission.objects.get(contest_id=contest_id, 
-            user_id=user_id, question_id=q_type, question_type=q_type)
+            submission = models.ContestSubmission.objects.get(contest_id=contest_id, user_id=user_id, question_id=q_type, question_type=q_type)
         except models.ContestSubmission.DoesNotExist:
             error = Error('Not Found: submission not found!')
             return Response(error.error, status=status.HTTP_404_NOT_FOUND)
         answer = submission.answer
         if q_type == models.QuestionType.SINGLE:
             try:
-                question = SingleChoiceQuestion.objects.get(pk = q_id)
+                question = SingleChoiceQuestion.objects.get(pk=q_id)
             except SingleChoiceQuestion.DoesNotExist:
                 error = Error('Not Found: question not found!')
                 return Response(error.error, status=status.HTTP_404_NOT_FOUND)
         elif q_type == models.QuestionType.MULTIPLE:
             try:
-                question = MultipleChoiceQuestion.objects.get(pk = q_id)
+                question = MultipleChoiceQuestion.objects.get(pk=q_id)
             except MultipleChoiceQuestion.DoesNotExist:
                 error = Error('Not Found: question not found!')
                 return Response(error.error, status=status.HTTP_404_NOT_FOUND)
@@ -247,7 +246,7 @@ class MatchesView(APIView):
 
 
 class Error():
-    
+
     def __init__(self, msg):
         self.error = {
             "error": {
