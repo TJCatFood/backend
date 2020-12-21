@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from course_database.models import ExperimentCaseDatabase
 from experiment.models import CourseCase, ExperimentAssignment
 from experiment.serializers import ExperimentCaseDatabaseSerializer, CourseCaseSerializer, ExperimentAssignmentSerializer
@@ -16,6 +16,7 @@ from user.authentication import CatfoodAuthentication
 from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 
 from experiment import utils
+from course.models import Course, Teach
 
 
 class TestView(APIView):
@@ -30,14 +31,13 @@ class TestView(APIView):
 
 
 @api_view(['GET', 'POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsChargingTeacher | IsTeacher])
+@authentication_classes([CatfoodAuthentication])
 def experiment_case_list(request):
     """
     List all cases, or create a new case.
-    TODO: 必须有教师或责任教师权限
     """
     if request.method == 'GET':
-        # TODO: 分页
         cases = ExperimentCaseDatabase.objects.all()
         serializer = ExperimentCaseDatabaseSerializer(cases, many=True)
         return Response(utils.generate_response(serializer.data, True))
@@ -50,12 +50,12 @@ def experiment_case_list(request):
             return Response(utils.generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([AllowAny])
+@api_view(['GET', 'PUT'])
+@permission_classes([IsChargingTeacher | IsTeacher])
+@authentication_classes([CatfoodAuthentication])
 def experiment_case_detail(request, pk):
     """
     Retrieve, update or delete a experiment case instance.
-    TODO: 必须有教师或者责任教师的权限
     """
     try:
         case = ExperimentCaseDatabase.objects.get(pk=pk)
@@ -73,28 +73,40 @@ def experiment_case_detail(request, pk):
         if serializer.is_valid():
             serializer.save()
             return Response(utils.generate_response(serializer.data, True))
-        return Response(utils.generate_response(cserializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        case.delete()
-        response_data = {"detail": "have delete"}
-        return Response(utils.generate_response(response_data, True), status=status.HTTP_204_NO_CONTENT)
+        return Response(utils.generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant | IsStudent])
+@authentication_classes([CatfoodAuthentication])
 def course_case_list(request, course_id):
     """
     List all cases of a specific course, or bind a case to this course.
     """
-    # TODO: 鉴权
     if request.method == 'GET':
         cases = CourseCase.objects.all()
         cases = cases.filter(course_id=course_id)
         serializer = CourseCaseSerializer(cases, many=True)
+        for index, case in enumerate(serializer.data):
+            case_id = case['case_id']
+            case_info = ExperimentCaseDatabase.objects.get(experiment_case_id=case_id)
+            case_ser = ExperimentCaseDatabaseSerializer(case_info)
+            serializer.data[index]['experiment_name'] = case_ser.data['experiment_name']
+            serializer.data[index]['experiment_case_description'] = case_ser.data['experiment_case_description']
         return Response(utils.generate_response(serializer.data, True))
 
     elif request.method == 'POST':
+        #  只有责任老师和老师才有创建的权限
+        if request.user.character not in [1, 2]:
+            error_msg = {"detail": "没有权限"}
+            return Response(utils.generate_response(error_msg, False), status=status.HTTP_400_BAD_REQUEST)
+        elif request.user.character in [2]:
+            try:
+                print('*'*10, course_id, request.user.user_id, '*'*10)
+                teach = Teach.objects.get(course_id=course_id, teacher_id=request.user.user_id)
+            except Teach.DoesNotExist:
+                error_msg = {"detail": "没有权限"}
+                return Response(utils.generate_response(error_msg, False), status=status.HTTP_400_BAD_REQUEST)
         serializer = CourseCaseSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -102,12 +114,12 @@ def course_case_list(request, course_id):
         return Response(utils.generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([AllowAny])
+@api_view(['GET', 'PUT'])
+@permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant | IsStudent])
+@authentication_classes([CatfoodAuthentication])
 def course_case_detail(request, pk):
     """
     Retrieve, update or delete a course case instance.
-    TODO: 必须有责任教师的权限
     """
     try:
         case = CourseCase.objects.get(pk=pk)
@@ -120,29 +132,34 @@ def course_case_detail(request, pk):
         return Response(utils.generate_response(serializer.data, True))
 
     elif request.method == 'PUT':
+        if request.user.character not in [1, 2]:
+            error_msg = {"detail": "没有权限"}
+            return Response(utils.generate_response(error_msg, False), status=status.HTTP_400_BAD_REQUEST)
+        elif request.user.character in [2]:
+            try:
+                print('*'*10, course_id, request.user.user_id, '*'*10)
+                teach = Teach.objects.get(course_id=course_id, teacher_id=request.user.user_id)
+            except Teach.DoesNotExist:
+                error_msg = {"detail": "没有权限"}
+                return Response(utils.generate_response(error_msg, False), status=status.HTTP_400_BAD_REQUEST)
         serializer = CourseCaseSerializer(
             case, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(utils.generate_response(serializer.data, True))
-        return Response(utils.generate_response(cserializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        case.delete()
-        response_data = {"detail": "have delete"}
-        return Response(utils.generate_response(response_data, True), status=status.HTTP_204_NO_CONTENT)
+        return Response(utils.generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsStudent])
+@authentication_classes([CatfoodAuthentication])
 def assignment_student_list(request):
     """
     List all assignments for a particular student.
     Submit a assignment
     """
     if request.method == 'GET':
-        assignments = ExperimentAssignment.objects.all()
-        # TODO: 鉴权
+        assignments = ExperimentAssignment.objects.filter(submission_uploader=request.user.user_id)
         # TODO: 获取学生信息，用于过滤
         # assignments = assignments.filter()
         serializer = ExperimentAssignmentSerializer(assignments, many=True)

@@ -5,8 +5,8 @@ from django.db import models
 
 class ExperimentAssignment(models.Model):
     course_case_id = models.ForeignKey('CourseCase', on_delete=models.CASCADE)
-    # submission_uploader = models.ForeignKey('user.User', on_delete=models.CASCADE)
-    submission_uploader = models.CharField(max_length=200)
+    submission_uploader = models.ForeignKey('user.User', on_delete=models.CASCADE)
+    # submission_uploader = models.CharField(max_length=200)
     submission_file_token = models.CharField(max_length=200)
     submission_timestamp = models.DateTimeField(auto_now=True)
     submission_score = models.IntegerField(default=-1)
