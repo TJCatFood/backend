@@ -57,6 +57,7 @@ MAX_AVATAR_SIZE = 4 * 1024 * 1024
 def generate_avatar_token(user_id: int) -> str:
     return f"{AVATAR_PREFIX}/{user_id}/avatar"
 
+
 class AvatarView(APIView):
 
     # FIXME: this permission is for testing purpose only
