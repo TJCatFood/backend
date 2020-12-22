@@ -27,6 +27,7 @@ from datetime import timedelta, datetime
 from os import environ
 
 from catfood.settings import MINIO_STORAGE_MEDIA_BUCKET_NAME as DEFAULT_BUCKET
+from catfood.settings import MINIO_STORAGE_USE_HTTPS
 
 import random
 
@@ -38,7 +39,7 @@ local_minio_client = Minio(
     environ['MINIO_ADDRESS'],
     access_key=environ['MINIO_ACCESS_KEY'],
     secret_key=environ['MINIO_SECRET_KEY'],
-    secure=False,
+    secure=MINIO_STORAGE_USE_HTTPS,
 )
 
 # default file URL timeout = 15 min
@@ -65,11 +66,16 @@ class AvatarView(APIView):
 
     def get(self, request, user_id, format=None):
         file_token = generate_avatar_token(user_id)
-        result_url = local_minio_client.presigned_url("GET",
-                                                      DEFAULT_BUCKET,
-                                                      file_token,
-                                                      expires=DEFAULT_FILE_URL_TIMEOUT)
 
+        # old presigned method
+        # result_url = local_minio_client.presigned_url("GET",
+        #                                               DEFAULT_BUCKET,
+        #                                               file_token,
+        #                                               expires=DEFAULT_FILE_URL_TIMEOUT)
+
+        # now the folder is public
+        result_url_scheme = "https" if MINIO_STORAGE_USE_HTTPS else "http"
+        result_url = f"{result_url_scheme}://{environ['MINIO_ADDRESS']}/{DEFAULT_BUCKET}/{file_token}"
         return HttpResponseRedirect(redirect_to=result_url)
 
     def put(self, request, user_id, format=None):
@@ -82,9 +88,11 @@ class AvatarView(APIView):
         # set content length for incoming uploads.
         post_policy.set_content_length_range(0, MAX_AVATAR_SIZE)
 
-        # set expiry 10 days into future.
+        # set expiry
         expires_date = datetime.utcnow() + DEFAULT_FILE_URL_TIMEOUT
         post_policy.set_expires(expires_date)
+
+        post_policy
 
         url, signed_form_data = local_minio_client.presigned_post_policy(post_policy)
         response = {
