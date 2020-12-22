@@ -3,9 +3,9 @@ from django.db import models
 # Create your models here.
 
 
-class QuestionType(models.TextChoices):
-    SINGLE = 'SingleAnswer', 'SingleAnswer'
-    MULTIPLE = 'MultipleAnswer', 'MultipleAnswer'
+class QuestionType(models.IntegerChoices):
+    SINGLE = 0
+    MULTIPLE = 1
 
 
 class Quiz(models.Model):
