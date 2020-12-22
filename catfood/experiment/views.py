@@ -51,7 +51,7 @@ def experiment_case_list(request):
 
 
 @api_view(['GET', 'PUT'])
-@permission_classes([IsChargingTeacher | IsTeacher ])
+@permission_classes([IsChargingTeacher | IsTeacher])
 @authentication_classes([CatfoodAuthentication])
 def experiment_case_detail(request, pk):
     """
@@ -75,8 +75,9 @@ def experiment_case_detail(request, pk):
             return Response(utils.generate_response(serializer.data, True))
         return Response(utils.generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['GET'])
-@permission_classes([IsStudent])
+@permission_classes([IsStudent | IsChargingTeacher | IsTeacher | IsTeachingAssistant])
 @authentication_classes([CatfoodAuthentication])
 def student_get_case_detail(request, course_case_id):
     """
@@ -92,7 +93,7 @@ def student_get_case_detail(request, course_case_id):
         case_id = course_case_serializer['case_id']
         # 补充案例信息
 
-        case = ExperimentCaseDatabase.objects.get(experiment_case_id=case_id.value)        
+        case = ExperimentCaseDatabase.objects.get(experiment_case_id=case_id.value)
         case_serializer = ExperimentCaseDatabaseSerializer(case)
         answer = dict(course_case_serializer.data)
         answer['experiment_name'] = case_serializer.data['experiment_name']
@@ -110,6 +111,7 @@ def student_get_case_detail(request, course_case_id):
         except ExperimentAssignment.DoesNotExist:
             answer['is_submit'] = False
         return Response(utils.generate_response(answer, True))
+
 
 @api_view(['GET'])
 @permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant])
@@ -132,6 +134,7 @@ def teacher_get_assignment_detail(request, submission_id):
         answer['experiment_case_description'] = case_serializer.data['experiment_case_description']
         return Response(utils.generate_response(answer, True))
 
+
 @api_view(['GET'])
 @permission_classes([IsChargingTeacher])
 @authentication_classes([CatfoodAuthentication])
@@ -147,11 +150,12 @@ def teacher_public_all_assignments(request, course_case_id):
             }
             assignment_serializer = ExperimentAssignmentSerializer(assignment_serializer)
             if assignment_serializer.is_valid():
-                 serializer.save()
+                serializer.save()
             else:
                 error_data = {"detail": "update error"}
                 return Response(utils.generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
         return Response(utils.generate_response(' ', True), status=status.HTTP_201_CREATED)
+
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant | IsStudent])
@@ -291,7 +295,8 @@ def assignment_student_detail(request, pk):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant | IsStudent])
+@authentication_classes([CatfoodAuthentication])
 def assignment_teacher_list(request, course_case_id):
     """
     List all the assignments with a specific course_case_id for teacher.
@@ -305,6 +310,8 @@ def assignment_teacher_list(request, course_case_id):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant | IsStudent])
+@authentication_classes([CatfoodAuthentication])
 def assignment_teacher_detail(request, pk):
     """
     Retrieve, update or delete a assignment submission instance.

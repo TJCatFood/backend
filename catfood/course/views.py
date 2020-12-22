@@ -27,8 +27,22 @@ def courses_list(request):
     List all courses, or create a new course.
     """
     if request.method == 'GET':
+        if request.user.character in [2, 3]:
+            teacher_id = request.user.user_id
+            teachs = Teach.objects.all()
+            teachs_serializer = TeachSerializers(teachs.filter(teacher_id=teacher_id), many=True)
+            answer = []
+            for teach in teachs_serializer.data:
+                course_id = teach['course_id']
+                courses = Course.objects.all()
+                courses_serializer = CourseSerializers(courses.filter(course_id=course_id), many=True)
+                answer.extend(courses_serializer.data)
+            return Response(generate_response(answer, True))
+        elif request.user.character in [4]:
+            pass
         courses = Course.objects.all()
         serializer = CourseSerializers(courses, many=True)
+        print(serializer.data)
         return Response(generate_response(serializer.data, True))
 
     elif request.method == 'POST':
@@ -43,7 +57,7 @@ def courses_list(request):
         return Response(generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT'])
+@api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant | IsStudent])
 @authentication_classes([CatfoodAuthentication])
 def course_detail(request, course_id):
@@ -71,6 +85,15 @@ def course_detail(request, course_id):
             return Response(generate_response(serializer.data, True))
         return Response(generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
 
+    elif request.method == 'DELETE':
+        if request.user.character in [1]:
+            course.delete()
+            response_data = {"detail": "have delete"}
+            return Response(generate_response(response_data, True), status=status.HTTP_204_NO_CONTENT)
+        else:
+            error_msg = {"detail": "没有权限"}
+            return Response(generate_response(error_msg, False), status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant])
@@ -82,6 +105,13 @@ def teach_list(request):
     if request.method == 'GET':
         teach_list = Teach.objects.all()
         serializer = TeachSerializers(teach_list, many=True)
+        answer = serializer.data
+        for index, teach in enumerate(answer):
+            course_id = teach['course_id']
+            course_info = CourseSerializers(Course.objects.get(course_id=course_id)).data
+            answer[index]['course_name'] = course_info['course_name']
+            answer[index]['course_description'] = course_info['course_description']
+            answer[index]['course_credit'] = course_info['course_credit']
         return Response(generate_response(serializer.data, True))
 
     elif request.method == 'POST':
