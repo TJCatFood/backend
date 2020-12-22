@@ -8,6 +8,7 @@ from os import environ
 import json
 
 from catfood.settings import MINIO_STORAGE_MEDIA_BUCKET_NAME as DEFAULT_BUCKET
+from catfood.settings import MINIO_STORAGE_USE_HTTPS
 
 # AVATAR_BUCKET
 AVATAR_PREFIX = "avatar"
@@ -20,10 +21,10 @@ local_minio_client = Minio(
     environ['MINIO_ADDRESS'],
     access_key=environ['MINIO_ACCESS_KEY'],
     secret_key=environ['MINIO_SECRET_KEY'],
-    secure=False,
+    secure=MINIO_STORAGE_USE_HTTPS,
 )
 
-# predefined_anonymous read-only avatar policy
+# predefined anonymous read-only avatar policy
 
 predefined_avatar_policy = {
     "Version": "2012-10-17",

@@ -28,6 +28,7 @@ from datetime import timedelta
 from os import environ
 
 from catfood.settings import MINIO_STORAGE_MEDIA_BUCKET_NAME as DEFAULT_BUCKET
+from catfood.settings import MINIO_STORAGE_USE_HTTPS
 
 import random
 
@@ -39,7 +40,7 @@ local_minio_client = Minio(
     environ['MINIO_ADDRESS'],
     access_key=environ['MINIO_ACCESS_KEY'],
     secret_key=environ['MINIO_SECRET_KEY'],
-    secure=False,
+    secure=MINIO_STORAGE_USE_HTTPS,
 )
 
 # default file URL timeout = 15 min
