@@ -38,8 +38,10 @@ predefined_avatar_policy = {
     ],
 }
 
+
 class AvatarConfig(AppConfig):
     name = 'avatar'
     verbose_name = "Catfood Avatar"
+
     def ready(self):
         local_minio_client.set_bucket_policy(DEFAULT_BUCKET, json.dumps(predefined_avatar_policy))
