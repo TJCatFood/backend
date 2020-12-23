@@ -11,6 +11,7 @@ urlpatterns = [
     path('matches/<int:contest_id>', views.MatchesView.as_view()),
     path('matches/student', views.get_matches_student),
     path('matchid', views.get_matchid),
-    path('contest/question/<int:contest_id>', views.get_contest_questions),
+    path('contest/questions/student/<int:contest_id>', views.get_contest_questions_student),
+    path('contest/questions/teacher/<int:contest_id>', views.get_contest_questions_teacher),
     path('contest/end', views.get_contest_end),
 ]
