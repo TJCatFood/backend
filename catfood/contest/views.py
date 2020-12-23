@@ -240,7 +240,7 @@ def get_matchid(request):
     except TypeError:
         error = Error('Bad Request: studentId or contestId illegal!')
         return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
-    
+
     match = models.Match.objects.filter(contest_id=contest_id, user_id=student_id)
     if match.count() > 0:
         return Response({
@@ -302,7 +302,7 @@ def get_contest_questions_student(request, contest_id):
         contest_question['question_choice_b_content'] = question.question_choice_b_content
         contest_question['question_choice_c_content'] = question.question_choice_c_content
         contest_question['question_choice_d_content'] = question.question_choice_d_content
-    contest_questions=list(contest_questions)
+    contest_questions = list(contest_questions)
     my_serializer = QuestionSerializer(data=contest_questions, many=True)
     my_serializer.is_valid(True)
     return Response({
@@ -352,7 +352,7 @@ def get_contest_questions_teacher(request, contest_id):
         contest_question['question_choice_b_content'] = question.question_choice_b_content
         contest_question['question_choice_c_content'] = question.question_choice_c_content
         contest_question['question_choice_d_content'] = question.question_choice_d_content
-    contest_questions=list(contest_questions)
+    contest_questions = list(contest_questions)
     my_serializer = QuestionAnswerSerializer(data=contest_questions, many=True)
     my_serializer.is_valid(True)
     return Response({
@@ -469,9 +469,9 @@ class ContestView(APIView):
         except TypeError:
             error = Error('Bad Request: questions must be a list!')
             return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
-        l = len(questions)
-        for i in range(l):
-            for j in range(l):
+        length = len(questions)
+        for i in range(length):
+            for j in range(length):
                 if i == j:
                     continue
                 else:
@@ -520,7 +520,7 @@ class ContestView(APIView):
             contest_question['question_choice_b_content'] = question.question_choice_b_content
             contest_question['question_choice_c_content'] = question.question_choice_c_content
             contest_question['question_choice_d_content'] = question.question_choice_d_content
-        contest_questions=list(contest_questions)
+        contest_questions = list(contest_questions)
         my_serializer = QuestionAnswerSerializer(data=contest_questions, many=True)
         my_serializer.is_valid(True)
         response = {
@@ -528,7 +528,7 @@ class ContestView(APIView):
             "questions": my_serializer.data
         }
         return Response(response, status=status.HTTP_201_CREATED)
-    
+
     def delete(self, request, format=None):
         params = request.query_params.dict()
         contest_id = params['contestId']
@@ -578,9 +578,8 @@ class MatchesView(APIView):
             return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
         return self.get_contest_matches(contest, pg_sz, pg_num)
-        
 
-    def get_contest_matches(self, contest, pg_sz, pg_num):  
+    def get_contest_matches(self, contest, pg_sz, pg_num):
         all_matches = models.Match.objects.filter(contest_id=contest.contest_id).order_by('match_tag').distinct('match_tag')
         total = all_matches.count()
         pg_start = (pg_num - 1) * pg_sz
@@ -683,6 +682,7 @@ class MatchSerializer(Serializer):
     score = IntegerField()
     courseId = IntegerField()
     publisherId = IntegerField()
+
 
 class FKContestSerializer(Serializer):
     contest_id = IntegerField()
