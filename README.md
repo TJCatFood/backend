@@ -52,6 +52,7 @@
 
 **注意！**
 - **不要滥用 sudo**
+  - 如果不加 sudo 时使用 docker 出错，你可能需要将当前用户加入 docker 用户组并重启会话
 - 在本地开发分支中执行以下操作
 - 所有对于 `catfood` 下文件的修改都与本地目录同步
 - DB 的数据会持久化存储在 `.persistence` 下，删除请使用
@@ -86,6 +87,12 @@ USER_ID=`id -u` GROUP_ID=`id -g` MINIO_ADDRESS=`myip` docker-compose up
 不要关闭终端，使用代码编辑器修改代码
 
 在 `http://127.0.0.1:8000` 可以访问 Web API，本地文件保存时会自动刷新服务器
+
+在 docker 的依赖发生变化后（参考 Dockerfile），请重新构建 docker：
+
+```
+USER_ID=`id -u` GROUP_ID=`id -g` MINIO_ADDRESS=`myip` docker-compose build
+```
 
 #### 在 Docker 中运行指令
 
