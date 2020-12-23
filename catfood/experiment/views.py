@@ -137,26 +137,26 @@ def teacher_get_assignment_detail(request, submission_id):
         return Response(utils.generate_response(answer, True))
 
 
-@api_view(['GET'])
+@api_view(['PUT'])
 @permission_classes([IsChargingTeacher])
 @authentication_classes([CatfoodAuthentication])
 def teacher_public_all_assignments(request, course_case_id):
     if request.method == 'PUT':
-        assignment_list = ExperimentAssignment.objects.all()
-        assignment_list = assignment_list.filter(course_case_id=course_case_id)
-        assignment_list = ExperimentAssignmentSerializer(assignment_list, many=True)
+        assignment_model_list = ExperimentAssignment.objects.all().filter(course_case_id=course_case_id)
+        assignment_list = ExperimentAssignmentSerializer(assignment_model_list, many=True)
         for index, assignment in enumerate(assignment_list.data):
-            change_data = {
-                'submission_case_id': assignment['submission_case_id'],
-                'submission_is_public': True
-            }
-            assignment_serializer = ExperimentAssignmentSerializer(assignment_serializer)
+            change_data = assignment
+            change_data['submission_is_public'] = True
+            print(change_data)
+            assignment_serializer = ExperimentAssignmentSerializer(assignment_model_list[index], data=change_data, partial=True)
             if assignment_serializer.is_valid():
-                serializer.save()
+                assignment_serializer.save()
             else:
+                print(assignment_serializer.errors)
                 error_data = {"detail": "update error"}
-                return Response(utils.generate_response(error_data, False), status=status.HTTP_404_NOT_FOUND)
-        return Response(utils.generate_response(' ', True), status=status.HTTP_201_CREATED)
+                return Response(utils.generate_response(error_data, False))
+        success_data = {"detail": "success"}
+        return Response(utils.generate_response(success_data, True), status=status.HTTP_201_CREATED)
 
 
 @api_view(['GET', 'POST'])
