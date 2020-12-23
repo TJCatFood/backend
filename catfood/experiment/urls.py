@@ -18,4 +18,5 @@ urlpatterns = [
     path('student/case/detail/<int:course_case_id>', views.student_get_case_detail),
     path('teacher/assignment/detail/<int:submission_id>', views.teacher_get_assignment_detail),
     path('teacher/assignment/public/<int:course_case_id>', views.teacher_public_all_assignments),
+    path('statistics/course-case/<int:course_case_id>', views.get_course_case_statistics),
 ]
