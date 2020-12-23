@@ -1,3 +1,4 @@
+from django.db.models.query import QuerySet
 from django.http.response import HttpResponseBadRequest
 from django.shortcuts import render
 from django.db import models
@@ -57,6 +58,9 @@ class QuestionView(APIView):
         need_pagination = False
         pagination_page_size = -1
         pagination_page_num = -1
+        need_to_select_from_chapter = False
+        chapter_start = -1
+        chapter_end = -1
 
         if query_dict:
             # find out whether the user requested for specific type of question
@@ -77,6 +81,25 @@ class QuestionView(APIView):
                 # not an int
                 return Response(dict({
                     "msg": "Invaild pagination request."
+                }), status=400)
+
+            # find out whether the user requested for
+            # question falls in chapter ranging from start and end
+            try:
+                chapter_start = int(query_dict["chapterStart"])
+                chapter_end = int(query_dict["chapterEnd"])
+                if chapter_start > chapter_end:
+                    return Response(dict({
+                        "msg": "Invaild chapter selection request: "
+                        "start index is larger than end index"
+                    }), status=400)
+                need_to_select_from_chapter = True
+            except KeyError:
+                pass
+            except ValueError:
+                # not an int
+                return Response(dict({
+                    "msg": "Invaild chapter selection request."
                 }), status=400)
 
         all_questions = []
@@ -100,6 +123,14 @@ class QuestionView(APIView):
             all_multiple_choice_questions = MultipleChoiceQuestion.objects.all()
             for item in all_multiple_choice_questions:
                 all_questions.append(Question(item))
+
+        if need_to_select_from_chapter:
+            all_questions_original = all_questions
+            all_questions = []
+            item: Question
+            for item in all_questions_original:
+                if chapter_start <= item.question_chapter <= chapter_end:
+                    all_questions.append(item)
 
         response = {
             "questions": [],
