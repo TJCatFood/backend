@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from contest.models import Contest, Match
+from contest.models import Contest, Match, ContestQuestion
 
 
 class ContestSerializer(ModelSerializer):
@@ -26,4 +26,14 @@ class MatchSerializer(ModelSerializer):
             'contest_id',
             'user_id',
             'timestamp'
+        ]
+
+
+class ContestQuestionSerializer(ModelSerializer):
+    class Meta:
+        model = ContestQuestion
+        fields = [
+            'contest_id',
+            'question_id',
+            'question_type'
         ]
