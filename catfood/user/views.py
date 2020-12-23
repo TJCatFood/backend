@@ -59,7 +59,7 @@ class LoginView(APIView):
                     'message': "输入的用户ID不存在"
                 }
             }
-            return Response(content, status=400)
+            return Response(content, status=200)
 
         # check the password
         if not user.check_password(password):
@@ -69,7 +69,7 @@ class LoginView(APIView):
                     'message': "用户ID与密码不匹配"
                 }
             }
-            return Response(content, status=400)
+            return Response(content, status=200)
 
         content = {
             'isSuccess': True,
@@ -130,7 +130,7 @@ class RegisterView(APIView):
                     'message': "缺少必填信息"
                 }
             }
-            return Response(content, status=400)
+            return Response(content, status=200)
 
         try:
             avatar = request.data["avatar"]
@@ -145,14 +145,15 @@ class RegisterView(APIView):
             user = User.objects.create(password=password, realname=realname,
                                        email=email, university_id=university_id, school_id=school_id, character=character,
                                        personal_id=personal_id, avatar=avatar)
-        except(ObjectDoesNotExist):
+        except(Exception):
             content = {
                 'isSuccess': False,
                 'error': {
-                    'message': "大学或学院编号不符合外码约束"
+                    'message': "字段违反数据库约束（如外码约束和长度约束）"
                 }
             }
-            return Response(content, status=400)
+            return Response(content, status=200)
+
         request.session.flush()
         content = {
             'isSuccess': True,
@@ -241,7 +242,7 @@ class PasswordView(APIView):
                     'message': "旧密码错误"
                 }
             }
-            return Response(content, status=400)
+            return Response(content, status=200)
         try:
             password = request.data["password"]
         except(MultiValueDictKeyError):
@@ -278,7 +279,7 @@ class AccountsView(APIView):
                         'message': "待导入学生缺少必需信息"
                     }
                 }
-                return Response(content, status=400)
+                return Response(content, status=200)
             try:
                 avatar = student["avatar"]
             except(KeyError):
@@ -289,16 +290,25 @@ class AccountsView(APIView):
                 email = None
 
             try:
-                University.objects.get(university_id=university_id)
-                School.objects.get(school_id=school_id)
-            except(ObjectDoesNotExist):
+                university = University.objects.get(university_id=university_id)
+                school = School.objects.get(school_id=school_id)
+                user = User(
+                    realname=realname,
+                    email=User.objects.normalize_email(email),
+                    university_id=university,
+                    school_id=school,
+                    personal_id=personal_id,
+                    character=character,
+                    avatar=avatar,
+                )
+            except(Exception):
                 content = {
                     'isSuccess': False,
                     'error': {
-                        'message': "大学或学院编号不符合外码约束"
+                        'message': "字段违反数据库约束（如外码约束和长度约束）"
                     }
                 }
-                return Response(content, status=400)
+                return Response(content, status=200)
 
         responseData = []
         for student in request.data:
@@ -333,7 +343,7 @@ class CoursesView(APIView):
                         'message': "缺少用户号或课号"
                     }
                 }
-                return Response(content, status=400)
+                return Response(content, status=200)
             try:
                 student = User.objects.get(user_id=student_id)
                 course = Course.objects.get(course_id=course_id)
@@ -344,7 +354,25 @@ class CoursesView(APIView):
                         'message': "用户号或课号不满足外码约束"
                     }
                 }
-                return Response(content, status=400)
+                return Response(content, status=200)
+            try:
+                takeCourseItem = TakeCourse.objects.get(student_id=student, course_id=course)
+            except(ObjectDoesNotExist):
+                serializer = TakeCourseSerializer(data=takeCourse)
+            else:
+                serializer = TakeCourseSerializer(takeCourseItem, data=takeCourse)
+            if not serializer.is_valid():
+                content = {
+                    'isSuccess': False,
+                    'error': {
+                        'message': "选课情况解析失败"
+                    }
+                }
+                return Response(content, status=200)
+
+        for takeCourse in request.data:
+            student = User.objects.get(user_id=student_id)
+            course = Course.objects.get(course_id=course_id)
             try:
                 takeCourseItem = TakeCourse.objects.get(student_id=student, course_id=course)
             except(ObjectDoesNotExist):
@@ -353,14 +381,6 @@ class CoursesView(APIView):
                 serializer = TakeCourseSerializer(takeCourseItem, data=takeCourse)
             if serializer.is_valid():
                 serializer.save()
-            else:
-                content = {
-                    'isSuccess': False,
-                    'error': {
-                        'message': "选课情况解析失败"
-                    }
-                }
-                return Response(content, status=400)
 
         content = {
             'isSuccess': True,
@@ -373,7 +393,6 @@ class CoursesView(APIView):
 
 class UniversityView(APIView):
     permission_classes = (AllowAny,)
-    # FIXME: only for test
 
     def get(self, request, format=None):
         cases = University.objects.all()
@@ -381,6 +400,7 @@ class UniversityView(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
+        # FIXME: only for test
         serializer = UniversitySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -390,7 +410,6 @@ class UniversityView(APIView):
 
 class SchoolView(APIView):
     permission_classes = (AllowAny,)
-    # FIXME: only for test
 
     def get(self, request, format=None):
         cases = School.objects.all()
@@ -398,6 +417,7 @@ class SchoolView(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
+        # FIXME: only for test
         serializer = SchoolSerializer(data=request.data)
         if serializer.is_valid():
             print(serializer)

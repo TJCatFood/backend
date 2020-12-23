@@ -10,6 +10,9 @@ from rest_framework.decorators import api_view
 
 from rest_framework.permissions import AllowAny
 
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+
 from .models import ExperimentDocument
 from .serializers import ExperimentDocumentSerializer
 
@@ -25,6 +28,7 @@ from datetime import timedelta
 from os import environ
 
 from catfood.settings import MINIO_STORAGE_MEDIA_BUCKET_NAME as DEFAULT_BUCKET
+from catfood.settings import MINIO_STORAGE_USE_HTTPS
 
 import random
 
@@ -36,7 +40,7 @@ local_minio_client = Minio(
     environ['MINIO_ADDRESS'],
     access_key=environ['MINIO_ACCESS_KEY'],
     secret_key=environ['MINIO_SECRET_KEY'],
-    secure=False,
+    secure=MINIO_STORAGE_USE_HTTPS,
 )
 
 # default file URL timeout = 15 min
@@ -58,30 +62,25 @@ class ExperimentView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request, experiment_id, format=None):
-        request_body = None
-        request_has_body = False
+        query_dict = request.query_params
+
         need_pagination = False
         pagination_page_size = -1
         pagination_page_num = -1
 
-        request_body_unicode = request.body.decode('utf-8')
-        if len(request_body_unicode) != 0:
-            try:
-                request_body = json.loads(request_body_unicode)
-                request_has_body = True
-            except json.decoder.JSONDecodeError:
-                return Response(dict({
-                    "msg": "Invalid JSON string provided."
-                }), status=400)
-
-        if request_has_body:
+        if query_dict:
             # find out whether the user requested for pagination
             try:
-                pagination_page_size = request_body["itemCountOnOnePage"]
-                pagination_page_num = request_body["pageIndex"]
+                pagination_page_size = int(query_dict["itemCountOnOnePage"])
+                pagination_page_num = int(query_dict["pageIndex"])
                 need_pagination = True
             except KeyError:
                 pass
+            except ValueError:
+                # not an int
+                return Response(dict({
+                    "msg": "Invaild pagination request."
+                }), status=400)
 
         all_files = ExperimentDocument.objects.filter(experiment_id=experiment_id)
         # newly updated file on top
@@ -114,6 +113,8 @@ class ExperimentView(APIView):
             file_uploader=114514,
             file_token=file_token)
         new_experiment_file.file_token = file_token
+        path = default_storage.save('catfood/alive', ContentFile(MINIO_FILE_PLACEHOLDER))
+        default_storage.delete(path)
         post_url = local_minio_client.presigned_url("PUT",
                                                     DEFAULT_BUCKET,
                                                     file_token,
