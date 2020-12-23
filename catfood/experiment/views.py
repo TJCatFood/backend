@@ -260,7 +260,8 @@ def assignment_student_list(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([AllowAny])
+@permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant | IsStudent])
+@authentication_classes([CatfoodAuthentication])
 def assignment_student_detail(request, pk):
     """
     Retrieve, update or delete a assignment submission instance.

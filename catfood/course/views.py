@@ -20,7 +20,8 @@ from course.utils import generate_response
 
 
 @api_view(['GET', 'POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant | IsStudent])
+@authentication_classes([CatfoodAuthentication])
 def courses_list(request):
     """
     List all courses, or create a new course.
