@@ -10,8 +10,8 @@ class QuestionType(models.IntegerChoices):
 
 class Contest(models.Model):
     contest_id = models.AutoField(primary_key=True)
-    course_id = models.ForeignKey('course.Course', on_delete=models.CASCADE)
-    publisher_id = models.ForeignKey('user.User', on_delete=models.CASCADE)
+    course_id = models.ForeignKey('course.Course', on_delete=models.CASCADE, related_name='course_id+', db_column='course_id')
+    publisher_id = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='publisher_id+', db_column='publisher_id')
     title = models.CharField(max_length=100, null=True)
     participant_number = models.IntegerField()
     start_time = models.DateTimeField()
@@ -21,8 +21,8 @@ class Contest(models.Model):
 
 
 class AttendContest(models.Model):
-    user_id = models.ForeignKey('user.User', on_delete=models.CASCADE)
-    contest_id = models.ForeignKey('Contest', on_delete=models.CASCADE)
+    user_id = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='user_id+', db_column='user_id')
+    contest_id = models.ForeignKey('Contest', on_delete=models.CASCADE, related_name='contest_id+', db_column='contest_id')
     timestamp = models.DateTimeField(auto_now_add=True)
     score = models.IntegerField()
     rank = models.IntegerField()
@@ -32,7 +32,7 @@ class AttendContest(models.Model):
 
 
 class ContestQuestion(models.Model):
-    contest_id = models.ForeignKey('Contest', on_delete=models.CASCADE)
+    contest_id = models.ForeignKey('Contest', on_delete=models.CASCADE, related_name='contest_id+', db_column='contest_id')
     question_id = models.IntegerField()
     question_type = models.IntegerField(
         choices=QuestionType.choices,
@@ -45,15 +45,15 @@ class ContestQuestion(models.Model):
 
 class Match(models.Model):
     match_id = models.AutoField(primary_key=True)
-    contest_id = models.ForeignKey('Contest', on_delete=models.CASCADE)
-    user_id = models.ForeignKey('user.User', on_delete=models.CASCADE)
+    contest_id = models.ForeignKey('Contest', on_delete=models.CASCADE, related_name='contest_id+', db_column='contest_id')
+    user_id = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='user_id+', db_column='user_id')
     timestamp = models.DateTimeField(auto_now_add=True)
     match_tag = models.IntegerField(default=0)
 
 
 class ContestSubmission(models.Model):
-    user_id = models.ForeignKey('user.User', on_delete=models.CASCADE)
-    contest_id = models.ForeignKey('Contest', on_delete=models.CASCADE)
+    user_id = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='user_id+', db_column='user_id')
+    contest_id = models.ForeignKey('Contest', on_delete=models.CASCADE, related_name='contest_id+', db_column='contest_id')
     timestamp = models.DateTimeField(auto_now_add=True)
     question_id = models.IntegerField()
     question_type = models.IntegerField(
