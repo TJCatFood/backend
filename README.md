@@ -91,7 +91,7 @@ USER_ID=`id -u` GROUP_ID=`id -g` MINIO_ADDRESS=`myip` docker-compose up
 在 docker 的依赖发生变化后（参考 Dockerfile），请重新构建 docker：
 
 ```
-USER_ID=`id -u` GROUP_ID=`id -g` MINIO_ADDRESS=`myip` docker-compose build
+docker-compose build
 ```
 
 #### 在 Docker 中运行指令
