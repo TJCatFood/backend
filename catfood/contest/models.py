@@ -23,7 +23,7 @@ class Contest(models.Model):
 class AttendContest(models.Model):
     user_id = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='user_id+', db_column='user_id')
     contest_id = models.ForeignKey('Contest', on_delete=models.CASCADE, related_name='contest_id+', db_column='contest_id')
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField()
     score = models.IntegerField()
     rank = models.IntegerField()
 
