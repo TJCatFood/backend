@@ -104,17 +104,23 @@ class QuestionView(APIView):
 
         all_questions = []
         if need_filter:
-            if requested_question_type == QuestionType.SINGLE_CHOICE:
-                all_single_choice_questions = SingleChoiceQuestion.objects.all()
-                for item in all_single_choice_questions:
-                    all_questions.append(Question(item))
-            elif requested_question_type == QuestionType.MULTIPLE_CHOICE:
-                all_multiple_choice_questions = MultipleChoiceQuestion.objects.all()
-                for item in all_multiple_choice_questions:
-                    all_questions.append(Question(item))
-            else:
+            try:
+                if int(requested_question_type) == QuestionType.SINGLE_CHOICE:
+                    all_single_choice_questions = SingleChoiceQuestion.objects.all()
+                    for item in all_single_choice_questions:
+                        all_questions.append(Question(item))
+                elif int(requested_question_type) == QuestionType.MULTIPLE_CHOICE:
+                    all_multiple_choice_questions = MultipleChoiceQuestion.objects.all()
+                    for item in all_multiple_choice_questions:
+                        all_questions.append(Question(item))
+                else:
+                    return Response(dict({
+                        "msg": "question_type wants to fuck you"
+                    }), status=400)
+            except ValueError:
+                # not an int
                 return Response(dict({
-                    "msg": "question_type wants to fuck you"
+                    "msg": "question_type is not an int"
                 }), status=400)
         else:
             all_single_choice_questions = SingleChoiceQuestion.objects.all()
