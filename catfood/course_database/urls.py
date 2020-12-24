@@ -20,5 +20,6 @@ urlpatterns = [
     path('contest-question-database/question', contest_question_database_views.QuestionView.as_view()),
     path('contest-question-database/question/count', contest_question_database_views.QuestionCountView.as_view()),
     path('contest-question-database/question/<int:question_type>/<int:question_id>', contest_question_database_views.QuestionIdView.as_view()),
+    path('contest-question-database/question/random', contest_question_database_views.RandomQuestionView.as_view()),
     # contest question database ends
 ]

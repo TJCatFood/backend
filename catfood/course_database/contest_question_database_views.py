@@ -1,3 +1,4 @@
+from django.db.models.query import QuerySet
 from django.http.response import HttpResponseBadRequest
 from django.shortcuts import render
 from django.db import models
@@ -15,6 +16,7 @@ from .models import MultipleChoiceQuestion, SingleChoiceQuestion
 from typing import Union
 
 import json
+import random
 from enum import IntEnum
 
 
@@ -57,6 +59,9 @@ class QuestionView(APIView):
         need_pagination = False
         pagination_page_size = -1
         pagination_page_num = -1
+        need_to_select_from_chapter = False
+        chapter_start = -1
+        chapter_end = -1
 
         if query_dict:
             # find out whether the user requested for specific type of question
@@ -79,19 +84,44 @@ class QuestionView(APIView):
                     "msg": "Invaild pagination request."
                 }), status=400)
 
+            # find out whether the user requested for
+            # question falls in chapter ranging from start and end
+            try:
+                chapter_start = int(query_dict["chapterStart"])
+                chapter_end = int(query_dict["chapterEnd"])
+                if chapter_start > chapter_end:
+                    return Response(dict({
+                        "msg": "Invaild chapter selection request: "
+                        "start index is larger than end index"
+                    }), status=400)
+                need_to_select_from_chapter = True
+            except KeyError:
+                pass
+            except ValueError:
+                # not an int
+                return Response(dict({
+                    "msg": "Invaild chapter selection request."
+                }), status=400)
+
         all_questions = []
         if need_filter:
-            if requested_question_type == QuestionType.SINGLE_CHOICE:
-                all_single_choice_questions = SingleChoiceQuestion.objects.all()
-                for item in all_single_choice_questions:
-                    all_questions.append(Question(item))
-            elif requested_question_type == QuestionType.MULTIPLE_CHOICE:
-                all_multiple_choice_questions = MultipleChoiceQuestion.objects.all()
-                for item in all_multiple_choice_questions:
-                    all_questions.append(Question(item))
-            else:
+            try:
+                if int(requested_question_type) == QuestionType.SINGLE_CHOICE:
+                    all_single_choice_questions = SingleChoiceQuestion.objects.all()
+                    for item in all_single_choice_questions:
+                        all_questions.append(Question(item))
+                elif int(requested_question_type) == QuestionType.MULTIPLE_CHOICE:
+                    all_multiple_choice_questions = MultipleChoiceQuestion.objects.all()
+                    for item in all_multiple_choice_questions:
+                        all_questions.append(Question(item))
+                else:
+                    return Response(dict({
+                        "msg": "question_type wants to fuck you"
+                    }), status=400)
+            except ValueError:
+                # not an int
                 return Response(dict({
-                    "msg": "question_type wants to fuck you"
+                    "msg": "question_type is not an int"
                 }), status=400)
         else:
             all_single_choice_questions = SingleChoiceQuestion.objects.all()
@@ -100,6 +130,14 @@ class QuestionView(APIView):
             all_multiple_choice_questions = MultipleChoiceQuestion.objects.all()
             for item in all_multiple_choice_questions:
                 all_questions.append(Question(item))
+
+        if need_to_select_from_chapter:
+            all_questions_original = all_questions
+            all_questions = []
+            item: Question
+            for item in all_questions_original:
+                if chapter_start <= item.question_chapter <= chapter_end:
+                    all_questions.append(item)
 
         response = {
             "questions": [],
@@ -277,4 +315,132 @@ class QuestionIdView(APIView):
         return Response(dict({
             "msg": "Good."
         }))
+
+
+class RandomQuestionView(APIView):
+
+    # FIXME: this permission is for testing purpose only
+    permission_classes = (AllowAny,)
+
+    def get(self, request, format=None):
+        query_dict = request.query_params
+        need_to_select_from_chapter = False
+        chapter_start = -1
+        chapter_end = -1
+
+        single_choice_question_num = -1
+        multiple_choice_question_num = -1
+
+        if query_dict:
+            # find out whether the user requested for
+            # question falls in chapter ranging from start and end
+            try:
+                chapter_start = int(query_dict["chapterStart"])
+                chapter_end = int(query_dict["chapterEnd"])
+                if chapter_start > chapter_end:
+                    return Response(dict({
+                        "msg": "Invaild chapter selection request: "
+                        "start index is larger than end index"
+                    }), status=400)
+                need_to_select_from_chapter = True
+            except KeyError:
+                pass
+            except ValueError:
+                # not an int
+                return Response(dict({
+                    "msg": "Invaild chapter selection request."
+                }), status=400)
+            try:
+                single_choice_question_num = int(query_dict["singleChoiceQuestionNum"])
+            except KeyError:
+                pass
+            except ValueError:
+                # not an int
+                return Response(dict({
+                    "msg": "Invaild singleChoiceQuestionNum request."
+                }), status=400)
+            try:
+                multiple_choice_question_num = int(query_dict["mutipleChoiceQuestionNum"])
+            except KeyError:
+                pass
+            except ValueError:
+                # not an int
+                return Response(dict({
+                    "msg": "Invaild mutipleChoiceQuestionNum request."
+                }), status=400)
+        if single_choice_question_num == multiple_choice_question_num == -1:
+            return Response(dict({
+                "msg": "You should provide a limit for at least one kind of question."
+            }), status=400)
+
+        response = {
+            "questions": [],
+            "single_choice_question_stats": False,
+            "multiple_choice_question_stats": False,
+        }
+
+        all_single_choice_questions_list = []
+        all_multiple_choice_questions_list = []
+        selected_random_single_choice_questions = []
+        selected_random_multiple_choice_questions = []
+
+        if single_choice_question_num != -1:
+            all_single_choice_questions_queryset = SingleChoiceQuestion.objects.all()
+            for item in all_single_choice_questions_queryset:
+                all_single_choice_questions_list.append(Question(item))
+            selected_single_choice_questions_list = all_single_choice_questions_list
+            if need_to_select_from_chapter:
+                selected_single_choice_questions_list = []
+                item: Question
+                for item in all_single_choice_questions_list:
+                    if chapter_start <= item.question_chapter <= chapter_end:
+                        selected_single_choice_questions_list.append(item)
+            if len(selected_single_choice_questions_list) >= single_choice_question_num:
+                response["single_choice_question_stats"] = True
+                selected_random_single_choice_questions = random.choices(selected_single_choice_questions_list, k=single_choice_question_num)
+            else:
+                selected_random_single_choice_questions = selected_single_choice_questions_list
+            for item in selected_random_single_choice_questions:
+                response["questions"].append({
+                    "questionId": item.question_id,
+                    "questionType": item.question_type,
+                    "questionChapter": item.question_chapter,
+                    "questionContent": item.question_content,
+                    "questionChoiceAContent": item.question_choice_a_content,
+                    "questionChoiceBContent": item.question_choice_b_content,
+                    "questionChoiceCContent": item.question_choice_c_content,
+                    "questionChoiceDContent": item.question_choice_d_content,
+                    "questionAnswer": item.question_answer,
+                })
+
+        if multiple_choice_question_num != -1:
+            all_multiple_choice_questions_queryset = MultipleChoiceQuestion.objects.all()
+            for item in all_multiple_choice_questions_queryset:
+                all_multiple_choice_questions_list.append(Question(item))
+            selected_multiple_choice_questions_list = all_multiple_choice_questions_list
+            if need_to_select_from_chapter:
+                selected_multiple_choice_questions_list = []
+                item: Question
+                for item in all_multiple_choice_questions_list:
+                    if chapter_start <= item.question_chapter <= chapter_end:
+                        selected_multiple_choice_questions_list.append(item)
+            if len(selected_multiple_choice_questions_list) >= multiple_choice_question_num:
+                response["multiple_choice_question_stats"] = True
+                selected_random_multiple_choice_questions = random.choices(selected_multiple_choice_questions_list, k=multiple_choice_question_num)
+            else:
+                selected_random_multiple_choice_questions = selected_multiple_choice_questions_list
+            for item in selected_random_multiple_choice_questions:
+                response["questions"].append({
+                    "questionId": item.question_id,
+                    "questionType": item.question_type,
+                    "questionChapter": item.question_chapter,
+                    "questionContent": item.question_content,
+                    "questionChoiceAContent": item.question_choice_a_content,
+                    "questionChoiceBContent": item.question_choice_b_content,
+                    "questionChoiceCContent": item.question_choice_c_content,
+                    "questionChoiceDContent": item.question_choice_d_content,
+                    "questionAnswer": item.question_answer,
+                })
+
+        return Response(response)
 # Contest question database ends
