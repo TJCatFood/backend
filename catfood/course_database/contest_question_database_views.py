@@ -374,8 +374,7 @@ class RandomQuestionView(APIView):
             }), status=400)
 
         response = {
-            "single_choice_questions": [],
-            "multiple_choice_questions": [],
+            "questions": [],
             "single_choice_question_stats": False,
             "multiple_choice_question_stats": False,
         }
@@ -396,13 +395,13 @@ class RandomQuestionView(APIView):
                 for item in all_single_choice_questions_list:
                     if chapter_start <= item.question_chapter <= chapter_end:
                         selected_single_choice_questions_list.append(item)
-            if len(selected_single_choice_questions_list) > single_choice_question_num:
+            if len(selected_single_choice_questions_list) >= single_choice_question_num:
                 response["single_choice_question_stats"] = True
                 selected_random_single_choice_questions = random.choices(selected_single_choice_questions_list, k=single_choice_question_num)
             else:
                 selected_random_single_choice_questions = selected_single_choice_questions_list
             for item in selected_random_single_choice_questions:
-                response["single_choice_questions"].append({
+                response["questions"].append({
                     "questionId": item.question_id,
                     "questionType": item.question_type,
                     "questionChapter": item.question_chapter,
@@ -425,13 +424,13 @@ class RandomQuestionView(APIView):
                 for item in all_multiple_choice_questions_list:
                     if chapter_start <= item.question_chapter <= chapter_end:
                         selected_multiple_choice_questions_list.append(item)
-            if len(selected_multiple_choice_questions_list) > multiple_choice_question_num:
+            if len(selected_multiple_choice_questions_list) >= multiple_choice_question_num:
                 response["multiple_choice_question_stats"] = True
                 selected_random_multiple_choice_questions = random.choices(selected_multiple_choice_questions_list, k=multiple_choice_question_num)
             else:
                 selected_random_multiple_choice_questions = selected_multiple_choice_questions_list
             for item in selected_random_multiple_choice_questions:
-                response["multiple_choice_questions"].append({
+                response["questions"].append({
                     "questionId": item.question_id,
                     "questionType": item.question_type,
                     "questionChapter": item.question_chapter,
