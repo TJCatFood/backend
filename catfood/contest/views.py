@@ -437,6 +437,7 @@ class MatchView(APIView):
         else:
             return matches[0].match_tag + 1
 
+
 class AttendView(APIView):
     permission_classes = (AllowAny,)
 
