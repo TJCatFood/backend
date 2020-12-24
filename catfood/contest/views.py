@@ -9,13 +9,14 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import AllowAny
 from rest_framework.serializers import Serializer, IntegerField, CharField, DateTimeField
 
-from contest.serializer import ContestSerializer, ContestQuestionSerializer
+from contest.serializer import ContestSerializer, ContestQuestionSerializer, MatchSerializer, AttendSerializer
 from contest import models
 from user.models import User
 from course_database.models import SingleChoiceQuestion, MultipleChoiceQuestion
 from course.models import Course
 import datetime
 import pytz
+import json
 
 utc = pytz.utc
 
@@ -62,15 +63,14 @@ def get_matches(request):
                 "description": f"{contest.description}",
                 "rank": attend[0].rank,
                 "score": attend[0].score,
-                "courseId": contest.course_id,
-                "publisherId": contest.publisher_id
+                "courseId": contest.course_id_id,
+                "publisherId": contest.publisher_id_id
             }
             response_list.append(item)
-
     return Response(response_list)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'DELETE'])
 @permission_classes([AllowAny])
 def get_match(request, match_id):
     try:
@@ -79,18 +79,37 @@ def get_match(request, match_id):
         error = Error('Not Found: match not found!')
         return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
-    user_id = match.user_id
-    contest_id = match.contest_id
+    if request.method == 'DELETE':
+        match.delete()
+        return Response(match)
+
+    params = request.query_params.dict()
+
+    student_id = params.get('studentId', None)
+    if student_id is None:
+        error = Error('Bad Request: studentId needed!')
+        return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        student_id = int(student_id)
+    except TypeError:
+        error = Error('Bad Request: studentId illegal!')
+        return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
+
+    if match.user_id_id != student_id:
+        error = Error('Bad Request: student have no access!')
+        return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
+
+    contest_id = match.contest_id_id
 
     try:
-        user = User.objects.get(pk=user_id)
+        user = User.objects.get(pk=student_id)
         contest = models.Contest.objects.get(pk=contest_id)
     except models.Contest.DoesNotExist:
         error = Error('Not Found: user or contest not found!')
         return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
     attend = models.AttendContest.objects.filter(user_id=student_id, contest_id=contest_id)
-    if attend.count <= 0:
+    if attend.count() <= 0:
         error = Error('Bad Request: The match is not over yet!')
         return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
@@ -100,7 +119,7 @@ def get_match(request, match_id):
         q_type = q.question_type
         q_id = q.question_id
         try:
-            submission = models.ContestSubmission.objects.get(contest_id=contest_id, user_id=user_id, question_id=q_type, question_type=q_type)
+            submission = models.ContestSubmission.objects.get(contest_id=contest_id, user_id=student_id, question_id=q_id, question_type=q_type)
         except models.ContestSubmission.DoesNotExist:
             error = Error('Not Found: submission not found!')
             return Response(error.error, status=status.HTTP_404_NOT_FOUND)
@@ -136,12 +155,12 @@ def get_match(request, match_id):
     content = {
         "name": f"{user.realname}",
         "avatar": f"{user.avatar}",
-        "userId": user_id,
+        "userId": student_id,
         "contestId": contest_id,
-        "courseId": contest.course_id,
+        "courseId": contest.course_id_id,
         "timeStamp": f"{match.timestamp}",
         "title": f"{contest.title}",
-        "publisherId": contest.publisher_id,
+        "publisherId": contest.publisher_id_id,
         "participantNumber": contest.participant_number,
         "startTime": f"{contest.start_time}",
         "endTime": f"{contest.end_time}",
@@ -185,7 +204,7 @@ def get_matches_student(request):
     contests = models.Contest.objects.filter(course_id=course_id)
     for contest in contests:
         try:
-            attend = models.AttendContest.objects.get(user_id=student_id, contest_id=contest_id)
+            attend = models.AttendContest.objects.get(user_id=student_id, contest_id=contest.contest_id)
         except models.AttendContest.DoesNotExist:
             continue
         match = {
@@ -199,18 +218,19 @@ def get_matches_student(request):
             "description": f"{contest.description}",
             "rank": attend.rank,
             "score": attend.score,
-            "courseId": contest.course_id,
-            "publisherId": contest.publisher_id
+            "courseId": contest.course_id_id,
+            "publisherId": contest.publisher_id_id
         }
         matches.append(match)
-    my_serializer = MatchSerializer(data=matches, many=True)
+    my_serializer = MatchContestSerializer(data=matches, many=True)
     my_serializer.is_valid(True)
     student = {
         "userId": student_id,
         "email": f"{student.email}",
         "name": f"{student.realname}",
         "avatar": f"{student.avatar}",
-        "schoolId": student.school_id,
+        "universityId": student.university_id_id,
+        "schoolId": student.school_id_id,
         "personalId": student.personal_id
     }
     response = {
@@ -242,7 +262,8 @@ def get_matchid(request):
         return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
     match = models.Match.objects.filter(contest_id=contest_id, user_id=student_id)
-    if match.count() > 0:
+    attend = models.AttendContest.objects.filter(contest_id=contest_id, user_id=student_id)
+    if match.count() > 0 and attend.count() == 0:
         return Response({
             "matchId": match[0].match_id,
             "timeStamp": f"{match[0].timestamp}"
@@ -393,6 +414,52 @@ def get_contest_end(request):
     })
 
 
+class MatchView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request, format=None):
+        matches = models.Match.objects.all()
+        match_serializer = MatchSerializer(matches, many=True)
+        return Response(match_serializer.data)
+
+    def post(self, request, format=None):
+        data = request.data
+        # data['match_tag'] = self.get_match_tag()
+        match_serializer = MatchSerializer(data=data)
+        match_serializer.is_valid(True)
+        match_serializer.save()
+        return Response(match_serializer.data)
+
+    def get_match_tag(self):
+        matches = models.Match.objects.all().order_by(F('match_tag').desc())
+        if matches.count() == 0:
+            return 1
+        else:
+            return matches[0].match_tag + 1
+
+class AttendView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request, format=None):
+        attends = models.AttendContest.objects.all()
+        attend_serializer = AttendSerializer(attends, many=True)
+        return Response(attend_serializer.data)
+
+    def post(self, request, format=None):
+        data = request.data
+        attend_serializer = AttendSerializer(data=data)
+        attend_serializer.is_valid(True)
+        attend_serializer.save()
+        return Response(attend_serializer.data)
+
+    def delete(self, request, format=None):
+        params = request.query_params.dict()
+        user_id = params.get('userId', None)
+        contest_id = params.get('contestId', None)
+        attend = models.AttendContest.objects.get(user_id=user_id, contest_id=contest_id).delete()
+        return Response(attend)
+
+
 class TestView(APIView):
     permission_classes = (AllowAny,)
 
@@ -525,7 +592,7 @@ class ContestView(APIView):
         my_serializer.is_valid(True)
         response = {
             "contest": contest_serializer.data,
-            "questions": my_serializer.data
+            "questions": []
         }
         return Response(response, status=status.HTTP_201_CREATED)
 
@@ -584,27 +651,27 @@ class MatchesView(APIView):
         total = all_matches.count()
         pg_start = (pg_num - 1) * pg_sz
         pg_end = pg_num * pg_sz
-        if pg_start >= total:
-            error = Error('Bad Request: pageSize and pageNum illegal!')
-            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
         if pg_end > total:
             pg_end = total
-        all_matches = all_matches[pg_start:pg_end]
+        if pg_start >= total:
+            all_matches = []
+        else:
+            all_matches = all_matches[pg_start:pg_end]
         matches = []
 
         for match in all_matches:
             tag_matches = models.Match.objects.filter(match_tag=match.match_tag)
             participants = []
             for tag_match in tag_matches:
-                participant = User.objects.get(pk=tag_match.user_id)
-                attend = models.AttendContest.objects.get(contest_id=contest.contest_id, user_id=tag_match.user_id)
+                participant = User.objects.get(pk=tag_match.user_id_id)
+                attend = models.AttendContest.objects.get(contest_id=contest.contest_id, user_id=tag_match.user_id_id)
                 item = {
                     "userId": participant.user_id,
                     "email": f"{participant.email}",
-                    "name": f"{participant.name}",
+                    "name": f"{participant.realname}",
                     "avatar": f"{participant.avatar}",
-                    "universityId": participant.university_id,
-                    "schoolId": participant.school_id,
+                    "universityId": participant.university_id_id,
+                    "schoolId": participant.school_id_id,
                     "rank": attend.rank,
                     "score": attend.score,
                     "personalId": participant.personal_id
@@ -618,14 +685,14 @@ class MatchesView(APIView):
 
         response = {
             "contestId": contest.contest_id,
-            "publisherId": contest.publisher_id,
+            "publisherId": contest.publisher_id_id,
             "title": f"{contest.title}",
             "participantNumber": contest.participant_number,
             "startTime": f"{contest.start_time}",
             "endTime": f"{contest.end_time}",
             "chapter": contest.chapter,
             "description": f"{contest.description}",
-            "courseId": contest.course_id,
+            "courseId": contest.course_id_id,
             "matches": matches,
             "pagination": {
                 "pageNum": pg_num,
@@ -669,7 +736,7 @@ class QuestionSerializer(Serializer):
     question_choice_d_content = CharField()
 
 
-class MatchSerializer(Serializer):
+class MatchContestSerializer(Serializer):
     contestId = IntegerField()
     timeStamp = CharField()
     title = CharField()

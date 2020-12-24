@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from contest.models import Contest, Match, ContestQuestion
+from contest.models import Contest, Match, ContestQuestion, AttendContest
 
 
 class ContestSerializer(ModelSerializer):
@@ -25,7 +25,8 @@ class MatchSerializer(ModelSerializer):
             'match_id',
             'contest_id',
             'user_id',
-            'timestamp'
+            'timestamp',
+            'match_tag'
         ]
 
 
@@ -36,4 +37,16 @@ class ContestQuestionSerializer(ModelSerializer):
             'contest_id',
             'question_id',
             'question_type'
+        ]
+
+
+class AttendSerializer(ModelSerializer):
+    class Meta:
+        model = AttendContest
+        fields = [
+            'user_id',
+            'contest_id',
+            'timestamp',
+            'score',
+            'rank'
         ]
