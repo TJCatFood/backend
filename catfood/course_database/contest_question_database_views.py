@@ -366,11 +366,11 @@ class RandomQuestionView(APIView):
             except ValueError:
                 # not an int
                 return Response(dict({
-<<<<<<< HEAD
+                    << << << < HEAD
                     "msg": "Invaild multipleChoiceQuestionNum request."
-=======
+                    == == == =
                     "msg": "Invaild mutipleChoiceQuestionNum request."
->>>>>>> 3c8b0236903369a3ca89a5ee7ece0c7fadb8a9ec
+                    >> >>>> > 3c8b0236903369a3ca89a5ee7ece0c7fadb8a9ec
                 }), status=400)
         if single_choice_question_num == multiple_choice_question_num == -1:
             return Response(dict({
