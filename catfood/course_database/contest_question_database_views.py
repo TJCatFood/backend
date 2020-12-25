@@ -360,13 +360,13 @@ class RandomQuestionView(APIView):
                     "msg": "Invaild singleChoiceQuestionNum request."
                 }), status=400)
             try:
-                multiple_choice_question_num = int(query_dict["mutipleChoiceQuestionNum"])
+                multiple_choice_question_num = int(query_dict["multipleChoiceQuestionNum"])
             except KeyError:
                 pass
             except ValueError:
                 # not an int
                 return Response(dict({
-                    "msg": "Invaild mutipleChoiceQuestionNum request."
+                    "msg": "Invaild multipleChoiceQuestionNum request."
                 }), status=400)
         if single_choice_question_num == multiple_choice_question_num == -1:
             return Response(dict({
