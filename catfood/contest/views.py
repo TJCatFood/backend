@@ -321,7 +321,7 @@ def get_contest_questions_student(request, contest_id):
         contest_question['question_content'] = question.question_content
         contest_question['question_choice_a_content'] = question.question_choice_a_content
         contest_question['question_choice_b_content'] = question.question_choice_b_content
-        contest_question['question_choice_c_content'] = question.question_choice_c_content 
+        contest_question['question_choice_c_content'] = question.question_choice_c_content
         contest_question['question_choice_d_content'] = question.question_choice_d_content
     contest_questions = list(contest_questions)
     my_serializer = QuestionSerializer(data=contest_questions, many=True)

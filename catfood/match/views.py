@@ -151,11 +151,11 @@ def calculate_score(room):
 
 def calculate_rank(score_list, time_list):
     rank_list = []
-    l = len(score_list)
-    for i in range(l):
+    length = len(score_list)
+    for i in range(length):
         score = score_list[i]
         cnt = 0
-        for j in range(l):
+        for j in range(length):
             if score_list[j] < score or (score_list[j] == score and time_list[j] < time_list[i]):
                 cnt += 1
         rank_list.append(cnt + 1)
@@ -335,7 +335,7 @@ class CancelView(APIView):
 
         if room.get_user_index(student_id) < 0:
             error = Error('Not Found: user not in room!')
-            return Response(error.error, status=status.HTTP_404_NOT_FOUND) 
+            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
         cache.delete(student_id)
         room.delete_user(student_id)
