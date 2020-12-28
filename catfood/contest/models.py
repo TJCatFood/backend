@@ -60,7 +60,7 @@ class ContestSubmission(models.Model):
         choices=QuestionType.choices,
         default=QuestionType.SINGLE
     )
-    answer = models.CharField(max_length=16)
+    answer = models.CharField(max_length=16, blank=True)
 
     class Meta:
         unique_together = (('user_id', 'contest_id', 'question_id', 'question_type'),)

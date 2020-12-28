@@ -118,12 +118,11 @@ def get_match(request, match_id):
     for q in questions:
         q_type = q.question_type
         q_id = q.question_id
-        try:
-            submission = models.ContestSubmission.objects.get(contest_id=contest_id, user_id=student_id, question_id=q_id, question_type=q_type)
-        except models.ContestSubmission.DoesNotExist:
+        submission = models.ContestSubmission.objects.filter(contest_id=contest.contest_id, user_id=user_id, question_id=q_id, question_type=q_type)
+        if submission.count() == 0:
             error = Error('Not Found: submission not found!')
             return Response(error.error, status=status.HTTP_404_NOT_FOUND)
-        answer = submission.answer
+        answer = submission[0].answer
         if q_type == models.QuestionType.SINGLE:
             try:
                 question = SingleChoiceQuestion.objects.get(pk=q_id)
@@ -429,6 +428,13 @@ class MatchView(APIView):
         match_serializer.save()
         return Response(match_serializer.data)
 
+    def delete(self, request, format=None):
+        params = request.query_params.dict()
+        user_id = params.get('userId', None)
+        contest_id = params.get('contestId', None)
+        match = models.Match.objects.get(user_id=user_id, contest_id=contest_id).delete()
+        return Response(match)
+
 
 class AttendView(APIView):
     permission_classes = (AllowAny,)
@@ -501,9 +507,8 @@ class ContestView(APIView):
             return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
         if user.character == 4:
-            try:
-                attend = models.AttendContest.objects.get(contest_id=contest.contest_id, user_id=user_id)
-            except models.AttendContest.DoesNotExist:
+            submission = models.ContestSubmission.objects.filter(contest_id=contest.contest_id, user_id=user_id)
+            if submission.count() == 0:
                 b_is_participated = False
                 try:
                     match = models.Match.objects.get(contest_id=contest.contest_id, user_id=user_id)
