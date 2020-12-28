@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.db.models import F
 
 from rest_framework.response import Response
 from rest_framework.response import Response
@@ -8,10 +9,11 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny
 from django.core.cache import cache
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 
 from match.room import Room, RoomStatus, ContestRooms
 from contest.serializer import SubmissionSerializer, MatchSerializer, AttendSerializer
-from contest.models import Contest, Match, ContestSubmission, Contest, ContestQuestion
+from contest.models import Contest, Match, ContestSubmission, Contest, ContestQuestion, QuestionType
 from course_database.models import SingleChoiceQuestion, MultipleChoiceQuestion
 from user.models import User
 import time
@@ -29,8 +31,8 @@ contests = {}
 ws_url = "http://nchan:8081/api/v1/contest/pub?id="
 room_time = 60.0
 cache_time = 600
-ws_time = 1.0
-contest_time = 300
+ws_time = 2.0
+contest_time = 180
 submit_wait_time = 10.0
 rank_bonus = 10
 
@@ -38,7 +40,7 @@ rank_bonus = 10
 def contest_start(room):
     channel_id = room.channel_id
     contest_id = room.contest_id
-    matches = models.Match.objects.all().order_by(F('match_tag').desc())
+    matches = Match.objects.all().order_by(F('match_tag').desc())
     if matches.count() == 0:
         match_tag = 1
     else:
@@ -51,8 +53,8 @@ def contest_start(room):
             'user_id': user_id,
             'match_tag': match_tag
         }
-        matches.append[match]
-    match_serailizer = MatchSerializer(data=matches, many=True)
+        matches.append(match)
+    match_serializer = MatchSerializer(data=matches, many=True)
     match_serializer.is_valid(True)
     match_serializer.save()
     timer = Timer(contest_time, check_room, (channel_id,))
@@ -75,9 +77,10 @@ def check_room(channel_id):
 
 def contest_end(room):
     # results = [[rank_list],[score_list]]
-    results = calculate_score[room]
+    results = calculate_score(room)
     ranks = results[0]
     scores = results[1]
+    channel_id = room.channel_id
     url = ws_url + str(channel_id)
     payload = json.dumps({
         "type": 7,
@@ -99,7 +102,7 @@ def contest_end(room):
             return Response(error.error, status=status.HTTP_404_NOT_FOUND)
         attend = {
             'user_id': user_id,
-            'contest_id': match.contest_id,
+            'contest_id': contest_id,
             'timestamp': match.timestamp,
             'score': scores[i],
             'rank': ranks[i]
@@ -127,7 +130,7 @@ def calculate_score(room):
         error = Error('Not Found: contest not found')
         return Response(error.error, status=status.HTTP_404_NOT_FOUND)
     questions = ContestQuestion.objects.filter(contest_id=contest_id)
-    counts = questions.count()
+    count = questions.count()
     for user_id in user_id_list:
         submissions = ContestSubmission.objects.filter(user_id=user_id, contest_id=contest_id)
         right_count = 0
@@ -142,7 +145,7 @@ def calculate_score(room):
             time_list.append(utc.localize(datetime.datetime.utcnow()))
         score_list.append(right_count * 100 / count)
     rank_list = calculate_rank(score_list, time_list)
-    for i in len(rank_list):
+    for i in range(len(rank_list)):
         if rank_list[i] == 1:
             score_list[i] += rank_bonus
             break
@@ -163,17 +166,32 @@ def calculate_rank(score_list, time_list):
 
 
 def question_check(q_id, q_type, answer):
-    if q_type == models.QuestionType.SINGLE:
+    if q_type == QuestionType.SINGLE:
         question = SingleChoiceQuestion.objects.get(pk=q_id)
-    elif q_type == models.QuestionType.MULTIPLE:
+    elif q_type == QuestionType.MULTIPLE:
         question = MultipleChoiceQuestion.objects.get(pk=q_id)
-    corr_ans = question.answer
+    corr_ans = question.question_answer
     answer_list = sorted(answer)
     answer = "".join(answer_list)
     if answer.lower() == corr_ans.lower():
         return 1
     else:
         return 0
+
+
+# fuck
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def fuck(request):
+    params = request.query_params.dict()
+
+    student_id = params.get('studentId', None)
+    try:
+        cache.delete(student_id)
+    except:
+        error = Error('Not Found: student not found!')
+        return Response(error.error, status=status.HTTP_404_NOT_FOUND)
+    return Response()
 
 
 class TestView(APIView):
@@ -211,9 +229,8 @@ class StartView(APIView):
             error = Error('Not Found: contest not found!')
             return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
-        try:
-            match = Match.objects.get(user_id=user_id, contest_id=contest_id)
-        except Match.DoesNotExist:
+        match = Match.objects.filter(user_id=student_id, contest_id=contest_id)
+        if match.count() > 0:
             error = Error('Bad Request: Students have already taken part in the contest!')
             return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
@@ -551,7 +568,7 @@ class SubmissionView(APIView):
                 'contest_id': rooms[channel_id].contest_id,
                 'question_id': q_id,
                 'question_type': q_type,
-                'answer': answer
+                'answer': ans
             }
             submissions.append(submission)
         sub_serailizer = SubmissionSerializer(data=submissions, many=True)
@@ -571,8 +588,8 @@ class SubmissionView(APIView):
             url = ws_url + str(channel_id)
             payload = json.dumps({
                 "type": 5,
-                "content": "user " + res + "submit!",
-                "submissionArray": room.submit_list
+                "content": "user " + str(res) + "submit!",
+                "submitIndex": res
                 })
             requests.post(url, data=payload)
         return Response(status=status.HTTP_204_NO_CONTENT)
