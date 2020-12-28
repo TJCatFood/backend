@@ -424,18 +424,10 @@ class MatchView(APIView):
 
     def post(self, request, format=None):
         data = request.data
-        # data['match_tag'] = self.get_match_tag()
         match_serializer = MatchSerializer(data=data)
         match_serializer.is_valid(True)
         match_serializer.save()
         return Response(match_serializer.data)
-
-    def get_match_tag(self):
-        matches = models.Match.objects.all().order_by(F('match_tag').desc())
-        if matches.count() == 0:
-            return 1
-        else:
-            return matches[0].match_tag + 1
 
 
 class AttendView(APIView):
@@ -496,12 +488,10 @@ class ContestView(APIView):
 
         contests = models.Contest.objects.filter(course_id=course_id).order_by(F('end_time').desc())
         if contests.count() == 0:
-            error = Error('Not Found: No contest is over yet')
-            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
+            return Response([])
         time = utc.localize(datetime.datetime.utcnow())
         if time > contests[0].end_time:
-            error = Error('Not Found: No contest is over yet')
-            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
+            return Response([])
         contest = contests[0]
         serializer = ContestSerializer(contest)
         try:

@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from contest.models import Contest, Match, ContestQuestion, AttendContest
+from contest.models import Contest, Match, ContestQuestion, AttendContest, ContestSubmission
 
 
 class ContestSerializer(ModelSerializer):
@@ -49,4 +49,17 @@ class AttendSerializer(ModelSerializer):
             'timestamp',
             'score',
             'rank'
+        ]
+
+
+class SubmissionSerializer(ModelSerializer):
+    class Meta:
+        model = ContestSubmission
+        fields = [
+            'user_id',
+            'contest_id',
+            'timestamp',
+            'question_id',
+            'question_type',
+            'answer'
         ]

@@ -21,10 +21,28 @@ class Room():
         self.ready_list = [False] * total_count
         self.status = RoomStatus.WAIT
         self.contest_id = contest_id
+        self.submit_count = 0
+        self.submit_list = [False] * total_count
+
+    def user_submit(self, user_id):
+        try:
+            index = self.user_id_list.index(user_id)
+        except ValueError:
+            print('user not found!')
+            return None
+        else:
+            if self.submit_list[index]:
+                return -1
+            self.submit_list[index] = True
+            self.submit_count += 1
+            return index
 
     def add_user(self, user_id):
         self.user_id_list.append(user_id)
         self.cur_count += 1
+
+    def bis_end(self):
+        return self.submit_count == self.total_count
 
     def bis_empty(self):
         return self.cur_count == 0
