@@ -427,7 +427,7 @@ class MatchView(APIView):
         match_serializer.is_valid(True)
         match_serializer.save()
         return Response(match_serializer.data)
-    
+
     def delete(self, request, format=None):
         params = request.query_params.dict()
         user_id = params.get('userId', None)

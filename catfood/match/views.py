@@ -179,21 +179,6 @@ def question_check(q_id, q_type, answer):
         return 0
 
 
-# fuck
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def fuck(request):
-    params = request.query_params.dict()
-
-    student_id = params.get('studentId', None)
-    try:
-        cache.delete(student_id)
-    except:
-        error = Error('Not Found: student not found!')
-        return Response(error.error, status=status.HTTP_404_NOT_FOUND)
-    return Response()
-
-
 class TestView(APIView):
     permission_classes = (AllowAny,)
 

@@ -11,6 +11,4 @@ urlpatterns = [
     path('ready', views.ReadyView.as_view()),
     path('channel', views.ChannelView.as_view()),
     path('submission', views.SubmissionView.as_view()),
-    # fix me
-    path('fuck', views.fuck)
 ]
