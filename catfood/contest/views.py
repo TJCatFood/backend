@@ -118,12 +118,11 @@ def get_match(request, match_id):
     for q in questions:
         q_type = q.question_type
         q_id = q.question_id
-        try:
-            submission = models.ContestSubmission.objects.get(contest_id=contest_id, user_id=student_id, question_id=q_id, question_type=q_type)
-        except models.ContestSubmission.DoesNotExist:
+        submission = models.ContestSubmission.objects.filter(contest_id=contest.contest_id, user_id=user_id, question_id=q_id, question_type=q_type)
+        if submission.count() == 0:
             error = Error('Not Found: submission not found!')
             return Response(error.error, status=status.HTTP_404_NOT_FOUND)
-        answer = submission.answer
+        answer = submission[0].answer
         if q_type == models.QuestionType.SINGLE:
             try:
                 question = SingleChoiceQuestion.objects.get(pk=q_id)
@@ -424,18 +423,17 @@ class MatchView(APIView):
 
     def post(self, request, format=None):
         data = request.data
-        # data['match_tag'] = self.get_match_tag()
         match_serializer = MatchSerializer(data=data)
         match_serializer.is_valid(True)
         match_serializer.save()
         return Response(match_serializer.data)
 
-    def get_match_tag(self):
-        matches = models.Match.objects.all().order_by(F('match_tag').desc())
-        if matches.count() == 0:
-            return 1
-        else:
-            return matches[0].match_tag + 1
+    def delete(self, request, format=None):
+        params = request.query_params.dict()
+        user_id = params.get('userId', None)
+        contest_id = params.get('contestId', None)
+        match = models.Match.objects.get(user_id=user_id, contest_id=contest_id).delete()
+        return Response(match)
 
 
 class AttendView(APIView):
@@ -477,9 +475,9 @@ class ContestView(APIView):
 
     def get(self, request, format=None):
         params = request.query_params.dict()
-        student_id = params.get('studentId', None)
-        if student_id is None:
-            error = Error('Bad Request: studentId needed!')
+        user_id = params.get('userId', None)
+        if user_id is None:
+            error = Error('Bad Request: userId needed!')
             return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
         course_id = params.get('courseId', None)
@@ -488,31 +486,41 @@ class ContestView(APIView):
             return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            student_id = int(student_id)
+            user_id = int(user_id)
             course_id = int(course_id)
         except TypeError:
             error = Error('Bad Request: studentId or courseId illegal!')
             return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
 
         contests = models.Contest.objects.filter(course_id=course_id).order_by(F('end_time').desc())
+        if contests.count() == 0:
+            return Response([])
         time = utc.localize(datetime.datetime.utcnow())
         if time > contests[0].end_time:
-            error = Error('Not Found: No contest is over yet')
-            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
+            return Response([])
         contest = contests[0]
         serializer = ContestSerializer(contest)
         try:
-            attend = models.AttendContest.objects.get(contest_id=contest.contest_id, user_id=student_id)
-        except models.AttendContest.DoesNotExist:
-            b_is_participated = False
-            try:
-                match = models.Match.objects.get(contest_id=contest.contest_id, user_id=student_id)
-            except models.Match.DoesNotExist:
-                b_is_participating = False
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            error = Error('Not Found: user not found')
+            return Response(error.error, status=status.HTTP_404_NOT_FOUND)
+
+        if user.character == 4:
+            submission = models.ContestSubmission.objects.filter(contest_id=contest.contest_id, user_id=user_id)
+            if submission.count() == 0:
+                b_is_participated = False
+                try:
+                    match = models.Match.objects.get(contest_id=contest.contest_id, user_id=user_id)
+                except models.Match.DoesNotExist:
+                    b_is_participating = False
+                else:
+                    b_is_participating = True
             else:
-                b_is_participating = True
+                b_is_participated = True
+                b_is_participating = False
         else:
-            b_is_participated = True
+            b_is_participated = False
             b_is_participating = False
         contest_data = dict(serializer.data)
         return Response({
