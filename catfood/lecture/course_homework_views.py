@@ -117,6 +117,11 @@ class HomeworkView(APIView):
             homework_update_timestamp=datetime.now(),
         )
 
+        if new_homework.homework_start_timestamp > new_homework.homework_end_timestamp:
+            return Response(dict({
+                "msg": "End before start."
+            }), status=status.HTTP_400_BAD_REQUEST)
+
         try:
             new_homework.save()
         except ValidationError as e:
@@ -177,12 +182,16 @@ class HomeworkDataView(APIView):
             }), status=status.HTTP_404_NOT_FOUND)
 
         request_body = json.loads(request_body_unicode)
-        homework.homework_creator = request_body["homeworkCreatorId"]
         homework.homework_title = request_body["homeworkTitle"]
         homework.homework_description = request_body["homeworkDescription"]
         homework.homework_start_timestamp = request_body["homeworkStartTime"]
         homework.homework_end_timestamp = request_body["homeworkEndTime"]
         homework.homework_update_timestamp = datetime.now()
+
+        if homework.homework_start_timestamp > homework.homework_end_timestamp:
+            return Response(dict({
+                "msg": "End before start."
+            }), status=status.HTTP_400_BAD_REQUEST)
 
         homework.save()
 
@@ -211,6 +220,18 @@ class HomeworkDataFileView(APIView):
     def put(self, request, course_id, homework_id, format=None):
 
         replace_flag = False
+
+        try:
+            homework = Homework.objects.get(homework_id=homework_id)
+        except Homework.DoesNotExist:
+            return Response(dict({
+                "msg": "No such homework found."
+            }), status=status.HTTP_404_NOT_FOUND)
+
+        if homework.homework_end_timestamp < datetime.now():
+            return Response(dict({
+                "msg": "You can not submit after the deadline."
+            }), status=status.HTTP_400_BAD_REQUEST)
 
         try:
             # FIXME: get student_id from token.
