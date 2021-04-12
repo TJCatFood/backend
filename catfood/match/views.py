@@ -69,7 +69,7 @@ def check_room(channel_id):
             payload = json.dumps({
                 "type": 6,
                 "content": "Time out! Please submit!",
-                })
+            })
             requests.post(url, data=payload)
             timer = Timer(submit_wait_time, contest_end, (room,))
             timer.start()
@@ -87,7 +87,7 @@ def contest_end(room):
         "content": "contest end!",
         "rankArray": ranks,
         "scoreArray": scores
-        })
+    })
     requests.post(url, data=payload)
 
     contest_id = room.contest_id
@@ -274,7 +274,7 @@ class StartView(APIView):
         payload = json.dumps({
             "type": 1,
             "content": "request ready!"
-            })
+        })
         requests.post(url, data=payload)
         timer = Timer(room_time, self.room_check_ready, (room,))
         timer.start()
@@ -303,7 +303,7 @@ class StartView(APIView):
         payload = json.dumps({
             "type": 2,
             "content": "room clear!"
-            })
+        })
         requests.post(url, data=payload)
 
 
@@ -447,7 +447,7 @@ class ReadyView(APIView):
                     "type": 3,
                     "content": "A user ready!",
                     "readyArray": room.ready_list
-                    })
+                })
                 requests.post(url, data=payload)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -469,7 +469,7 @@ class ReadyView(APIView):
         payload = json.dumps({
             "type": 2,
             "content": "room clear!"
-            })
+        })
         requests.post(url, data=payload)
 
     def all_ready(self, room):
@@ -481,7 +481,7 @@ class ReadyView(APIView):
         payload = json.dumps({
             "type": 4,
             "content": "Contest start!",
-            })
+        })
         requests.post(url, data=payload)
         contest_start(room)
 
@@ -575,7 +575,7 @@ class SubmissionView(APIView):
                 "type": 5,
                 "content": "user " + str(res) + "submit!",
                 "submitIndex": res
-                })
+            })
             requests.post(url, data=payload)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
