@@ -20,6 +20,7 @@ from course.models import Course, Teach
 from user.models import TakeCourse
 from user.serializers import TakeCourseSerializer
 
+
 class TestView(APIView):
     permission_classes = (AllowAny,)
 

@@ -160,9 +160,9 @@ def assignment_student_detail(request, pk):
         response_headers = {}
         file_token = serializer.data['submission_file_token']
         get_url = local_minio_client.presigned_url("GET",
-                                                      DEFAULT_BUCKET,
-                                                      file_token,
-                                                      expires=DEFAULT_FILE_URL_TIMEOUT)
+                                                   DEFAULT_BUCKET,
+                                                   file_token,
+                                                   expires=DEFAULT_FILE_URL_TIMEOUT)
         response_headers['ASSIGNMENT_DOWNLOAD_URL'] = get_url
 
         ans = serializer.data

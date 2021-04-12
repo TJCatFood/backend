@@ -77,9 +77,9 @@ def experiment_case_list(request):
         random_hex_string = ('%030x' % random.randrange(16 ** 30))
         file_token = f"{EXPERIMENT_CASE_PREFIX }/{random_hex_string}/{file_display_name}"
         post_url = local_minio_client.presigned_url("PUT",
-                            DEFAULT_BUCKET,
-                            file_token,
-                            expires=DEFAULT_FILE_URL_TIMEOUT)
+                                                    DEFAULT_BUCKET,
+                                                    file_token,
+                                                    expires=DEFAULT_FILE_URL_TIMEOUT)
         new_case['experiment_case_file_token'] = file_token
         response_headers['CASE_FILE_UPLOAD_URL'] = post_url
 
@@ -88,12 +88,12 @@ def experiment_case_list(request):
         random_hex_string = ('%030x' % random.randrange(16 ** 30))
         file_token = f"{EXPERIMENT_CASE_PREFIX }/{random_hex_string}/{file_display_name}"
         post_url = local_minio_client.presigned_url("PUT",
-                                    DEFAULT_BUCKET,
-                                    file_token,
-                                    expires=DEFAULT_FILE_URL_TIMEOUT)
+                                                    DEFAULT_BUCKET,
+                                                    file_token,
+                                                    expires=DEFAULT_FILE_URL_TIMEOUT)
         new_case['answer_file_token'] = file_token
         response_headers['ANSWER_FILE_UPLOAD_URL'] = post_url
-        
+
         # other info
         new_case['experiment_name'] = request.data['experiment_name']
         new_case['experiment_case_name'] = request.data['experiment_case_name']
@@ -128,15 +128,15 @@ def experiment_case_detail(request, pk):
         response_headers = {}
         file_token = serializer.data['experiment_case_file_token']
         get_url = local_minio_client.presigned_url("GET",
-                                                      DEFAULT_BUCKET,
-                                                      file_token,
-                                                      expires=DEFAULT_FILE_URL_TIMEOUT)
+                                                   DEFAULT_BUCKET,
+                                                   file_token,
+                                                   expires=DEFAULT_FILE_URL_TIMEOUT)
         response_headers['CASE_FILE_DOWNLOAD_URL'] = get_url
         file_token = serializer.data['answer_file_token']
         get_url = local_minio_client.presigned_url("GET",
-                                                      DEFAULT_BUCKET,
-                                                      file_token,
-                                                      expires=DEFAULT_FILE_URL_TIMEOUT)
+                                                   DEFAULT_BUCKET,
+                                                   file_token,
+                                                   expires=DEFAULT_FILE_URL_TIMEOUT)
         response_headers['ANSWER_FILE_DOWNLOAD_URL'] = get_url
         # 去掉数据库中的 token 信息
         ans = serializer.data
@@ -177,4 +177,3 @@ def experiment_case_detail(request, pk):
             ans.pop('answer_file_token', None)
             return Response(utils.generate_response(ans, True), headers=response_headers)
         return Response(utils.generate_response(serializer.errors, False), status=status.HTTP_400_BAD_REQUEST)
-
