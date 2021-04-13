@@ -16,6 +16,8 @@ from contest.serializer import SubmissionSerializer, MatchSerializer, AttendSeri
 from contest.models import Contest, Match, ContestSubmission, Contest, ContestQuestion, QuestionType
 from course_database.models import SingleChoiceQuestion, MultipleChoiceQuestion
 from user.models import User
+from user.authentication import CatfoodAuthentication
+from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 import time
 from threading import Timer
 import requests
@@ -190,7 +192,8 @@ class TestView(APIView):
 
 
 class StartView(APIView):
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent]
 
     def post(self, request, format=None):
         data = request.data
@@ -306,7 +309,8 @@ class StartView(APIView):
 
 
 class CancelView(APIView):
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent]
 
     def post(self, request, format=None):
         data = request.data
@@ -343,7 +347,8 @@ class CancelView(APIView):
 
 
 class IndexView(APIView):
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent]
 
     def get(sele, request, format=None):
         data = request.query_params.dict()
@@ -385,7 +390,8 @@ class IndexView(APIView):
 
 
 class ReadyView(APIView):
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent]
 
     def post(self, request, format=None):
         data = request.data
@@ -487,7 +493,8 @@ class ReadyView(APIView):
 
 
 class ChannelView(APIView):
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent]
 
     def get(sele, request, format=None):
         data = request.query_params.dict()
@@ -517,7 +524,8 @@ class ChannelView(APIView):
 
 
 class SubmissionView(APIView):
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent]
 
     def post(self, request, format=None):
         data = request.data

@@ -12,6 +12,8 @@ from rest_framework.serializers import Serializer, IntegerField, CharField, Date
 from contest.serializer import ContestSerializer, ContestQuestionSerializer, MatchSerializer, AttendSerializer
 from contest import models
 from user.models import User
+from user.authentication import CatfoodAuthentication
+from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 from course_database.models import SingleChoiceQuestion, MultipleChoiceQuestion
 from course.models import Course
 import datetime
@@ -22,7 +24,8 @@ utc = pytz.utc
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@authentication_classes([CatfoodAuthentication])
+@permission_classes([IsTeachingAssistant | IsTeacher | IsChargingTeacher])
 def get_matches(request):
     params = request.query_params.dict()
 
@@ -71,7 +74,8 @@ def get_matches(request):
 
 
 @api_view(['GET', 'DELETE'])
-@permission_classes([AllowAny])
+@authentication_classes([CatfoodAuthentication])
+@permission_classes([IsStudent | IsTeachingAssistant | IsTeacher | IsChargingTeacher])
 def get_match(request, match_id):
     try:
         match = models.Match.objects.get(pk=match_id)
@@ -173,7 +177,8 @@ def get_match(request, match_id):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@authentication_classes([CatfoodAuthentication])
+@permission_classes([IsTeachingAssistant | IsTeacher | IsChargingTeacher])
 def get_matches_student(request):
     params = request.query_params
     student_id = params.get('studentId', None)
@@ -240,7 +245,8 @@ def get_matches_student(request):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@authentication_classes([CatfoodAuthentication])
+@permission_classes([IsStudent])
 def get_matchid(request):
     params = request.query_params
     student_id = params.get('studentId', None)
@@ -273,7 +279,8 @@ def get_matchid(request):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@authentication_classes([CatfoodAuthentication])
+@permission_classes([IsStudent])
 def get_contest_questions_student(request, contest_id):
     params = request.query_params
     student_id = params.get('studentId', None)
@@ -331,7 +338,8 @@ def get_contest_questions_student(request, contest_id):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@authentication_classes([CatfoodAuthentication])
+@permission_classes([IsTeachingAssistant | IsTeacher | IsChargingTeacher])
 def get_contest_questions_teacher(request, contest_id):
     params = request.query_params
     user_id = params.get('userId', None)
@@ -381,7 +389,8 @@ def get_contest_questions_teacher(request, contest_id):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@authentication_classes([CatfoodAuthentication])
+@permission_classes([IsTeachingAssistant | IsTeacher | IsChargingTeacher])
 def get_contest_end(request):
     params = request.query_params.dict()
     course_id = params.get('courseId', None)
@@ -414,7 +423,7 @@ def get_contest_end(request):
 
 
 class MatchView(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = [AllowAny]
 
     def get(self, request, format=None):
         matches = models.Match.objects.all()
@@ -437,7 +446,7 @@ class MatchView(APIView):
 
 
 class AttendView(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = [AllowAny]
 
     def get(self, request, format=None):
         attends = models.AttendContest.objects.all()
@@ -460,7 +469,7 @@ class AttendView(APIView):
 
 
 class TestView(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = [AllowAny]
 
     def get(self, request, format=None):
         response = 'test succeed!'
@@ -471,7 +480,8 @@ class TestView(APIView):
 
 
 class ContestView(APIView):
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent | IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, format=None):
         params = request.query_params.dict()
@@ -626,7 +636,8 @@ class ContestView(APIView):
 
 
 class MatchesView(APIView):
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, contest_id, format=None):
         params = request.query_params.dict()
