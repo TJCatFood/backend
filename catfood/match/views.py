@@ -57,8 +57,6 @@ def contest_start(room):
     match_serializer = MatchSerializer(data=matches, many=True)
     match_serializer.is_valid(True)
     match_serializer.save()
-    timer = Timer(contest_time, check_room, (channel_id,))
-    timer.start()
 
 
 def check_room(channel_id):
@@ -170,7 +168,7 @@ def question_check(q_id, q_type, answer):
         question = SingleChoiceQuestion.objects.get(pk=q_id)
     elif q_type == QuestionType.MULTIPLE:
         question = MultipleChoiceQuestion.objects.get(pk=q_id)
-    corr_ans = question.question_answer
+    corr_ans = "".join(sorted(question.question_answer))
     answer_list = sorted(answer)
     answer = "".join(answer_list)
     if answer.lower() == corr_ans.lower():
@@ -482,8 +480,10 @@ class ReadyView(APIView):
             "type": 4,
             "content": "Contest start!",
         })
-        requests.post(url, data=payload)
         contest_start(room)
+        requests.post(url, data=payload)
+        timer = Timer(contest_time, check_room, (channel_id,))
+        timer.start()
 
 
 class ChannelView(APIView):

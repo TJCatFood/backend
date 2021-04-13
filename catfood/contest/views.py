@@ -118,7 +118,7 @@ def get_match(request, match_id):
     for q in questions:
         q_type = q.question_type
         q_id = q.question_id
-        submission = models.ContestSubmission.objects.filter(contest_id=contest.contest_id, user_id=user_id, question_id=q_id, question_type=q_type)
+        submission = models.ContestSubmission.objects.filter(contest_id=contest.contest_id, user_id=student_id, question_id=q_id, question_type=q_type)
         if submission.count() == 0:
             error = Error('Not Found: submission not found!')
             return Response(error.error, status=status.HTTP_404_NOT_FOUND)
