@@ -138,8 +138,8 @@ class CourseView(APIView):
             # student
             # reject
             return Response(dict({
-                    "msg": "Forbidden. You are not the teacher."
-                }), status=403)
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         request_body_unicode = request.body.decode('utf-8')
         request_body = json.loads(request_body_unicode)
         file_display_name = request_body["fileDisplayName"]
@@ -232,7 +232,7 @@ class CourseFileMetaView(APIView):
                 return Response(dict({
                     "msg": "Forbidden. You are not within course."
                 }), status=403)
-        
+
         file_queried: CourseDocument
         try:
             file_queried = CourseDocument.objects.get(course_id=course_id, file_course_document_id=file_id)
@@ -264,9 +264,9 @@ class CourseFileMetaView(APIView):
             # student
             # reject
             return Response(dict({
-                    "msg": "Forbidden. You are not the teacher."
-                }), status=403)
-        
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
+
         request_has_body = False
         request_body = None
         request_body_unicode = request.body.decode('utf-8')
@@ -313,9 +313,9 @@ class CourseFileMetaView(APIView):
             # student
             # reject
             return Response(dict({
-                    "msg": "Forbidden. You are not the teacher."
-                }), status=403)
-        
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
+
         try:
             file_to_delete = CourseDocument.objects.get(course_id=course_id, file_course_document_id=file_id)
             item_token_to_delete = file_to_delete.file_token

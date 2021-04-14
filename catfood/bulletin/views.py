@@ -18,6 +18,7 @@ from course.utils import is_student_within_course, is_teacher_teach_course
 import json
 import datetime
 
+
 class Announcement_:
     def __init__(self, announcement: Announcement):
         self.announcement_id = announcement.announcement_id
@@ -120,8 +121,8 @@ class AnnouncementView(APIView):
             # student
             # reject
             return Response(dict({
-                    "msg": "Forbidden. You are not the teacher."
-                }), status=403)
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         request_body_unicode = request.body.decode('utf-8')
         request_body = json.loads(request_body_unicode)
         new_announcement = Announcement(
@@ -221,8 +222,8 @@ class AnnouncementIdView(APIView):
             # student
             # reject
             return Response(dict({
-                    "msg": "Forbidden. You are not the teacher."
-                }), status=403)
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         request_has_body = False
         request_body = None
         request_body_unicode = request.body.decode('utf-8')

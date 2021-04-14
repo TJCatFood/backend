@@ -136,8 +136,8 @@ class HomeworkView(APIView):
             # student
             # reject
             return Response(dict({
-                    "msg": "Forbidden. You are not the teacher."
-                }), status=403)
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         request_body_unicode = request.body.decode('utf-8')
         if len(request_body_unicode) != 0:
             try:
@@ -267,8 +267,8 @@ class HomeworkDataView(APIView):
             # student
             # reject
             return Response(dict({
-                    "msg": "Forbidden. You are not the teacher."
-                }), status=403)
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         request_body_unicode = request.body.decode('utf-8')
         if len(request_body_unicode) != 0:
             try:
@@ -321,8 +321,8 @@ class HomeworkDataView(APIView):
             # student
             # reject
             return Response(dict({
-                    "msg": "Forbidden. You are not the teacher."
-                }), status=403)
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         try:
             homework = Homework.objects.get(course_id=course_id, homework_id=homework_id)
             homework.delete()
@@ -350,14 +350,14 @@ class HomeworkDataFileView(APIView):
             # charging teacher
             # he/she should not handin homework!
             return Response(dict({
-                    "msg": "Forbidden. You should not handin homework."
-                }), status=403)
+                "msg": "Forbidden. You should not handin homework."
+            }), status=403)
         elif user_character == 2 or user_character == 3:
             # teacher or teaching assistant
             # these people should not handin homework!
             return Response(dict({
-                    "msg": "Forbidden. You should not handin homework."
-                }), status=403)
+                "msg": "Forbidden. You should not handin homework."
+            }), status=403)
         elif user_character == 4:
             # student
             # check if student is within this course
@@ -438,14 +438,14 @@ class HomeworkDataFileView(APIView):
             # charging teacher
             # he/she should not handin homework!
             return Response(dict({
-                    "msg": "Forbidden. You should not delete homework."
-                }), status=403)
+                "msg": "Forbidden. You should not delete homework."
+            }), status=403)
         elif user_character == 2 or user_character == 3:
             # teacher or teaching assistant
             # these people should not handin homework!
             return Response(dict({
-                    "msg": "Forbidden. You should not delete homework."
-                }), status=403)
+                "msg": "Forbidden. You should not delete homework."
+            }), status=403)
         elif user_character == 4:
             # student
             # check if student is within this course
@@ -496,8 +496,8 @@ class HomeworkDataFileView(APIView):
             # student
             # reject
             return Response(dict({
-                    "msg": "Forbidden. You are not the teacher."
-                }), status=403)
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         query_dict = request.query_params
 
         need_pagination = False
@@ -559,8 +559,8 @@ class HomeworkDataFileCountView(APIView):
             # student
             # reject
             return Response(dict({
-                    "msg": "Forbidden. You are not the teacher."
-                }), status=403)
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         response = {
             "courseId": course_id,
             "courseHomeworkFileCount": HomeworkFile.objects.filter(homework_id=homework_id).count()
@@ -604,8 +604,8 @@ class HomeworkFileView(APIView):
             if user_character == 4:
                 if file_queried.file_uploader != user_id:
                     return Response(dict({
-                    "msg": "You can not read other student's submission :("
-                }), status=403)
+                        "msg": "You can not read other student's submission :("
+                    }), status=403)
         except HomeworkFile.DoesNotExist:
             return Response(dict({
                 "msg": "Requested homework file does not exist.",
@@ -682,8 +682,8 @@ class HomeworkFileScoreView(APIView):
             # student
             # reject
             return Response(dict({
-                    "msg": "Forbidden. You are not the teacher."
-                }), status=403)
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         request_body_unicode = request.body.decode('utf-8')
         request_body = None
         if len(request_body_unicode) != 0:

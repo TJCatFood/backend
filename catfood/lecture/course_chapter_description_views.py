@@ -14,6 +14,7 @@ import json
 from user.authentication import CatfoodAuthentication
 from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 
+
 class ChapterDescriptionView(APIView):
 
     authentication_classes = [CatfoodAuthentication]
@@ -102,8 +103,8 @@ class ChapterDescriptionView(APIView):
             # student
             # reject
             return Response(dict({
-                    "msg": "Forbidden. You are not the teacher."
-                }), status=403)
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         request_body_unicode = request.body.decode('utf-8')
         request_body = json.loads(request_body_unicode)
         new_courseChapterDescrption = CourseChapterDescrption(
@@ -181,8 +182,8 @@ class ChapterDescriptionIdView(APIView):
             # student
             # reject
             return Response(dict({
-                    "msg": "Forbidden. You are not the teacher."
-                }), status=403)
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         request_body = None
         request_has_body = False
 
@@ -232,8 +233,8 @@ class ChapterDescriptionIdView(APIView):
             # student
             # reject
             return Response(dict({
-                    "msg": "Forbidden. You are not the teacher."
-                }), status=403)
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         try:
             courseChapterDescrption_to_delete = CourseChapterDescrption.objects.get(course_id=course_id, course_chapter_id=course_chapter_id)
             courseChapterDescrption_to_delete.delete()

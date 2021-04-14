@@ -3,11 +3,13 @@ from course.serializers import CourseSerializers, TeachSerializers
 from user.models import TakeCourse
 from user.serializers import TakeCourseSerializer
 
+
 def generate_response(data, isSuccess):
     return {
         "isSuccess": isSuccess,
         "data": data
     }
+
 
 def is_teacher_teach_course(teacher_id, course_id) -> bool:
     teaches = Teach.objects.filter(teacher_id=teacher_id)
@@ -18,6 +20,7 @@ def is_teacher_teach_course(teacher_id, course_id) -> bool:
     if course_id not in course_id_list:
         return False
     return True
+
 
 def is_student_within_course(student_id, course_id) -> bool:
     takes = TakeCourse.objects.filter(student_id=student_id)
