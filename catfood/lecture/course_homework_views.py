@@ -14,6 +14,10 @@ from django.utils import timezone as datetime
 from .models import Homework, HomeworkFile, HomeworkScore
 from .serializers import HomeworkFileSerializer, HomeworkSerializer, HomeworkScoreSerializer
 
+from user.authentication import CatfoodAuthentication
+from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
+from course.utils import is_student_within_course, is_teacher_teach_course
+
 import json
 
 from catfood.settings import MINIO_STORAGE_MEDIA_BUCKET_NAME as DEFAULT_BUCKET
@@ -26,10 +30,7 @@ from os import environ
 
 import random
 
-# minio client to use
-# TODO: when deployed and access through remote machine,
-#       minio remote address should be changed to HTTP_HOST
-#       with corresponding information.
+
 local_minio_client = Minio(
     environ['MINIO_ADDRESS'],
     access_key=environ['MINIO_ACCESS_KEY'],
@@ -54,11 +55,33 @@ TEST_USER = 114514
 
 class HomeworkView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     # /{courseId}/homework/ 按照页码和每页数目获取某门课程下的作业列表
     def get(self, request, course_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
         query_dict = request.query_params
 
         need_pagination = False
@@ -95,7 +118,26 @@ class HomeworkView(APIView):
 
     # /{courseId}/homework/ 创建一次新作业
     def post(self, request, course_id, format=None):
-
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # reject
+            return Response(dict({
+                    "msg": "Forbidden. You are not the teacher."
+                }), status=403)
         request_body_unicode = request.body.decode('utf-8')
         if len(request_body_unicode) != 0:
             try:
@@ -108,7 +150,7 @@ class HomeworkView(APIView):
         request_body = json.loads(request_body_unicode)
         new_homework = Homework(
             course_id=course_id,
-            homework_creator=TEST_USER,
+            homework_creator=request.request.user.user_id,
             homework_title=request_body["homeworkTitle"],
             homework_description=request_body["homeworkDescription"],
             homework_start_timestamp=request_body["homeworkStartTime"],
@@ -134,11 +176,33 @@ class HomeworkView(APIView):
 
 class HomeworkCountView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     # /{courseId}/homework/count 获取某门课共有多少作业
     def get(self, request, course_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
         response = {
             "courseId": course_id,
             "courseHomeworkCount": Homework.objects.filter(course_id=course_id).count()
@@ -148,12 +212,33 @@ class HomeworkCountView(APIView):
 
 class HomeworkDataView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     # /{courseId}/homework/{homeworkId} 获取某门课程下的某次作业详细信息（非提交文件）
     def get(self, request, course_id, homework_id, format=None):
-
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
         try:
             homework = Homework.objects.get(homework_id=homework_id)
             return Response(HomeworkSerializer(homework).data, status=status.HTTP_200_OK)
@@ -164,7 +249,26 @@ class HomeworkDataView(APIView):
 
     # /{courseId}/homework/{homeworkId} 更改作业信息（只有作业标题、作业描述、作业截止时间受影响，同时作业最后的更新时间会被更新）
     def put(self, request, course_id, homework_id, format=None):
-
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # reject
+            return Response(dict({
+                    "msg": "Forbidden. You are not the teacher."
+                }), status=403)
         request_body_unicode = request.body.decode('utf-8')
         if len(request_body_unicode) != 0:
             try:
@@ -199,7 +303,26 @@ class HomeworkDataView(APIView):
 
     # /{courseId}/homework/{homeworkId} 删除这个作业
     def delete(self, request, course_id, homework_id, format=None):
-
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # reject
+            return Response(dict({
+                    "msg": "Forbidden. You are not the teacher."
+                }), status=403)
         try:
             homework = Homework.objects.get(course_id=course_id, homework_id=homework_id)
             homework.delete()
@@ -213,11 +336,35 @@ class HomeworkDataView(APIView):
 
 class HomeworkDataFileView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     # /{courseId}/homework/{homeworkId}/file 学生提交作业（覆盖原有作业）
     def put(self, request, course_id, homework_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            # he/she should not handin homework!
+            return Response(dict({
+                    "msg": "Forbidden. You should not handin homework."
+                }), status=403)
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # these people should not handin homework!
+            return Response(dict({
+                    "msg": "Forbidden. You should not handin homework."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
 
         replace_flag = False
 
@@ -234,8 +381,12 @@ class HomeworkDataFileView(APIView):
             }), status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # FIXME: get student_id from token.
-            file_to_delete = HomeworkFile.objects.get(file_uploader=TEST_USER, homework_id=homework_id)
+            file_to_delete = HomeworkFile.objects.get(file_uploader=request.user.user_id, homework_id=homework_id)
+            # not this student
+            if file_to_delete.file_uploader != user_id:
+                return Response(dict({
+                    "msg": "You can not change other student's submission :("
+                }), status=403)
             item_token_to_delete = file_to_delete.file_token
             local_minio_client.remove_object(
                 DEFAULT_BUCKET,
@@ -250,19 +401,17 @@ class HomeworkDataFileView(APIView):
         request_body = json.loads(request_body_unicode)
         file_display_name = request_body["homeworkFileDisplayName"]
         random_hex_string = ('%030x' % random.randrange(16**30))
-        file_token = f"{HOMEWORK_PREFIX}/{course_id}/{homework_id}/{TEST_USER}/{random_hex_string}/{file_display_name}"
+        file_token = f"{HOMEWORK_PREFIX}/{course_id}/{homework_id}/{request.user.user_id}/{random_hex_string}/{file_display_name}"
         new_course_file = HomeworkFile(
             homework_id=(Homework.objects.get(homework_id=homework_id)),
             file_comment=request_body["homeworkFileComment"],
             file_display_name=file_display_name,
             file_timestamp=datetime.now(),
-            # FIXME: this user_id is for testing purpose only
-            # waiting for user module
-            file_uploader=TEST_USER,
+            file_uploader=request.user.user_id,
             file_token=file_token)
         new_course_file.file_token = file_token
-        path = default_storage.save('catfood/alive', ContentFile(MINIO_FILE_PLACEHOLDER))
-        default_storage.delete(path)
+        if not local_minio_client.bucket_exists(DEFAULT_BUCKET):
+            local_minio_client.make_bucket(DEFAULT_BUCKET)
         post_url = local_minio_client.presigned_url("PUT",
                                                     DEFAULT_BUCKET,
                                                     file_token,
@@ -281,10 +430,36 @@ class HomeworkDataFileView(APIView):
 
     # /{courseId}/homework/{homeworkId} 删除该学生这次作业的提交
     def delete(self, request, course_id, homework_id, format=None):
-
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            # he/she should not handin homework!
+            return Response(dict({
+                    "msg": "Forbidden. You should not delete homework."
+                }), status=403)
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # these people should not handin homework!
+            return Response(dict({
+                    "msg": "Forbidden. You should not delete homework."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
         try:
-            # FIXME: get student_id from token.
-            file_to_delete = HomeworkFile.objects.get(file_uploader=TEST_USER, homework_id=homework_id)
+            file_to_delete = HomeworkFile.objects.get(homework_id=homework_id)
+            # not this student
+            if file_to_delete.file_uploader != user_id:
+                return Response(dict({
+                    "msg": "You can not change other student's submission :("
+                }), status=403)
             item_token_to_delete = file_to_delete.file_token
             local_minio_client.remove_object(
                 DEFAULT_BUCKET,
@@ -303,6 +478,26 @@ class HomeworkDataFileView(APIView):
 
     # /{courseId}/homework/{homeworkId}/file 按照页码和每页数目获取某门课的作业文件列表
     def get(self, request, course_id, homework_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # reject
+            return Response(dict({
+                    "msg": "Forbidden. You are not the teacher."
+                }), status=403)
         query_dict = request.query_params
 
         need_pagination = False
@@ -340,11 +535,32 @@ class HomeworkDataFileView(APIView):
 
 class HomeworkDataFileCountView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     # /{courseId}/homework/{homeworkId}/file/count 获取当前该作业下已提交作业列表中共有多少作业文件
     def get(self, request, course_id, homework_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # reject
+            return Response(dict({
+                    "msg": "Forbidden. You are not the teacher."
+                }), status=403)
         response = {
             "courseId": course_id,
             "courseHomeworkFileCount": HomeworkFile.objects.filter(homework_id=homework_id).count()
@@ -354,14 +570,42 @@ class HomeworkDataFileCountView(APIView):
 
 class HomeworkFileView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     # /{courseId}/homework/{homeworkId}/file/{homeworkFileId} 获取作业文件
     def get(self, request, course_id, homework_id, homework_file_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
         file_queried: HomeworkFile
         try:
             file_queried = HomeworkFile.objects.get(homework_id=homework_id, file_homework_id=homework_file_id)
+            # check student
+            if user_character == 4:
+                if file_queried.file_uploader != user_id:
+                    return Response(dict({
+                    "msg": "You can not read other student's submission :("
+                }), status=403)
         except HomeworkFile.DoesNotExist:
             return Response(dict({
                 "msg": "Requested homework file does not exist.",
@@ -380,15 +624,35 @@ class HomeworkFileView(APIView):
 
 class HomeworkFileScoreView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     # /{courseId}/homework/{homeworkId}/file/{homeworkFileId}/score 获取作业分数
     def get(self, request, course_id, homework_id, homework_file_id, format=None):
-
-        # FIXME: get student id from token.
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
         try:
-            file_queried = HomeworkScore.objects.get(homework_id=homework_id, student_id=TEST_USER)
+            file_queried = HomeworkScore.objects.get(homework_id=homework_id, student_id=request.user.user_id)
         except HomeworkScore.DoesNotExist:
             return Response(dict({
                 "msg": "Requested homework file does not exist.",
@@ -400,7 +664,26 @@ class HomeworkFileScoreView(APIView):
 
     # /{courseId}/homework/{homeworkId}/file/{homeworkFileId}/score 根据文件 ID 登记分数
     def put(self, request, course_id, homework_id, homework_file_id, format=None):
-
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # reject
+            return Response(dict({
+                    "msg": "Forbidden. You are not the teacher."
+                }), status=403)
         request_body_unicode = request.body.decode('utf-8')
         request_body = None
         if len(request_body_unicode) != 0:

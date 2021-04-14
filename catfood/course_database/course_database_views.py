@@ -16,6 +16,11 @@ from django.core.files.base import ContentFile
 from .models import CourseDocument
 from .serializers import CourseDocumentSerializer
 
+from user.authentication import CatfoodAuthentication
+from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
+
+from course.utils import is_student_within_course, is_teacher_teach_course
+
 from typing import Union
 
 import json
@@ -32,10 +37,7 @@ from catfood.settings import MINIO_STORAGE_USE_HTTPS
 
 import random
 
-# minio client to use
-# TODO: when deployed and access through remote machine,
-#       minio remote address should be changed to HTTP_HOST
-#       with corresponding information.
+
 local_minio_client = Minio(
     environ['MINIO_ADDRESS'],
     access_key=environ['MINIO_ACCESS_KEY'],
@@ -58,12 +60,33 @@ COURSE_DOCUMENT_PREFIX = "course_document"
 
 class CourseView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, course_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
         query_dict = request.query_params
-
         need_pagination = False
         pagination_page_size = -1
         pagination_page_num = -1
@@ -97,6 +120,26 @@ class CourseView(APIView):
         return Response(response)
 
     def post(self, request, course_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # reject
+            return Response(dict({
+                    "msg": "Forbidden. You are not the teacher."
+                }), status=403)
         request_body_unicode = request.body.decode('utf-8')
         request_body = json.loads(request_body_unicode)
         file_display_name = request_body["fileDisplayName"]
@@ -108,13 +151,12 @@ class CourseView(APIView):
             file_comment=request_body["fileComment"],
             file_create_timestamp=datetime.datetime.now(),
             file_update_timestamp=datetime.datetime.now(),
-            # FIXME: this user_id is for testing purpose only
-            # waiting for user module
-            file_uploader=114514,
+
+            file_uploader=request.user.user_id,
             file_token=file_token)
         new_course_file.file_token = file_token
-        path = default_storage.save('catfood/alive', ContentFile(MINIO_FILE_PLACEHOLDER))
-        default_storage.delete(path)
+        if not local_minio_client.bucket_exists(DEFAULT_BUCKET):
+            local_minio_client.make_bucket(DEFAULT_BUCKET)
         post_url = local_minio_client.presigned_url("PUT",
                                                     DEFAULT_BUCKET,
                                                     file_token,
@@ -129,10 +171,32 @@ class CourseView(APIView):
 
 class CourseFileCountView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, course_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
         content = {
             "course_id": course_id,
             "course_file_count": CourseDocument.objects.filter(course_id=course_id).count()
@@ -142,10 +206,33 @@ class CourseFileCountView(APIView):
 
 class CourseFileMetaView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, course_id, file_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        
         file_queried: CourseDocument
         try:
             file_queried = CourseDocument.objects.get(course_id=course_id, file_course_document_id=file_id)
@@ -159,6 +246,27 @@ class CourseFileMetaView(APIView):
         return Response(CourseDocumentSerializer(file_queried).data)
 
     def put(self, request, course_id, file_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # reject
+            return Response(dict({
+                    "msg": "Forbidden. You are not the teacher."
+                }), status=403)
+        
         request_has_body = False
         request_body = None
         request_body_unicode = request.body.decode('utf-8')
@@ -187,6 +295,27 @@ class CourseFileMetaView(APIView):
         return Response(CourseDocumentSerializer(file_queried).data)
 
     def delete(self, request, course_id, file_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # reject
+            return Response(dict({
+                    "msg": "Forbidden. You are not the teacher."
+                }), status=403)
+        
         try:
             file_to_delete = CourseDocument.objects.get(course_id=course_id, file_course_document_id=file_id)
             item_token_to_delete = file_to_delete.file_token
@@ -208,10 +337,32 @@ class CourseFileMetaView(APIView):
 
 class CourseFileView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, course_id, file_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
         file_queried: CourseDocument
         try:
             file_queried = CourseDocument.objects.get(course_id=course_id, file_course_document_id=file_id)

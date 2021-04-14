@@ -13,10 +13,7 @@ from catfood.settings import MINIO_STORAGE_USE_HTTPS
 # AVATAR_BUCKET
 AVATAR_PREFIX = "avatar"
 
-# minio client to use
-# TODO: when deployed and access through remote machine,
-#       minio remote address should be changed to HTTP_HOST
-#       with corresponding information.
+
 local_minio_client = Minio(
     environ['MINIO_ADDRESS'],
     access_key=environ['MINIO_ACCESS_KEY'],
