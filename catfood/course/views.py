@@ -18,6 +18,10 @@ from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargi
 from user.models import User
 from course.utils import generate_response
 
+from experiment import utils
+from user.models import TakeCourse
+from user.serializers import TakeCourseSerializer
+
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant | IsStudent])
@@ -142,3 +146,41 @@ def teach_detail(request, teach_id):
     teach.delete()
     msg = {"detail": "has been deleted successfully"}
     return Response(generate_response(msg, True), status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+@permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant])
+@authentication_classes([CatfoodAuthentication])
+def get_students_by_course_id(request, course_id):
+    """
+    List all courses, or create a new course.
+    """
+    if request.method == 'GET':
+        if request.user.character in [2, 3]:
+            teacher_id = request.user.user_id
+            teaches = Teach.objects.filter(teacher_id=teacher_id)
+            teaches_serializer = TeachSerializers(data=teaches, many=True)
+            course_id_list = []
+            for teach in teaches_serializer.data:
+                course_id_list.append(teach['course_id'])
+            print(course_id_list)
+            if course_id not in course_id_list:
+                response_data = {
+                    "error_msg": 'permission denied, You have not yet bound the corresponding course'
+                }
+                return Response(utils.generate_response(response_data, False), status=status.HTTP_400_BAD_REQUEST)
+        take_objects = TakeCourse.objects.filter(course_id=course_id)
+        take_list = TakeCourseSerializer(take_objects, many=True).data
+        student_list = []
+        for take in take_list:
+            student_object = User.objects.get(user_id=take['student_id'])
+            student_list.append(utils.my_user_serializer(student_object))
+        ans = {
+            'students': student_list,
+            'pagination': {
+                'pageNum': 1,
+                'pageSize': 20,
+                'total': len(student_list)
+            }
+        }
+        return Response(ans)

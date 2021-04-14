@@ -50,3 +50,17 @@ def is_submission_delete_valid(old_submission):
 def check_ddl(end_time):
     ddl = datetime.datetime.strptime(end_time.split('+')[0], '%Y-%m-%dT%H:%M:%S')
     return datetime.datetime.now() < ddl
+
+
+def my_user_serializer(user):
+    user_serializer = {
+        'user_id': user.user_id,
+        'realname': user.realname,
+        'email': user.email,
+        'university_name': user.university_id.university_name,
+        'school_name': user.school_id.school_name,
+        'character': user.character,
+        'personal_id': user.personal_id,
+        'avatar': user.avatar,
+    }
+    return user_serializer
