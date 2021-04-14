@@ -64,3 +64,30 @@ def my_user_serializer(user):
         'avatar': user.avatar,
     }
     return user_serializer
+
+
+def page_params_check(pg_num, pg_sz):
+    # pg_num = params.get('pageNum', None)
+    is_valid = False
+    if pg_num is None:
+        response_data = {
+            "error_msg": 'Bad Request: pageNum needed!'
+        }
+        return is_valid, response_data
+
+    # pg_sz = params.get('pageSize', None)
+    if pg_sz is None:
+        response_data = {
+            "error_msg": 'Bad Request: pageSize needed!'
+        }
+        return is_valid, response_data
+    try:
+        pg_num = int(pg_num)
+        pg_sz = int(pg_sz)
+    except TypeError:
+        response_data = {
+            "error_msg": 'Bad Request: pageNum or pageSize illegal!'
+        }
+        return is_valid, response_data
+    is_valid = True
+    return is_valid, None
