@@ -156,6 +156,16 @@ def get_students_by_course_id(request, course_id):
     List all courses, or create a new course.
     """
     if request.method == 'GET':
+
+        # check params
+        params = request.query_params.dict()
+        pg_num = params.get('pageNum', None)
+        pg_size = params.get('pageSize', None)
+        is_valid, error_response = utils.page_params_check(pg_num, pg_size)
+        if not is_valid:
+            return Response(utils.generate_response(error_response, False), status=status.HTTP_400_BAD_REQUEST)
+        pg_num, pg_size = int(pg_num), int(pg_size)
+
         if request.user.character in [2, 3]:
             teacher_id = request.user.user_id
             teaches = Teach.objects.filter(teacher_id=teacher_id)
@@ -175,11 +185,18 @@ def get_students_by_course_id(request, course_id):
         for take in take_list:
             student_object = User.objects.get(user_id=take['student_id'])
             student_list.append(utils.my_user_serializer(student_object))
+        sorted(student_list, key=lambda x: x['user_id'])
+        pg_end = min(pg_num*pg_size, len(student_list))
+        pg_start = (pg_num-1)*pg_size
+        if pg_start < len(student_list):
+            response_student_list = student_list[pg_start:pg_end]
+        else:
+            response_student_list = []
         ans = {
-            'students': student_list,
+            'students': response_student_list,
             'pagination': {
-                'pageNum': 1,
-                'pageSize': 20,
+                'pageNum': pg_num,
+                'pageSize': pg_size,
                 'total': len(student_list)
             }
         }
