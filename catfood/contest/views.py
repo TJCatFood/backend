@@ -25,7 +25,7 @@ utc = pytz.utc
 
 @api_view(['GET'])
 @authentication_classes([CatfoodAuthentication])
-@permission_classes([IsTeachingAssistant | IsTeacher | IsChargingTeacher])
+@permission_classes([IsStudent | IsTeachingAssistant | IsTeacher | IsChargingTeacher])
 def get_matches(request):
     params = request.query_params.dict()
 
