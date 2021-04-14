@@ -169,11 +169,10 @@ def get_students_by_course_id(request, course_id):
         if request.user.character in [2, 3]:
             teacher_id = request.user.user_id
             teaches = Teach.objects.filter(teacher_id=teacher_id)
-            teaches_serializer = TeachSerializers(data=teaches, many=True)
+            teaches_serializer = TeachSerializers(teaches, many=True)
             course_id_list = []
             for teach in teaches_serializer.data:
                 course_id_list.append(teach['course_id'])
-            print(course_id_list)
             if course_id not in course_id_list:
                 response_data = {
                     "error_msg": 'permission denied, You have not yet bound the corresponding course'
