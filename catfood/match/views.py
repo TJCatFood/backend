@@ -159,7 +159,7 @@ def calculate_rank(score_list, time_list):
         score = score_list[i]
         cnt = 0
         for j in range(length):
-            if score_list[j] < score or (score_list[j] == score and time_list[j] < time_list[i]):
+            if score_list[j] > score or (score_list[j] == score and time_list[j] < time_list[i]):
                 cnt += 1
         rank_list.append(cnt + 1)
     return rank_list
