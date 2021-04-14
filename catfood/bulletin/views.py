@@ -10,6 +10,11 @@ from rest_framework.permissions import AllowAny
 from .models import Announcement
 from .serializers import AnnouncementSerializer
 
+from user.authentication import CatfoodAuthentication
+from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
+
+from course.utils import is_student_within_course, is_teacher_teach_course
+
 import json
 import datetime
 
@@ -38,16 +43,33 @@ class AliveView(APIView):
 
 class AnnouncementView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, course_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
         query_dict = request.query_params
-
-        content = {
-            "course_id": course_id,
-        }
-
         need_pagination = False
         pagination_page_size = -1
         pagination_page_num = -1
@@ -81,6 +103,26 @@ class AnnouncementView(APIView):
         return Response(response)
 
     def post(self, request, course_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # reject
+            return Response(dict({
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         request_body_unicode = request.body.decode('utf-8')
         request_body = json.loads(request_body_unicode)
         new_announcement = Announcement(
@@ -90,19 +132,40 @@ class AnnouncementView(APIView):
             announcement_is_pinned=request_body["announcementIsPinned"],
             announcement_publish_time=datetime.datetime.now(),
             announcement_last_update_time=datetime.datetime.now(),
-            # FIXME: this user_id is for testing purpose only
-            # waiting for user module
-            announcement_sender_id=114514,
+
+            announcement_sender_id=request.user.user_id,
         )
         new_announcement.save()
         return Response(AnnouncementSerializer(new_announcement).data)
 
 
 class AnnouncementCountView(APIView):
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, course_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
         response = {
             "courseId": course_id,
             "announcementCount": Announcement.objects.filter(course_id=course_id).count()
@@ -111,14 +174,56 @@ class AnnouncementCountView(APIView):
 
 
 class AnnouncementIdView(APIView):
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, course_id, announcement_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
         query_announcement = Announcement.objects.get(course_id=course_id, announcement_id=announcement_id)
         return Response(AnnouncementSerializer(query_announcement).data)
 
     def put(self, request, course_id, announcement_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # reject
+            return Response(dict({
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         request_has_body = False
         request_body = None
         request_body_unicode = request.body.decode('utf-8')

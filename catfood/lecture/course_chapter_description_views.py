@@ -7,15 +7,42 @@ from rest_framework.permissions import AllowAny
 from .models import CourseChapterDescrption
 from .serializers import CourseChapterDescrptionSerializer
 
+from course.utils import is_student_within_course, is_teacher_teach_course
+
 import json
+
+from user.authentication import CatfoodAuthentication
+from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 
 
 class ChapterDescriptionView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, course_id, *args, **kwargs):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
         query_dict = request.query_params
 
         request_body = None
@@ -58,6 +85,26 @@ class ChapterDescriptionView(APIView):
         return Response(response, status=status.HTTP_200_OK)
 
     def post(self, request, course_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # reject
+            return Response(dict({
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         request_body_unicode = request.body.decode('utf-8')
         request_body = json.loads(request_body_unicode)
         new_courseChapterDescrption = CourseChapterDescrption(
@@ -80,10 +127,32 @@ class ChapterDescriptionView(APIView):
 
 class ChapterDescriptionIdView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, course_id, course_chapter_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
         try:
             selected_courseChapterDescrption = CourseChapterDescrption.objects.get(course_id=course_id, course_chapter_id=course_chapter_id)
         except CourseChapterDescrption.DoesNotExist:
@@ -95,7 +164,26 @@ class ChapterDescriptionIdView(APIView):
         return Response(CourseChapterDescrptionSerializer(selected_courseChapterDescrption).data, status=status.HTTP_200_OK)
 
     def put(self, request, course_id, course_chapter_id, format=None):
-
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # reject
+            return Response(dict({
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         request_body = None
         request_has_body = False
 
@@ -127,6 +215,26 @@ class ChapterDescriptionIdView(APIView):
         return Response(CourseChapterDescrptionSerializer(query_courseChapterDescrption).data, status=status.HTTP_200_OK)
 
     def delete(self, request, course_id, course_chapter_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # reject
+            return Response(dict({
+                "msg": "Forbidden. You are not the teacher."
+            }), status=403)
         try:
             courseChapterDescrption_to_delete = CourseChapterDescrption.objects.get(course_id=course_id, course_chapter_id=course_chapter_id)
             courseChapterDescrption_to_delete.delete()
