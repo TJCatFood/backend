@@ -49,8 +49,9 @@ class Question:
 # Contest question database starts
 # TODO: fix permissions
 
+
 class QuestionView(APIView):
-    
+
     authentication_classes = [CatfoodAuthentication]
     permission_classes = [IsStudent |
                           IsTeachingAssistant | IsTeacher | IsChargingTeacher]
