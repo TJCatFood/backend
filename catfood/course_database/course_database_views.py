@@ -158,9 +158,9 @@ class CourseView(APIView):
         if not local_minio_client.bucket_exists(DEFAULT_BUCKET):
             local_minio_client.make_bucket(DEFAULT_BUCKET)
         put_url = local_minio_client.presigned_url("PUT",
-                                                    DEFAULT_BUCKET,
-                                                    file_token,
-                                                    expires=DEFAULT_FILE_URL_TIMEOUT)
+                                                   DEFAULT_BUCKET,
+                                                   file_token,
+                                                   expires=DEFAULT_FILE_URL_TIMEOUT)
         file_put_url_dict = {
             "FILE_PUT_URL": put_url
         }
