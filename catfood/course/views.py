@@ -19,8 +19,10 @@ from user.models import User
 from course.utils import generate_response
 
 from experiment import utils
+from course.utils import is_student_within_course, is_teacher_teach_course
 from user.models import TakeCourse
 from user.serializers import TakeCourseSerializer
+from django.core.exceptions import ObjectDoesNotExist
 
 
 @api_view(['GET', 'POST'])
@@ -30,28 +32,31 @@ def courses_list(request):
     """
     List all courses, or create a new course.
     """
-    # TODO: 鉴权
     if request.method == 'GET':
+        user_id = request.user.user_id
         if request.user.character in [2, 3]:
-            teacher_id = request.user.user_id
-            teachs = Teach.objects.all()
-            teachs_serializer = TeachSerializers(teachs.filter(teacher_id=teacher_id), many=True)
-            answer = []
-            for teach in teachs_serializer.data:
-                course_id = teach['course_id']
-                courses = Course.objects.all()
-                courses_serializer = CourseSerializers(courses.filter(course_id=course_id), many=True)
-                answer.extend(courses_serializer.data)
-            return Response(generate_response(answer, True))
-        elif request.user.character in [4]:
-            pass
-        courses = Course.objects.all()
-        serializer = CourseSerializers(courses, many=True)
-        print(serializer.data)
-        return Response(generate_response(serializer.data, True))
+            teaches_objects = Teach.objects.filter(teacher_id=user_id)
+            teaches_list = TeachSerializers(teaches_objects, many=True).data
+            course_list = []
+            for teach in teaches_list:
+                course = CourseSerializers(Course.objects.get(course_id=teach['course_id'])).data
+                course_list.append(course)
+        elif request.user.character == 1:
+            course_list = CourseSerializers(Course.objects.all(), many=True).data
+        else:
+            # for student
+            takes_list = TakeCourseSerializer(TakeCourse.objects.filter(student_id=user_id), many=True).data
+            course_list = []
+            for take in takes_list:
+                course = CourseSerializers(Course.objects.get(course_id=take['course_id'])).data
+                course_list.append(course)
+        return Response(generate_response(course_list, True))
 
     elif request.method == 'POST':
         serializer = CourseSerializers(data=request.data)
+        if request.user.character in [2, 3, 4]:
+            response_data = {"error_msg": 'permission denied'}
+            return Response(utils.generate_response(response_data, False), status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -70,6 +75,16 @@ def course_detail(request, course_id):
     except Course.DoesNotExist:
         error_msg = {"detail": "object not exists"}
         return Response(generate_response(error_msg, False), status=status.HTTP_404_NOT_FOUND)
+
+    user_id = request.user.user_id
+    if request.user.character in [2, 3]:
+        if not is_teacher_teach_course(teacher_id=user_id, course_id=course_id):
+            response_data = {"error_msg": 'permission denied'}
+            return Response(utils.generate_response(response_data, False), status=status.HTTP_400_BAD_REQUEST)
+    elif request.user.character == 4:
+        if not is_student_within_course(student_id=user_id, course_id=course_id):
+            response_data = {"error_msg": 'permission denied'}
+            return Response(utils.generate_response(response_data, False), status=status.HTTP_400_BAD_REQUEST)
 
     if request.method == 'GET':
         serializer = CourseSerializers(course)
@@ -97,7 +112,7 @@ def course_detail(request, course_id):
 
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant])
+@permission_classes([IsChargingTeacher])
 @authentication_classes([CatfoodAuthentication])
 def teach_list(request):
     """
@@ -116,11 +131,14 @@ def teach_list(request):
         return Response(generate_response(serializer.data, True))
 
     elif request.method == 'POST':
-        teacher = User.objects.get(user_id=request.user.user_id)
-        if teacher.character not in [1]:
-            error_msg = {"detail": "邀请人没有权限"}
-            return Response(generate_response(error_msg, False), status=status.HTTP_400_BAD_REQUEST)
-        if teacher.character not in [1, 2, 3]:
+        teacher_id = request.data['teacher_id']
+        try:
+            teacher = User.objects.get(user_id=teacher_id)
+        except ObjectDoesNotExist:
+            error_msg = {"detail": "被邀请人ID不存在"}
+            return Response(generate_response(error_msg, False), status=status.HTTP_404_NOT_FOUND)
+        teacher = User.objects.get(pk=teacher_id)
+        if teacher.character not in [2, 3]:
             error_msg = {"detail": "被邀请人身份不符合要求"}
             return Response(generate_response(error_msg, False), status=status.HTTP_400_BAD_REQUEST)
         serializer = TeachSerializers(data=request.data)
