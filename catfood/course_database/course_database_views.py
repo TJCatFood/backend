@@ -157,16 +157,17 @@ class CourseView(APIView):
         new_course_file.file_token = file_token
         if not local_minio_client.bucket_exists(DEFAULT_BUCKET):
             local_minio_client.make_bucket(DEFAULT_BUCKET)
-        post_url = local_minio_client.presigned_url("PUT",
+        put_url = local_minio_client.presigned_url("PUT",
                                                     DEFAULT_BUCKET,
                                                     file_token,
                                                     expires=DEFAULT_FILE_URL_TIMEOUT)
-        response_headers = {
-            "FILE_UPLOAD_URL": post_url
+        file_put_url_dict = {
+            "FILE_PUT_URL": put_url
         }
         new_course_file.save()
-        return Response(CourseDocumentSerializer(new_course_file).data,
-                        headers=response_headers)
+        # This method is for Python 3.9+ only.
+        final_dict_to_return = CourseDocumentSerializer(new_course_file).data | file_put_url_dict
+        return Response(final_dict_to_return)
 
 
 class CourseFileCountView(APIView):
