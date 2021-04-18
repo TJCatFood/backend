@@ -412,21 +412,20 @@ class HomeworkDataFileView(APIView):
         new_course_file.file_token = file_token
         if not local_minio_client.bucket_exists(DEFAULT_BUCKET):
             local_minio_client.make_bucket(DEFAULT_BUCKET)
-        post_url = local_minio_client.presigned_url("PUT",
-                                                    DEFAULT_BUCKET,
-                                                    file_token,
-                                                    expires=DEFAULT_FILE_URL_TIMEOUT)
-        response_headers = {
-            "FILE_UPLOAD_URL": post_url
+        put_url = local_minio_client.presigned_url("PUT",
+                                                   DEFAULT_BUCKET,
+                                                   file_token,
+                                                   expires=DEFAULT_FILE_URL_TIMEOUT)
+        file_put_url_dict = {
+            "FILE_PUT_URL": put_url
         }
         new_course_file.save()
-
+        # This method is for Python 3.9+ only.
+        final_dict_to_return = HomeworkFileSerializer(new_course_file).data | file_put_url_dict
         if replace_flag:
-            return Response(HomeworkFileSerializer(new_course_file).data,
-                            headers=response_headers, status=status.HTTP_200_OK)
+            return Response(final_dict_to_return, status=status.HTTP_200_OK)
         else:
-            return Response(HomeworkFileSerializer(new_course_file).data,
-                            headers=response_headers, status=status.HTTP_201_CREATED)
+            return Response(final_dict_to_return, status=status.HTTP_201_CREATED)
 
     # /{courseId}/homework/{homeworkId} 删除该学生这次作业的提交
     def delete(self, request, course_id, homework_id, format=None):
