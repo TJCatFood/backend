@@ -9,14 +9,16 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    ports:
-      - 5432:5432
+    # reserved for dedicated db instance
+    # ports:
+    #   - 5432:5432
   
   redis:
     image: redis:6-alpine
     restart: always
-    ports: 
-      - 6379:6379
+    # reserved for dedicated redis instance
+    # ports: 
+    #   - 6379:6379
 
   minio:
     image: minio/minio:latest

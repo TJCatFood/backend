@@ -5,15 +5,20 @@ services:
     restart: always
     volumes:
       - "./.persistence/db:/var/lib/postgresql/data"
-    # user: postgres
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    # reserved for dedicated db instance
+    # ports:
+    #   - 5432:5432
   
   redis:
     image: redis:6-alpine
     restart: always
+    # reserved for dedicated redis instance
+    # ports: 
+    #   - 6379:6379
 
   minio:
     image: minio/minio:latest
