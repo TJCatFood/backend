@@ -166,7 +166,7 @@ class CourseView(APIView):
         }
         new_course_file.save()
         # This method is for Python 3.9+ only.
-        final_dict_to_return = CourseDocumentSerializer(new_course_file).data | file_put_url_dict
+        final_dict_to_return = dict(CourseDocumentSerializer(new_course_file).data) | file_put_url_dict
         return Response(final_dict_to_return)
 
 

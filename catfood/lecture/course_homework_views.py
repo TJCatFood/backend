@@ -421,7 +421,7 @@ class HomeworkDataFileView(APIView):
         }
         new_course_file.save()
         # This method is for Python 3.9+ only.
-        final_dict_to_return = HomeworkFileSerializer(new_course_file).data | file_put_url_dict
+        final_dict_to_return = dict(HomeworkFileSerializer(new_course_file).data) | file_put_url_dict
         if replace_flag:
             return Response(final_dict_to_return, status=status.HTTP_200_OK)
         else:
