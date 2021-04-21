@@ -54,7 +54,7 @@ services:
       dockerfile: Dockerfile.web.prod
     environment:
       - SECRET_KEY=EatingOurOwnCatFood
-      - DEBUG=1
+      - DEBUG=0
       - DB_HOST=db
       - DB_NAME=postgres
       - DB_USER=postgres
