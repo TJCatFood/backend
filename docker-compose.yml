@@ -62,7 +62,7 @@ services:
       - MINIO_ACCESS_KEY=minio
       - MINIO_SECRET_KEY=minio123
       - MINIO_ADDRESS=$MINIO_ADDRESS
-    command: ["./wait-for-postgres.sh", "db", "postgres", "postgres", "python", "manage.py runserver 0.0.0.0:8000"]
+    command: ["./wait-for-postgres.sh", "python", "manage.py runserver 0.0.0.0:8000"]
     user: "${USER_ID}:${GROUP_ID}"
     volumes: 
       - "./catfood:/code/catfood:rw"
