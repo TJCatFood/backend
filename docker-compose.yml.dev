@@ -41,7 +41,7 @@ services:
   nchan:
     build:
       context: .
-      dockerfile: Dockerfile.nchan.prod
+      dockerfile: Dockerfile.nchan.dev
     volumes: 
       - "./nchan/nchan.conf:/etc/nginx/sites-enabled/default"
     ports:
@@ -51,7 +51,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile.web.prod
+      dockerfile: Dockerfile.web.dev
     environment:
       - SECRET_KEY=EatingOurOwnCatFood
       - DEBUG=1
@@ -64,8 +64,10 @@ services:
       - MINIO_ACCESS_KEY=minio
       - MINIO_SECRET_KEY=minio123
       - MINIO_ADDRESS=$MINIO_ADDRESS
-    command: ["./wait-for-postgres.sh", "python", "manage.py runserver 0.0.0.0:8000"]
+    command: ["./wait-for-postgres.sh", "db", "postgres", "postgres", "python", "manage.py runserver 0.0.0.0:8000"]
     user: "${USER_ID}:${GROUP_ID}"
+    volumes: 
+      - "./catfood:/code/catfood:rw"
     ports:
       - 8000:8000
     depends_on:
