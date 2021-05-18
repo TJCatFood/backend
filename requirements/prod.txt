@@ -23,3 +23,5 @@ toml==0.10.1
 typed-ast==1.4.1
 wrapt==1.12.1
 zipp==3.3.1
+pandas==1.2.4
+openpyxl==3.0.4
