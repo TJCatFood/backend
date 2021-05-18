@@ -70,7 +70,7 @@ def upload(request):
         # tmp = excel_file.get_sheet()
         # print(tmp)
         if is_success:
-            return Response({'is_success': is_success})
+            return Response({'is_success': is_success}, status=status.HTTP_201_CREATED)
         else:
             return Response({'is_success': is_success, 'msg': response_msg}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -91,10 +91,13 @@ class LoginView(APIView):
 
     def post(self, request, format=None):
         # use email
-        email = request.data['email']
+        try:
+            email = request.data['email']
 
-        ct_user = my_user_serializer(User.objects.filter(email=email)[0])
-
+            ct_user = my_user_serializer(User.objects.filter(email=email)[0])
+        except Exception as e:
+            print(str(e))
+            return Response({"is_success": False, "error_msg": "parameters error"+User.objects.filter(len(User.objects.filter(email=request.data['email'])))}, status=status.HTTP_400_BAD_REQUEST)
         # login with session_id
         if request.session.get(ct_user['user_id']):
             user_id = request.session['user_id']
@@ -120,9 +123,13 @@ class LoginView(APIView):
             user_id = ct_user['user_id']
         except(MultiValueDictKeyError):
             user_id = None
+        except Exception as e:
+            user_id = None
         try:
             password = request.data['password']
         except(MultiValueDictKeyError):
+            password = None
+        except Exception as e:
             password = None
         # check the user_id
         try:
@@ -134,8 +141,15 @@ class LoginView(APIView):
                     'message': "输入的用户ID不存在"
                 }
             }
-            return Response(content, status=200)
-
+            return Response(content, status=400)
+        except Exception as e:
+            content = {
+                'isSuccess': False,
+                'error': {
+                    'message': "输入的用户ID不存在"
+                }
+            }
+            return Response(content, status=400)
         # check the password
         if not user.check_password(password):
             content = {
@@ -144,7 +158,7 @@ class LoginView(APIView):
                     'message': "用户ID与密码不匹配"
                 }
             }
-            return Response(content, status=200)
+            return Response(content, status=400)
 
         content = {
             'isSuccess': True,
@@ -198,6 +212,7 @@ class RegisterView(APIView):
             school_id = request.data['school_id']
             character = request.data['character']
             personal_id = request.data['personal_id']
+            email = request.data["email"]
         except Exception as e:
             print(str(e))
             content = {
@@ -206,18 +221,15 @@ class RegisterView(APIView):
                     'message': str(e)
                 }
             }
-            return Response(content, status=200)
+            return Response(content, status=400)
 
         try:
             avatar = request.data["avatar"]
+        except MultiValueDictKeyError:
+            avatar = None
         except Exception as e:
             print(str(e))
             avatar = None
-        try:
-            email = request.data["email"]
-        except Exception as e:
-            print(str(e))
-            email = None
 
         try:
             user = User.objects.create(password=password, realname=realname,
