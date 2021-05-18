@@ -100,6 +100,8 @@ class HomeworkView(APIView):
                 return Response(dict({
                     "msg": "Invaild pagination request."
                 }), status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
         response = []
         all_homework = Homework.objects.filter(course_id=course_id)\
@@ -150,7 +152,7 @@ class HomeworkView(APIView):
         request_body = json.loads(request_body_unicode)
         new_homework = Homework(
             course_id=course_id,
-            homework_creator=request.request.user.user_id,
+            homework_creator=request.user.user_id,
             homework_title=request_body["homeworkTitle"],
             homework_description=request_body["homeworkDescription"],
             homework_start_timestamp=request_body["homeworkStartTime"],

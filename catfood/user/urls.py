@@ -12,5 +12,6 @@ urlpatterns = [
     path('logout/', views.LogoutView.as_view()),
     path('university/', views.UniversityView.as_view()),
     path('school/', views.SchoolView.as_view()),
-    path('courses/', views.CoursesView.as_view())
+    path('courses/', views.CoursesView.as_view()),
+    path('upload-students/', views.upload)
 ]
