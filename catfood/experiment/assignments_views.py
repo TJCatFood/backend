@@ -300,4 +300,17 @@ def teacher_get_assignment_detail(request, submission_id):
         answer['experiment_name'] = case_serializer.data['experiment_name']
         answer['experiment_case_name'] = case_serializer.data['experiment_case_name']
         answer['experiment_case_description'] = case_serializer.data['experiment_case_description']
-        return Response(utils.generate_response(answer, True))
+
+        # 生成 minio 下载 url
+        response_headers = {}
+        file_token = assignment_serializer.data['submission_file_token']
+        get_url = local_minio_client.presigned_url("GET",
+                                                   DEFAULT_BUCKET,
+                                                   file_token,
+                                                   expires=DEFAULT_FILE_URL_TIMEOUT)
+        response_headers['ASSIGNMENT_DOWNLOAD_URL'] = get_url
+
+        ans = assignment_serializer.data
+        ans.pop('submission_file_token', None)
+
+        return Response(utils.generate_response(answer, True), headers=response_headers)

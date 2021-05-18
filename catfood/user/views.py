@@ -15,13 +15,91 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.datastructures import MultiValueDictKeyError
 from course.models import Course
 
+from django import forms
+from django.http import HttpResponseBadRequest
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from experiment.utils import my_user_serializer
+import pandas as pd
+import io
+import os
+from django import forms
+import random
+
+
+@api_view(['POST'])
+@permission_classes([IsStudent | IsChargingTeacher | IsTeacher | IsTeachingAssistant])
+@authentication_classes([CatfoodAuthentication])
+def upload(request):
+    if request.method == "POST":
+
+        excel_file = request.FILES['student-list-file']
+        rd = str(int(random.random() * 1e6))
+        tmp_file_name = rd + 'student-list.xlsx'
+        response_msg = []
+        is_success = True
+        try:
+            with open(tmp_file_name, 'wb') as destination:
+                for chunk in excel_file.chunks():
+                    destination.write(chunk)
+            df = pd.read_excel(tmp_file_name, engine='openpyxl')
+            for index, row in df.iterrows():
+                try:
+                    row_dict = dict(row)
+                    password = row_dict['password']
+                    realname = row_dict['realname']
+                    university_id = row_dict['university_id']
+                    school_id = row_dict['school_id']
+                    character = row_dict['character']
+                    personal_id = row_dict['personal_id']
+                    email = row_dict['email']
+                    user = User.objects.create(password=password, realname=realname,
+                                               email=email, university_id=university_id, school_id=school_id,
+                                               character=character,
+                                               personal_id=personal_id, avatar=None)
+                except Exception as e:
+                    is_success = False
+                    msg = str(index) + "row error" + str(e)
+                    msg = msg.split('DETAIL:')[1].strip()
+                    response_msg.append(msg)
+        except Exception as e:
+            is_success = False
+            return Response({'is_success': is_success, 'msg': response_msg}, status=status.HTTP_400_BAD_REQUEST)
+        finally:
+            os.remove(tmp_file_name)
+
+        # tmp = excel_file.get_sheet()
+        # print(tmp)
+        if is_success:
+            return Response({'is_success': is_success}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'is_success': is_success, 'msg': response_msg}, status=status.HTTP_400_BAD_REQUEST)
+
+        # return excel.make_response(excel_file.get_sheet(), "csv")
+
+        # print(request.Post.get('file'))
+
+        # if form.is_valid():
+        #     filehandle = request.FILES['test_file']
+        #     print("file handle:", filehandle)
+        #     return excel.make_response(filehandle.get_sheet(), "csv")
+        # else:
+        #     return HttpResponseBadRequest()
+
 
 class LoginView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request, format=None):
+        # use email
+        try:
+            email = request.data['email']
+
+            ct_user = my_user_serializer(User.objects.filter(email=email)[0])
+        except Exception as e:
+            print(str(e))
+            return Response({"is_success": False, "error_msg": "parameters error"}, status=status.HTTP_400_BAD_REQUEST)
         # login with session_id
-        if request.session.get("user_id"):
+        if request.session.get(ct_user['user_id']):
             user_id = request.session['user_id']
             user = User.objects.get(user_id=user_id)
             if request.session.get("password") == user.password:
@@ -42,16 +120,20 @@ class LoginView(APIView):
 
         # login with user_id and password
         try:
-            user_id = request.data["user_id"]
+            user_id = ct_user['user_id']
         except(MultiValueDictKeyError):
             user_id = None
+        except Exception as e:
+            user_id = None
         try:
-            password = request.data["password"]
+            password = request.data['password']
         except(MultiValueDictKeyError):
+            password = None
+        except Exception as e:
             password = None
         # check the user_id
         try:
-            user = User.objects.get(user_id=user_id)
+            user = User.objects.get(pk=user_id)
         except(ObjectDoesNotExist):
             content = {
                 'isSuccess': False,
@@ -59,8 +141,15 @@ class LoginView(APIView):
                     'message': "输入的用户ID不存在"
                 }
             }
-            return Response(content, status=200)
-
+            return Response(content, status=400)
+        except Exception as e:
+            content = {
+                'isSuccess': False,
+                'error': {
+                    'message': "输入的用户ID不存在"
+                }
+            }
+            return Response(content, status=400)
         # check the password
         if not user.check_password(password):
             content = {
@@ -69,7 +158,7 @@ class LoginView(APIView):
                     'message': "用户ID与密码不匹配"
                 }
             }
-            return Response(content, status=200)
+            return Response(content, status=400)
 
         content = {
             'isSuccess': True,
@@ -123,36 +212,38 @@ class RegisterView(APIView):
             school_id = request.data['school_id']
             character = request.data['character']
             personal_id = request.data['personal_id']
-        except(MultiValueDictKeyError):
+            email = request.data["email"]
+        except Exception as e:
+            print(str(e))
             content = {
                 'isSuccess': False,
                 'error': {
-                    'message': "缺少必填信息"
+                    'message': str(e)
                 }
             }
-            return Response(content, status=200)
+            return Response(content, status=400)
 
         try:
             avatar = request.data["avatar"]
-        except(MultiValueDictKeyError):
+        except MultiValueDictKeyError:
             avatar = None
-        try:
-            email = request.data["email"]
-        except(MultiValueDictKeyError):
-            email = None
+        except Exception as e:
+            print(str(e))
+            avatar = None
 
         try:
             user = User.objects.create(password=password, realname=realname,
                                        email=email, university_id=university_id, school_id=school_id, character=character,
                                        personal_id=personal_id, avatar=avatar)
-        except(Exception):
+        except Exception as e:
+            print(e)
             content = {
                 'isSuccess': False,
                 'error': {
-                    'message': "字段违反数据库约束（如外码约束和长度约束）"
+                    'message': str(e)
                 }
             }
-            return Response(content, status=200)
+            return Response(content, status=400)
 
         request.session.flush()
         content = {
