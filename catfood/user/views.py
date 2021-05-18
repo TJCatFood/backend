@@ -198,22 +198,25 @@ class RegisterView(APIView):
             school_id = request.data['school_id']
             character = request.data['character']
             personal_id = request.data['personal_id']
-        except(MultiValueDictKeyError):
+        except Exception as e:
+            print(str(e))
             content = {
                 'isSuccess': False,
                 'error': {
-                    'message': "缺少必填信息"
+                    'message': str(e)
                 }
             }
             return Response(content, status=200)
 
         try:
             avatar = request.data["avatar"]
-        except(MultiValueDictKeyError):
+        except Exception as e:
+            print(str(e))
             avatar = None
         try:
             email = request.data["email"]
-        except(MultiValueDictKeyError):
+        except Exception as e:
+            print(str(e))
             email = None
 
         try:
@@ -228,7 +231,7 @@ class RegisterView(APIView):
                     'message': str(e)
                 }
             }
-            return Response(content, status=200)
+            return Response(content, status=400)
 
         request.session.flush()
         content = {
