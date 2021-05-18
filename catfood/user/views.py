@@ -97,7 +97,7 @@ class LoginView(APIView):
             ct_user = my_user_serializer(User.objects.filter(email=email)[0])
         except Exception as e:
             print(str(e))
-            return Response({"is_success": False, "error_msg": "parameters error"+User.objects.filter(len(User.objects.filter(email=request.data['email'])))}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"is_success": False, "error_msg": "parameters error"}, status=status.HTTP_400_BAD_REQUEST)
         # login with session_id
         if request.session.get(ct_user['user_id']):
             user_id = request.session['user_id']
