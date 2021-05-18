@@ -47,7 +47,6 @@
 
 - [Docker 文档](https://docs.docker.com/)
 
-
 ### 使用 Docker 环境开发
 
 **注意！**
@@ -55,33 +54,35 @@
 - 遇到运行 docker 的权限问题请先尝试 [Post-installation steps for Linux](https://docs.docker.com/engine/install/linux-postinstall/) 的解决办法
 - 在本地开发分支中执行以下操作
 - 所有对于 `catfood` 下文件的修改都与本地目录同步
-- DB 的数据会持久化存储在 `.persistence` 下，删除请使用
+- DB 和对象存储（MinIO）的数据会持久化存储在 `.persistence` 下，删除请使用
 
-    ```
+    ```bash
     # sudo rm -rf .persistence #
     ```
-#### 启动 Web 服务器
+
+#### 启动开发 Web 服务器
 
 进入代码根目录，运行
 
-```
-USER_ID=`id -u` GROUP_ID=`id -g` MINIO_ADDRESS=<ip of a specific NIC on your host> docker-compose up
+```bash
+USER_ID=`id -u` GROUP_ID=`id -g` MINIO_ADDRESS=<endpoint that can be accessed both from your browser and web container> docker-compose -f ./docker-compose.yml.dev up
 ```
 
 你可以手动查看自己网卡的 IP
 
-```
+```bash
 ip addr
 ```
 
 或者使用以下脚本匹配第一个可用网卡的 IP
 
-```
+```bash
 alias myip="ip -4 addr | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v 127.0.0.1 | head -n 1"
+export MINIO_PORT=9000
 ```
 
-```
-USER_ID=`id -u` GROUP_ID=`id -g` MINIO_ADDRESS=`myip` docker-compose up
+```bash
+USER_ID=`id -u` GROUP_ID=`id -g` MINIO_ADDRESS=`myip`:$MINIO_PORT docker-compose -f ./docker-compose.yml.dev up
 ```
 
 不要关闭终端，使用代码编辑器修改代码
@@ -90,31 +91,31 @@ USER_ID=`id -u` GROUP_ID=`id -g` MINIO_ADDRESS=`myip` docker-compose up
 
 当 `requirements` 下的依赖发生变化，请重新构建 docker image：
 
+```bash
+docker-compose -f ./docker-compose.yml.dev build
 ```
-docker-compose build
+
+或者：
+
+```bash
+docker-compose -f ./docker-compose.yml.dev up --build
 ```
 
 #### 在 Docker 中运行指令
 
-找到 web 的容器
+在项目目录下
 
-```
-docker ps
-```
-
-打开交互 Shell
-
-```
-docker exec -it <container name or id> /bin/bash 
+```bash
+docker-compose -f ./docker-compose.yml.dev exec <service_name> /bin/bash
 ```
 
 #### 关闭 Web 服务器
 
-```
-docker-compose down
+```bash
+docker-compose -f ./docker-compose.yml.dev down
 ```
 
-了解其他配置可以阅读 `Dockerfile.web.dev` 和 `docker-compose.yml`
+了解其他配置可以阅读 `Dockerfile.web.dev` 和 `docker-compose.yml.dev`
 
 ### VSCode 使用建议
 

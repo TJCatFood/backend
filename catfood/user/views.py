@@ -384,7 +384,7 @@ class AccountsView(APIView):
                         'message': "字段违反数据库约束（如外码约束和长度约束）"
                     }
                 }
-                return Response(content, status=200)
+                return Response(content, status=400)
 
         responseData = []
         for student in request.data:

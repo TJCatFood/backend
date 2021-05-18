@@ -9,16 +9,16 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    # reserved for dedicated db instance
-    # ports:
-    #   - 5432:5432
+    # for debugging
+    ports:
+      - 5432:5432
   
   redis:
     image: redis:6-alpine
     restart: always
-    # reserved for dedicated redis instance
-    # ports: 
-    #   - 6379:6379
+    # for debugging
+    ports: 
+      - 6379:6379
 
   minio:
     image: minio/minio:latest
@@ -41,7 +41,7 @@ services:
   nchan:
     build:
       context: .
-      dockerfile: Dockerfile.nchan.prod
+      dockerfile: Dockerfile.nchan.dev
     volumes: 
       - "./nchan/nchan.conf:/etc/nginx/sites-enabled/default"
     ports:
@@ -51,10 +51,10 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile.web.prod
+      dockerfile: Dockerfile.web.dev
     environment:
       - SECRET_KEY=EatingOurOwnCatFood
-      - DEBUG=0
+      - DEBUG=1
       - DB_HOST=db
       - DB_NAME=postgres
       - DB_USER=postgres
@@ -66,6 +66,8 @@ services:
       - MINIO_ADDRESS=$MINIO_ADDRESS
     command: ["./wait-for-postgres.sh", "python", "manage.py runserver 0.0.0.0:8000"]
     user: "${USER_ID}:${GROUP_ID}"
+    volumes: 
+      - "./catfood:/code/catfood:rw"
     ports:
       - 8000:8000
     depends_on:
