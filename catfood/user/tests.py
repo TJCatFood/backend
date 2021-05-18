@@ -6,6 +6,7 @@ from django.utils import timezone as datetime
 import json
 import random
 
+
 class UserTests(TestCase):
     @classmethod
     def setUpTestData(cls):
