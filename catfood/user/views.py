@@ -42,6 +42,12 @@ class PasswordRestView(APIView):
         except Exception as e:
             print(str(e))
             return Response({"is_success": False, "msg": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            tmp_user = User.objects.filter(email=receiver)
+            if len(tmp_user) == 0:
+                return Response({"is_success": False, "msg": "尚未注册"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"is_success": False, "msg": "尚未注册"}, status=status.HTTP_400_BAD_REQUEST)
         sender = 'tongjicatfood@163.com'
         token = int(random.random()*1e6)
         message = MIMEText('找回密码token:' + str(token), 'plain', 'utf-8')
@@ -54,6 +60,7 @@ class PasswordRestView(APIView):
             smtpObj = smtplib.SMTP(host='smtp.163.com', port=25)
             # 包含密钥 不要泄露
             config = configparser.ConfigParser()
+            config.read('env.ini')
             key = config['DEFAULT']['SECRET_KEY']
             smtpObj.login("tongjicatfood@163.com", key)
             smtpObj.sendmail(sender, receivers, message.as_string())
