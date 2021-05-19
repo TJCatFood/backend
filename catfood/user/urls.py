@@ -13,5 +13,7 @@ urlpatterns = [
     path('university/', views.UniversityView.as_view()),
     path('school/', views.SchoolView.as_view()),
     path('courses/', views.CoursesView.as_view()),
-    path('upload-students/', views.upload)
+    path('upload-students/', views.upload),
+    path('password/reset/', views.PasswordRestView.as_view()),
+    path('password/verify/', views.PwdResetTokenVerify.as_view())
 ]
