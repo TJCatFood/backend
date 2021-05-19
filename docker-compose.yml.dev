@@ -70,6 +70,7 @@ services:
       - "./catfood:/code/catfood:rw"
     ports:
       - 8000:8000
+      - 25:25
     depends_on:
       - db
       - redis 
