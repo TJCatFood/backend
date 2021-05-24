@@ -24,6 +24,119 @@ from user.models import TakeCourse
 from user.serializers import TakeCourseSerializer
 from django.core.exceptions import ObjectDoesNotExist
 
+# add upload
+
+import random
+import os
+import pandas as pd
+
+
+@api_view(['GET'])
+@permission_classes([IsStudent | IsChargingTeacher | IsTeacher | IsTeachingAssistant])
+@authentication_classes([CatfoodAuthentication])
+def take_list(request):
+    if request.method == 'GET':
+        take_list = TakeCourse.objects.all()
+        serializer = TakeCourseSerializer(take_list, many=True)
+        answer = serializer.data
+        for index, take in enumerate(answer):
+            course_id = take['course_id']
+            course_info = CourseSerializers(Course.objects.get(course_id=course_id)).data
+            answer[index]['course_name'] = course_info['course_name']
+            answer[index]['course_description'] = course_info['course_description']
+            answer[index]['course_credit'] = course_info['course_credit']
+            user_id = take['student_id']
+            student = User.objects.get(pk=user_id)
+            answer[index]['email'] = student.email
+        return Response(generate_response(serializer.data, True))
+
+
+@api_view(['POST'])
+@permission_classes([IsStudent | IsChargingTeacher | IsTeacher | IsTeachingAssistant])
+@authentication_classes([CatfoodAuthentication])
+def upload(request):
+    if request.method == "POST":
+        # 检查是否存在文件表单
+        try:
+            excel_file = request.FILES['student-course-list-file']
+        except Exception as e:
+            print('in exception error is:', str(e))
+            return Response({'is_success': False, 'msg': 'your form data lost key:'+str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        rd = str(int(random.random() * 1e6))
+        tmp_file_name = rd + 'student-course-list.xlsx'
+        response_msg = []
+
+        # 是否成功导入
+        try:
+            # 读取数据到data frame
+            with open(tmp_file_name, 'wb') as destination:
+                for chunk in excel_file.chunks():
+                    destination.write(chunk)
+            df = pd.read_excel(tmp_file_name, engine='openpyxl')
+            keys = df.keys()
+            # 文件列名检查
+            # 此处student_id是学号
+            print(set(keys))
+            if set(keys) == {'student_id', 'course_id'}:
+                # 遍历检查合法性
+                for index, row in df.iterrows():
+                    row_dict = dict(row)
+                    email = str(row_dict['student_id']) + '@tongji.edu.cn'
+                    course_id = row_dict['course_id']
+                    student = User.objects.filter(email=email)
+                    # 检查学生
+                    if len(student) == 0:
+                        return Response({'is_success': False, 'msg': 'student:' + email + ' not exists'},
+                                        status=status.HTTP_400_BAD_REQUEST)
+                    # 检查课程
+                    try:
+                        course = Course.objects.get(pk=course_id)
+                    except Exception as e:
+                        print(str(e))
+                        return Response({'is_success': False, 'msg': 'course:' + str(course_id) + ' not exists'},
+                                        status=status.HTTP_400_BAD_REQUEST)
+                    # 检查选课
+                    try:
+                        takeCourseItem = TakeCourse.objects.get(student_id=student[0].user_id, course_id=course)
+                        return Response(
+                            {'is_success': False, 'msg': email + 'take course:' + str(course_id) + 'exists'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                    except Exception as e:
+                        pass
+                # 遍历并且导入
+                for index, row in df.iterrows():
+                    row_dict = dict(row)
+                    email = str(row_dict['student_id']) + '@tongji.edu.cn'
+                    course_id = row_dict['course_id']
+                    student = User.objects.filter(email=email)
+                    user_id = student[0].user_id
+                    serializer = TakeCourseSerializer(data={
+                        'course_id': course_id,
+                        'student_id': user_id
+                    })
+                    if serializer.is_valid():
+                        serializer.save()
+                return Response({'is_success': True}, status=status.HTTP_201_CREATED)
+
+            elif set(keys) == {'email', 'course_id'}:
+                # FIXME: 支持email导入
+                e = 'in exception, error is: columns name is not: student_id, course_id or email, course_id'
+                print(e)
+                return Response({'is_success': False, 'msg': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                e = 'in exception, error is: columns name is not: student_id, course_id or email, course_id'
+                print(e)
+                return Response({'is_success': False, 'msg': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            print(str(e))
+            is_success = False
+            return Response({'is_success': False, 'msg': response_msg}, status=status.HTTP_400_BAD_REQUEST)
+        finally:
+            os.remove(tmp_file_name)
+
+# 11
+
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsChargingTeacher | IsTeacher | IsTeachingAssistant | IsStudent])
