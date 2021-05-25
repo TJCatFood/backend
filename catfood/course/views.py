@@ -48,6 +48,9 @@ def take_list(request):
             user_id = take['student_id']
             student = User.objects.get(pk=user_id)
             answer[index]['email'] = student.email
+            answer[index]['realname'] = student.realname
+            answer[index]['student_user_id'] = answer[index]['student_id']
+            answer[index]['student_id'] = student.personal_id
         return Response(generate_response(serializer.data, True))
 
 
