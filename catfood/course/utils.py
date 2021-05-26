@@ -24,7 +24,7 @@ def is_teacher_teach_course(teacher_id, course_id) -> bool:
 
 def is_student_within_course(student_id, course_id) -> bool:
     takes = TakeCourse.objects.filter(student_id=student_id)
-    takes_serializer = TeachSerializers(takes, many=True)
+    takes_serializer = TakeCourseSerializer(takes, many=True)
     course_id_list = []
     for take in takes_serializer.data:
         course_id_list.append(take['course_id'])
