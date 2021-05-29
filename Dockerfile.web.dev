@@ -13,6 +13,10 @@ RUN pip install pip -U
 RUN pip config set global.index-url https://mirrors.cloud.tencent.com/pypi/simple
 RUN pip install -r /code/dev.txt
 
+# Install pgsql client
+RUN apt-get update && apt-get install -y \
+    postgresql-client
+
 # Prepare to use non-root
 ## root:mypasswd
 ## code:mypasswd

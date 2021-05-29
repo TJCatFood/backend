@@ -1,0 +1,27 @@
+FROM python:3
+ENV PYTHONUNBUFFERED=1
+
+ENV HOME=/home/code
+WORKDIR /code/catfood
+
+RUN mkdir -p /home/code
+COPY ./catfood /code/catfood
+
+# Install packages
+COPY ./requirements/prod.txt /code
+RUN pip install pip -U
+RUN pip config set global.index-url https://mirrors.cloud.tencent.com/pypi/simple
+RUN pip install -r /code/prod.txt
+
+# Install pgsql client
+RUN apt-get update && apt-get install -y \
+    postgresql-client
+
+# Prepare to use non-root
+## root:mypasswd
+## code:mypasswd
+RUN echo 'root:mypasswd' | chpasswd
+COPY ./webscript/ /code/script
+
+ENTRYPOINT [ "/code/script/entrypoint.sh" ]
+CMD []

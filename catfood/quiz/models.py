@@ -3,14 +3,14 @@ from django.db import models
 # Create your models here.
 
 
-class QuestionType(models.TextChoices):
-    SINGLE = 'SingleAnswer', 'SingleAnswer'
-    MULTIPLE = 'MultipleAnswer', 'MultipleAnswer'
+class QuestionType(models.IntegerChoices):
+    SINGLE = 0
+    MULTIPLE = 1
 
 
 class Quiz(models.Model):
     quiz_id = models.AutoField(primary_key=True)
-    course_id = models.ForeignKey('class.Course', on_delete=models.CASCADE)
+    course_id = models.ForeignKey('course.Course', on_delete=models.CASCADE)
     publisher_id = models.ForeignKey('user.User', on_delete=models.CASCADE)
     title = models.CharField(max_length=100, null=True)
     start_time = models.DateTimeField()

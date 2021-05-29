@@ -56,7 +56,7 @@ class CatFoodStatusView(APIView):
     def minio_connected(self):
         try:
             testfile_content = b'minio here'
-            path = default_storage.save('test/testfile', ContentFile(testfile_content))
+            path = default_storage.save('catfood/alive', ContentFile(testfile_content))
             testfile_content_read = default_storage.open(path).read()
             default_storage.delete(path)
             return testfile_content == testfile_content_read

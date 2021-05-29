@@ -6,3 +6,8 @@
 *.pyc
 *.pyo
 *.DS_Store
+
+/catfood/.vscode
+/restart.sh
+/catfood/.idea/
+
