@@ -529,7 +529,16 @@ class HomeworkDataFileView(APIView):
         else:
             selected_homeworkFiles = all_homeworkFiles
         for item in selected_homeworkFiles:
-            response.append(HomeworkFileSerializer(item).data)
+            tmp_file_info = HomeworkFileSerializer(item).data
+            student_id = tmp_file_info['file_uploader']
+            score_queried: HomeworkScore
+            try:
+                score_queried = HomeworkScore.objects.get(homework_id=homework_id, student_id=student_id)
+                homework_score = score_queried.homework_score
+            except HomeworkScore.DoesNotExist:
+                homework_score = 0
+            tmp_file_info['homework_score'] = homework_score
+            response.append(tmp_file_info)
 
         return Response(response, status=status.HTTP_200_OK)
 
