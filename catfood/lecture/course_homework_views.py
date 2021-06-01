@@ -623,14 +623,15 @@ class HomeworkFileView(APIView):
         return HttpResponseRedirect(redirect_to=result_url)
 
 
-class HomeworkFileScoreView(APIView):
+class HomeworkFileUploaderView(APIView):
 
     authentication_classes = [CatfoodAuthentication]
     permission_classes = [IsStudent |
                           IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
-    # /{courseId}/homework/{homeworkId}/file/{homeworkFileId}/score 获取作业分数
-    def get(self, request, course_id, homework_id, homework_file_id, format=None):
+    # /{courseId}/homework/{homeworkId}/file/uploader/{fileUploader} 通过上传者 ID 获取作业文件信息
+    # 该 API 暂未使用
+    def get(self, request, course_id, homework_id, file_uploader, format=None):
         user_character = request.user.character
         user_id = request.user.user_id
         # all within this class
@@ -652,19 +653,79 @@ class HomeworkFileScoreView(APIView):
                 return Response(dict({
                     "msg": "Forbidden. You are not within course."
                 }), status=403)
+            # check if student is query his own file id
+            if not user_id == file_uploader:
+                return Response(dict({
+                    "msg": "You can not read other student's submission :("
+                }), status=403)
+        file_queried: HomeworkFile
         try:
-            file_queried = HomeworkScore.objects.get(homework_id=homework_id, student_id=request.user.user_id)
-        except HomeworkScore.DoesNotExist:
+            file_queried = HomeworkFile.objects.get(homework_id=homework_id, file_uploader=file_uploader)
+        except HomeworkFile.DoesNotExist:
             return Response(dict({
                 "msg": "Requested homework file does not exist.",
                 "courseId": course_id,
-                "homeworkId": homework_id
+                "studentId": file_uploader
             }), status=404)
 
-        return Response(HomeworkScoreSerializer(file_queried).data, status=status.HTTP_200_OK)
+        return Response(HomeworkFileSerializer(file_queried).data, status=status.HTTP_200_OK)
 
-    # /{courseId}/homework/{homeworkId}/file/{homeworkFileId}/score 根据文件 ID 登记分数
-    def put(self, request, course_id, homework_id, homework_file_id, format=None):
+
+class HomeworkScoreView(APIView):
+
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
+
+    # /{courseId}/homework/{homeworkId}/score/{studentId} 根据学生 ID 获取作业分数
+    def get(self, request, course_id, homework_id, student_id, format=None):
+        user_character = request.user.character
+        user_id = request.user.user_id
+        # all within this class
+        # TODO: change to match when comes to Python 3.10
+        if user_character == 1:
+            # charging teacher
+            pass
+        elif user_character == 2 or user_character == 3:
+            # teacher or teaching assistant
+            # check if this teacher teaches this course
+            if not is_teacher_teach_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+        elif user_character == 4:
+            # student
+            # check if student is within this course
+            if not is_student_within_course(user_id, course_id):
+                return Response(dict({
+                    "msg": "Forbidden. You are not within course."
+                }), status=403)
+            # check if student is query his own file id
+            if not user_id == student_id:
+                return Response(dict({
+                    "msg": "You can not read other student's submission :("
+                }), status=403)
+
+        score_queried: HomeworkScore
+        try:
+            score_queried = HomeworkScore.objects.get(homework_id=homework_id, student_id=student_id)
+        except HomeworkScore.DoesNotExist:
+            return Response(dict({
+                "msg": "Requested homework score does not exist.",
+                "courseId": course_id,
+                "homeworkId": homework_id
+            }), status=404)
+        if score_queried.homework_is_grade_available_to_students == False and user_character == 4:
+            return Response(dict({
+                "msg": "Requested homework score is not available to students now.",
+                "courseId": course_id,
+                "homeworkId": homework_id
+            }), status=403)
+
+        return Response(HomeworkScoreSerializer(score_queried).data, status=status.HTTP_200_OK)
+
+    # /{courseId}/homework/{homeworkId}/score/{studentId} 根据学生 ID 登记分数
+    def put(self, request, course_id, homework_id, student_id, format=None):
         user_character = request.user.character
         user_id = request.user.user_id
         # all within this class
@@ -695,31 +756,22 @@ class HomeworkFileScoreView(APIView):
                     "msg": "Invalid JSON string provided."
                 }), status=status.HTTP_400_BAD_REQUEST)
 
+        score_queried: HomeworkScore
         try:
-            file_queried = HomeworkFile.objects.get(file_homework_id=homework_file_id)
-        except HomeworkFile.DoesNotExist as e:
-            print(e.with_traceback)
-            return Response(dict({
-                "msg": "Requested homework file does not exist.",
-                "courseId": course_id,
-                "homeworkFileId": homework_file_id
-            }), status=404)
-
-        try:
-            file_score_queried = HomeworkScore.objects.get(homework_id=homework_id, student_id=file_queried.file_uploader)
-            file_score_queried.homework_score = request_body["homeworkScore"]
-            file_score_queried.homework_teachers_comments = request_body["homeworkTeachersComment"]
-            file_score_queried.homework_is_grade_available_to_students = request_body["homeworkIsGradeAvailable"]
-            file_score_queried.save()
+            score_queried = HomeworkScore.objects.get(homework_id=homework_id, student_id=student_id)
+            score_queried.homework_score = request_body["homeworkScore"]
+            score_queried.homework_teachers_comments = request_body["homeworkTeachersComment"]
+            score_queried.homework_is_grade_available_to_students = request_body["homeworkIsGradeAvailable"]
+            score_queried.save()
         except HomeworkScore.DoesNotExist:
-            file_score_queried = HomeworkScore(
+            score_queried = HomeworkScore(
                 homework_id=(Homework.objects.get(homework_id=homework_id)),
-                student_id=file_queried.file_uploader,
+                student_id=student_id,
                 course_id=course_id,
                 homework_score=request_body["homeworkScore"],
                 homework_teachers_comments=request_body["homeworkTeachersComment"],
                 homework_is_grade_available_to_students=request_body["homeworkIsGradeAvailable"],
             )
-            file_score_queried.save()
+            score_queried.save()
 
-        return Response(HomeworkScoreSerializer(file_score_queried).data, status=status.HTTP_200_OK)
+        return Response(HomeworkScoreSerializer(score_queried).data, status=status.HTTP_200_OK)
