@@ -724,7 +724,7 @@ class HomeworkScoreView(APIView):
                 "courseId": course_id,
                 "homeworkId": homework_id
             }), status=404)
-        if score_queried.homework_is_grade_available_to_students == False and user_character == 4:
+        if not score_queried.homework_is_grade_available_to_students and user_character == 4:
             return Response(dict({
                 "msg": "Requested homework score is not available to students now.",
                 "courseId": course_id,
