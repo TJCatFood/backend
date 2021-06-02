@@ -12,7 +12,8 @@ urlpatterns = [
     path('course-homework/<int:course_id>/homework/<int:homework_id>/file', course_homework_views.HomeworkDataFileView.as_view()),
     path('course-homework/<int:course_id>/homework/<int:homework_id>/file/count', course_homework_views.HomeworkDataFileCountView.as_view()),
     path('course-homework/<int:course_id>/homework/<int:homework_id>/file/<int:homework_file_id>', course_homework_views.HomeworkFileView.as_view()),
-    path('course-homework/<int:course_id>/homework/<int:homework_id>/file/uploader/<int:file_uploader>', course_homework_views.HomeworkFileUploaderView.as_view()),
+    path('course-homework/<int:course_id>/homework/<int:homework_id>/file/uploader/<int:file_uploader>', \
+         course_homework_views.HomeworkFileUploaderView.as_view()),
     path('course-homework/<int:course_id>/homework/<int:homework_id>/score/<int:student_id>', course_homework_views.HomeworkScoreView.as_view()),
     # course homework ends
     # course chapter description starts
