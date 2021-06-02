@@ -31,8 +31,8 @@ rooms = {}
 # {contest_id, contest_rooms(start_rooms, wait_rooms)}
 contests = {}
 ws_url = "http://nchan:8081/api/v1/contest/pub?id="
-room_time = 60.0
-cache_time = 600
+room_time = 15.0
+cache_time = 300
 ws_time = 2.0
 contest_time = 180
 submit_wait_time = 10.0
@@ -227,8 +227,10 @@ class StartView(APIView):
             return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
         if cache.get(student_id) is not None:
-            error = Error('Bad Request: User has already matched!')
-            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
+            # error = Error('Bad Request: User has already matched!')
+            # return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
+            channel_id = cache.get(student_id)
+            return Response({"channel_id": f"{channel_id}"})
 
         if contest_id not in contests:
             contest_rooms = ContestRooms()
