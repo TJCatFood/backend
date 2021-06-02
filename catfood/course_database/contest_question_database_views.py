@@ -13,6 +13,9 @@ from rest_framework.permissions import AllowAny
 
 from .models import MultipleChoiceQuestion, SingleChoiceQuestion
 
+from user.authentication import CatfoodAuthentication
+from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
+
 from typing import Union
 
 import json
@@ -44,12 +47,14 @@ class Question:
             self.question_type = QuestionType.UNKNOWN
 
 # Contest question database starts
+# TODO: fix permissions
 
 
 class QuestionView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, format=None):
         query_dict = request.query_params
@@ -214,8 +219,9 @@ class QuestionView(APIView):
 
 class QuestionCountView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, format=None):
         single_choice_questions_count = SingleChoiceQuestion.objects.count()
@@ -229,8 +235,9 @@ class QuestionCountView(APIView):
 
 class QuestionIdView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, question_type, question_id, format=None):
         item = None
@@ -319,8 +326,9 @@ class QuestionIdView(APIView):
 
 class RandomQuestionView(APIView):
 
-    # FIXME: this permission is for testing purpose only
-    permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
+    permission_classes = [IsStudent |
+                          IsTeachingAssistant | IsTeacher | IsChargingTeacher]
 
     def get(self, request, format=None):
         query_dict = request.query_params

@@ -13,6 +13,8 @@ from rest_framework.permissions import AllowAny
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
+from user.authentication import CatfoodAuthentication
+from user.permissions import IsStudent, IsTeachingAssistant, IsTeacher, IsChargingTeacher
 
 from typing import Union
 
@@ -31,10 +33,7 @@ from catfood.settings import MINIO_STORAGE_USE_HTTPS
 
 import random
 
-# minio client to use
-# TODO: when deployed and access through remote machine,
-#       minio remote address should be changed to HTTP_HOST
-#       with corresponding information.
+
 local_minio_client = Minio(
     environ['MINIO_ADDRESS'],
     access_key=environ['MINIO_ACCESS_KEY'],
@@ -61,8 +60,8 @@ def generate_avatar_token(user_id: int) -> str:
 
 class AvatarView(APIView):
 
-    # FIXME: this permission is for testing purpose only
     permission_classes = (AllowAny,)
+    authentication_classes = [CatfoodAuthentication]
 
     def get(self, request, user_id, format=None):
         file_token = generate_avatar_token(user_id)
@@ -79,6 +78,17 @@ class AvatarView(APIView):
         return HttpResponseRedirect(redirect_to=result_url)
 
     def put(self, request, user_id, format=None):
+        try:
+            # allow admin
+            if request.user.character == 1:
+                pass
+            else:
+                # make sure it's your own
+                if user_id != request.user.user_id:
+                    return Response({"msg": "Forbidden. You are not the man."}, status=403)
+        except AttributeError:
+            # Anonymous
+            return Response({"msg": "Forbidden. You are not logged in."}, status=403)
         post_policy = PostPolicy()
         # set bucket name location for uploads.
         post_policy.set_bucket_name(DEFAULT_BUCKET)
@@ -87,12 +97,9 @@ class AvatarView(APIView):
         post_policy.set_key_startswith(file_token)
         # set content length for incoming uploads.
         post_policy.set_content_length_range(0, MAX_AVATAR_SIZE)
-
         # set expiry
         expires_date = datetime.utcnow() + DEFAULT_FILE_URL_TIMEOUT
         post_policy.set_expires(expires_date)
-
-        post_policy
 
         url, signed_form_data = local_minio_client.presigned_post_policy(post_policy)
         response = {

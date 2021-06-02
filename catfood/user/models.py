@@ -32,7 +32,7 @@ class User(AbstractBaseUser):
     user_id = models.AutoField(primary_key=True)
     # AbstractBaseUser already has password.
     realname = models.CharField(max_length=50)
-    email = models.EmailField(max_length=50)
+    email = models.EmailField(max_length=50, unique=True)
     university_id = models.ForeignKey('University', on_delete=models.CASCADE)
     school_id = models.ForeignKey('School', on_delete=models.CASCADE)
     character = models.IntegerField(choices=user_character, default=4)

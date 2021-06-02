@@ -72,31 +72,37 @@ def experiment_case_list(request):
         new_case = {}
         response_headers = {}
 
-        # case file
-        file_display_name = request.data["experiment_case_file_name"]
-        random_hex_string = ('%030x' % random.randrange(16 ** 30))
-        file_token = f"{EXPERIMENT_CASE_PREFIX }/{random_hex_string}/{file_display_name}"
-        post_url = local_minio_client.presigned_url("PUT",
-                                                    DEFAULT_BUCKET,
-                                                    file_token,
-                                                    expires=DEFAULT_FILE_URL_TIMEOUT)
-        new_case['experiment_case_file_token'] = file_token
-        response_headers['CASE_FILE_UPLOAD_URL'] = post_url
+        try:
 
-        # answer file
-        file_display_name = request.data["answer_file_name"]
-        random_hex_string = ('%030x' % random.randrange(16 ** 30))
-        file_token = f"{EXPERIMENT_CASE_PREFIX }/{random_hex_string}/{file_display_name}"
-        post_url = local_minio_client.presigned_url("PUT",
-                                                    DEFAULT_BUCKET,
-                                                    file_token,
-                                                    expires=DEFAULT_FILE_URL_TIMEOUT)
-        new_case['answer_file_token'] = file_token
-        response_headers['ANSWER_FILE_UPLOAD_URL'] = post_url
+            # case file
+            file_display_name = request.data["experiment_case_file_name"]
+            random_hex_string = ('%030x' % random.randrange(16 ** 30))
+            file_token = f"{EXPERIMENT_CASE_PREFIX }/{random_hex_string}/{file_display_name}"
+            post_url = local_minio_client.presigned_url("PUT",
+                                                        DEFAULT_BUCKET,
+                                                        file_token,
+                                                        expires=DEFAULT_FILE_URL_TIMEOUT)
+            new_case['experiment_case_file_token'] = file_token
+            response_headers['CASE_FILE_UPLOAD_URL'] = post_url
 
-        # other info
-        new_case['experiment_name'] = request.data['experiment_name']
-        new_case['experiment_case_name'] = request.data['experiment_case_name']
+            # answer file
+            file_display_name = request.data["answer_file_name"]
+            random_hex_string = ('%030x' % random.randrange(16 ** 30))
+            file_token = f"{EXPERIMENT_CASE_PREFIX }/{random_hex_string}/{file_display_name}"
+            post_url = local_minio_client.presigned_url("PUT",
+                                                        DEFAULT_BUCKET,
+                                                        file_token,
+                                                        expires=DEFAULT_FILE_URL_TIMEOUT)
+            new_case['answer_file_token'] = file_token
+            response_headers['ANSWER_FILE_UPLOAD_URL'] = post_url
+
+            # other info
+            new_case['experiment_name'] = request.data['experiment_name']
+            new_case['experiment_case_name'] = request.data['experiment_case_name']
+
+        except Exception as e:
+            print(str(e))
+            return Response(utils.generate_response(str(e), False), status=status.HTTP_400_BAD_REQUEST)
 
         serializer = ExperimentCaseDatabaseSerializer(data=new_case)
         if serializer.is_valid():
