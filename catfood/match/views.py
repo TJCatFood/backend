@@ -343,6 +343,9 @@ class CancelView(APIView):
             error = Error('Not Found: user not in room!')
             return Response(error.error, status=status.HTTP_404_NOT_FOUND)
 
+        if room.status == RoomStatus.READY:
+            error = Error('Bad Request: Cannot cancel for the matched room!')
+            return Response(error.error, status=status.HTTP_400_BAD_REQUEST)
         cache.delete(student_id)
         room.delete_user(student_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
